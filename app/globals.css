@@ -1,0 +1,248 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Luxury Fashion Palette - Muted Gold Accent */
+    --background: 45 20% 98%;
+    --foreground: 0 0% 8%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+    
+    /* Primary: Muted Gold (luxury fashion accent) */
+    --primary: 45 65% 55%;
+    --primary-foreground: 0 0% 8%;
+    
+    /* Secondary: Warm neutral */
+    --secondary: 45 15% 96%;
+    --secondary-foreground: 0 0% 15%;
+    
+    /* Muted: Very light warm gray */
+    --muted: 45 10% 97%;
+    --muted-foreground: 0 0% 45%;
+    
+    /* Accent: Subtle gold tint */
+    --accent: 45 30% 95%;
+    --accent-foreground: 45 65% 45%;
+    
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 45 10% 88%;
+    --input: 45 15% 94%;
+    --ring: 45 65% 55%;
+    
+    /* Radius scale - generous and soft */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+    --radius: var(--radius-xl);
+    
+    /* Shadow scale - soft and elegant */
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.03);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+    --shadow-lg: 0 10px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
+    --shadow-xl: 0 20px 40px -8px rgb(0 0 0 / 0.12), 0 8px 16px -4px rgb(0 0 0 / 0.08);
+    
+    /* Typography scale */
+    --font-display: 3.5rem;
+    --font-hero: 2.5rem;
+    --font-title: 1.875rem;
+    --font-subtitle: 1.25rem;
+    --font-body: 1rem;
+    --font-caption: 0.875rem;
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 45 20% 98%;
+    
+    --card: 0 0% 10%;
+    --card-foreground: 45 20% 98%;
+    
+    --popover: 0 0% 10%;
+    --popover-foreground: 45 20% 98%;
+    
+    --primary: 45 65% 60%;
+    --primary-foreground: 0 0% 8%;
+    
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 45 20% 98%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 45 20% 20%;
+    --accent-foreground: 45 65% 70%;
+    
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 45 65% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+    line-height: 1.8;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Editorial Typography Hierarchy */
+  h1, .h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+  
+  h2, .h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  
+  h3, .h3 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  
+  h4, .h4 {
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  
+  p, .body {
+    font-size: 1rem;
+    line-height: 1.8;
+    letter-spacing: -0.01em;
+  }
+  
+  .caption {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  
+  /* Subtle grain texture for luxury feel */
+  .grain-texture {
+    position: relative;
+  }
+  
+  .grain-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.015;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* Editorial section spacing */
+  .section-spacing {
+    padding-top: clamp(4rem, 8vw, 8rem);
+    padding-bottom: clamp(4rem, 8vw, 8rem);
+  }
+}
+
+@layer utilities {
+  /* Luxury card - editorial feel */
+  .card-editorial {
+    @apply rounded-2xl border border-border/40 bg-card shadow-md backdrop-blur-sm;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-editorial:hover {
+    @apply shadow-lg border-border/60;
+    transform: translateY(-4px);
+  }
+  
+  /* Premium button - fashion brand feel */
+  .btn-editorial {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  
+  .btn-editorial:hover {
+    transform: translateY(-1px);
+  }
+  
+  .btn-editorial:active {
+    transform: translateY(0);
+  }
+  
+  /* Elegant focus ring */
+  .focus-editorial {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-4 focus-visible:ring-offset-background;
+  }
+  
+  /* Text reveal utility */
+  .text-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* Persian number formatting */
+  .persian-number {
+    font-variant-numeric: persian;
+    font-feature-settings: "tnum" 1, "rlig" 1;
+  }
+  
+  /* Editorial container */
+  .editorial-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: clamp(1.5rem, 4vw, 4rem);
+    padding-right: clamp(1.5rem, 4vw, 4rem);
+  }
+}
+
+/* RTL specific improvements */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}

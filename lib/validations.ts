@@ -1,0 +1,57 @@
+import { z } from "zod"
+
+export const signInSchema = z.object({
+  email: z.string().email("ایمیل معتبر نیست"),
+  password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+})
+
+export const signUpSchema = z.object({
+  name: z.string().min(2, "نام باید حداقل ۲ کاراکتر باشد"),
+  email: z.string().email("ایمیل معتبر نیست"),
+  password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+  phone: z.string().optional(),
+})
+
+export const productSchema = z.object({
+  name: z.string().min(1, "نام محصول الزامی است"),
+  nameEn: z.string().optional(),
+  slug: z.string().min(1, "اسلاگ الزامی است"),
+  description: z.string().optional(),
+  descriptionEn: z.string().optional(),
+  basePrice: z.number().int().positive("قیمت باید عدد مثبت باشد"),
+  categoryId: z.string().min(1, "دسته‌بندی الزامی است"),
+  images: z.array(z.string().url()).min(1, "حداقل یک تصویر الزامی است"),
+  isActive: z.boolean().default(true),
+  featured: z.boolean().default(false),
+})
+
+export const variantSchema = z.object({
+  size: z.string().min(1, "سایز الزامی است"),
+  color: z.string().min(1, "رنگ الزامی است"),
+  colorHex: z.string().regex(/^#[0-9A-F]{6}$/i, "کد رنگ معتبر نیست"),
+  stock: z.number().int().min(0, "موجودی نمی‌تواند منفی باشد"),
+  sku: z.string().min(1, "SKU الزامی است"),
+  priceOverride: z.number().int().positive().optional(),
+})
+
+export const checkoutSchema = z.object({
+  customerName: z.string().min(2, "??? ? ??? ???????? ?????? ???"),
+  shippingPhone: z.string().min(10, "????? ?????? ????? ????"),
+  shippingProvince: z.string().min(1, "????? ?????? ???"),
+  shippingCity: z.string().min(1, "??? ?????? ???"),
+  shippingAddress: z.string().min(10, "???? ???? ????? ?? ??????? ????"),
+  shippingPostalCode: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+export const commissionSettingsSchema = z.object({
+  level1Percentage: z.number().int().min(0).max(100),
+  level2Percentage: z.number().int().min(0).max(100),
+})
+
+export const payoutRequestSchema = z.object({
+  amount: z.number().int().positive("مبلغ باید عدد مثبت باشد"),
+  bankAccount: z.string().optional(),
+  notes: z.string().optional(),
+})
+

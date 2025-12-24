@@ -1,0 +1,253 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  customer
+  affiliate
+  admin
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  canceled
+  refunded
+}
+
+enum CommissionStatus {
+  pending
+  available
+  paid
+  void
+}
+
+enum PayoutStatus {
+  pending
+  approved
+  paid
+  rejected
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  name              String?
+  phone             String?
+  role              UserRole @default(customer)
+  affiliateCode     String?  @unique
+  parentAffiliateId String?
+  parentAffiliate   User?    @relation("AffiliateHierarchy", fields: [parentAffiliateId], references: [id])
+  subAffiliates     User[]   @relation("AffiliateHierarchy")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  accounts                  Account[]
+  sessions                  Session[]
+  orders                    Order[]         @relation("UserOrders")
+  referredOrdersAsAffiliate Order[]         @relation("AffiliateReferredOrders")
+  commissions               Commission[]
+  payoutRequests            PayoutRequest[]
+
+  @@index([affiliateCode])
+  @@index([parentAffiliateId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  nameEn      String?
+  slug        String   @unique
+  description String?  @db.Text
+  image       String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  nameEn        String?
+  slug          String   @unique
+  description   String?  @db.Text
+  descriptionEn String?  @db.Text
+  basePrice     Int // Price in Toman
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  images        String[] // Array of image URLs
+  isActive      Boolean  @default(true)
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  variants   ProductVariant[]
+  orderItems OrderItem[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([featured])
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size          String // XS, S, M, L, XL, etc.
+  color         String // Color name
+  colorHex      String // Hex color code
+  stock         Int      @default(0)
+  sku           String   @unique
+  priceOverride Int? // Optional price override in Toman
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@unique([productId, size, color])
+  @@index([productId])
+  @@index([sku])
+  @@index([stock])
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  userId             String
+  user               User        @relation("UserOrders", fields: [userId], references: [id])
+  status             OrderStatus @default(pending)
+  totalAmount        Int // Total in Toman
+  shippingCost       Int         @default(0)
+  refAffiliateId     String? // Affiliate who referred this order
+  refAffiliate       User?       @relation("AffiliateReferredOrders", fields: [refAffiliateId], references: [id])
+  customerName       String
+  shippingProvince   String
+  shippingAddress    String      @db.Text
+  shippingCity       String
+  shippingPostalCode String?
+  shippingPhone      String
+  notes              String?     @db.Text
+  zarinpalAuthority  String? // Zarinpal payment authority
+  zarinpalRefId      String? // Zarinpal RefID after payment
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  items       OrderItem[]
+  commissions Commission[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([refAffiliateId])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product        @relation(fields: [productId], references: [id])
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  quantity  Int
+  price     Int // Price at time of purchase (Toman)
+  createdAt DateTime       @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Commission {
+  id          String           @id @default(cuid())
+  affiliateId String
+  affiliate   User             @relation(fields: [affiliateId], references: [id])
+  orderId     String
+  order       Order            @relation(fields: [orderId], references: [id])
+  level       Int // 1 or 2
+  percentage  Int // Commission percentage (10 or 5)
+  amount      Int // Commission amount in Toman
+  status      CommissionStatus @default(pending)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([affiliateId])
+  @@index([orderId])
+  @@index([status])
+  @@index([level])
+}
+
+model PayoutRequest {
+  id          String       @id @default(cuid())
+  affiliateId String
+  affiliate   User         @relation(fields: [affiliateId], references: [id])
+  amount      Int // Amount in Toman
+  status      PayoutStatus @default(pending)
+  bankAccount String?      @db.Text
+  notes       String?      @db.Text
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([affiliateId])
+  @@index([status])
+}
+
+model Settings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?  @db.Text
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+}
