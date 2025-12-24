@@ -3,7 +3,8 @@
 import { useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import { useCartStore } from "@/store/cart-store"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
+import { StyledCard } from "@/components/ui/styled-card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CheckCircle2, Package, ArrowLeft, Sparkles } from "lucide-react"
@@ -20,7 +21,7 @@ export default function PaymentSuccessPage() {
 
   return (
     <div className="page-container py-12 md:py-20 flex items-center justify-center min-h-screen" dir="rtl">
-      <Card className="w-full max-w-2xl card-editorial border-border/40">
+      <StyledCard className="w-full max-w-2xl card-editorial border-border/40">
         <CardContent className="p-12 md:p-16 text-center">
           <div className="relative inline-flex mb-8">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
@@ -55,7 +56,7 @@ export default function PaymentSuccessPage() {
             </Link>
           </div>
         </CardContent>
-      </Card>
+      </StyledCard>
     </div>
   )
 }

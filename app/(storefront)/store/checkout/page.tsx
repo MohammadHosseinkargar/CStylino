@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCartStore } from "@/store/cart-store"
@@ -18,6 +18,7 @@ import { Loader2, MapPin, Phone, User } from "lucide-react"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
+import gsap from "gsap"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -26,6 +27,29 @@ export default function CheckoutPage() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [shippingCost, setShippingCost] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".checkout-section", {
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.15,
+        ease: "power2.out",
+      })
+
+      gsap.from(".checkout-summary", {
+        x: 20,
+        opacity: 0,
+        duration: 0.6,
+        delay: 0.3,
+        ease: "power2.out",
+      })
+    }, containerRef)
+
+    return () => ctx.revert()
+  }, [])
 
   const {
     register,
@@ -130,14 +154,15 @@ export default function CheckoutPage() {
 
   return (
     <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
-      <SectionHeader
-        title="ثبت سفارش"
-        subtitle="لطفاً اطلاعات خود را وارد کنید تا سفارش شما در سریع‌ترین زمان ممکن پردازش شود."
-      />
+      <div ref={containerRef}>
+        <SectionHeader
+          title="ثبت سفارش"
+          subtitle="لطفاً اطلاعات خود را وارد کنید تا سفارش شما در سریع‌ترین زمان ممکن پردازش شود."
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="lg:col-span-2 space-y-6">
-          <StyledCard variant="elevated" className="border-border/40">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+          <div className="lg:col-span-2 space-y-6">
+            <StyledCard variant="elevated" className="border-border/40 checkout-section">
             <CardHeader className="pb-6">
               <CardTitle className="text-title flex items-center gap-3">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -325,7 +350,7 @@ export default function CheckoutPage() {
           </StyledCard>
         </div>
 
-        <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
+        <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last checkout-summary">
           <StyledCard variant="subtle" className="border-border/40">
             <CardHeader className="pb-4 md:pb-6">
               <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
@@ -371,6 +396,7 @@ export default function CheckoutPage() {
               </div>
             </CardContent>
           </StyledCard>
+        </div>
         </div>
       </div>
     </PageContainer>

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/lib/utils"
@@ -91,7 +91,7 @@ export default function AffiliateSubAffiliatesPage() {
                   <ListCard
                     key={subAffiliate.id}
                     title={subAffiliate.name || subAffiliate.email}
-                    subtitle={کد معرف: }
+                    subtitle={`کد معرف: ${subAffiliate.affiliateCode}`}
                     meta={formatDate(subAffiliate.createdAt)}
                   >
                     <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">

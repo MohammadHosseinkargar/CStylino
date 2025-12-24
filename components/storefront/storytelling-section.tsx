@@ -1,212 +1,112 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import Image from "next/image"
+import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 gsap.registerPlugin(ScrollTrigger)
 
-type StoryStep = {
-  title: string
-  body: string
-  image: string
-  kicker?: string
-}
+const chapters = [
+  {
+    title: "فصل اول: اصالت",
+    text: "طراحی‌های ما ریشه در فرهنگ غنی ایرانی دارند، اما با نگاهی مدرن و جهانی.",
+    image: "/placeholders/story-atelier-1.svg", // Need to ensure these exist or use placeholders
+    color: "bg-[#FDFCF8]"
+  },
+  {
+    title: "فصل دوم: ظرافت",
+    text: "جزئیات، همه چیز است. دوخت‌های دقیق و پارچه‌های اعلا، امضای ماست.",
+    image: "/placeholders/story-atelier-2.svg",
+    color: "bg-[#F9F8F4]"
+  },
+  {
+    title: "فصل سوم: راحتی",
+    text: "زیبایی نباید به قیمت راحتی باشد. استایل شما باید بازتابی از آرامش درونتان باشد.",
+    image: "/placeholders/story-atelier-3.svg",
+    color: "bg-[#F5F4F0]"
+  },
+  {
+    title: "فصل چهارم: شما",
+    text: "ما فقط لباس نمی‌دوزیم، ما همراه لحظات خاص زندگی شما هستیم.",
+    image: "/placeholders/story-atelier-4.svg",
+    color: "bg-[#F0EFE9]"
+  }
+]
 
-type StorytellingSectionProps = {
-  steps: StoryStep[]
-}
-
-export function StorytellingSection({ steps }: StorytellingSectionProps) {
+export function StorytellingSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [motionEnabled, setMotionEnabled] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
+  const triggerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-    const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const desktopQuery = window.matchMedia("(min-width: 768px)")
-
-    const update = () => {
-      setMotionEnabled(!reducedQuery.matches)
-      setIsDesktop(desktopQuery.matches)
-    }
-
-    const subscribe = (query: MediaQueryList) => {
-      if (query.addEventListener) {
-        query.addEventListener("change", update)
-        return () => query.removeEventListener("change", update)
-      }
-      query.addListener(update)
-      return () => query.removeListener(update)
-    }
-
-    update()
-    const unsubscribeReduced = subscribe(reducedQuery)
-    const unsubscribeDesktop = subscribe(desktopQuery)
-
-    return () => {
-      unsubscribeReduced()
-      unsubscribeDesktop()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!motionEnabled || !isDesktop || !containerRef.current) return
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (prefersReducedMotion) return
 
     const ctx = gsap.context(() => {
-      const stepNodes = gsap.utils.toArray<HTMLElement>(".story-step")
-      const imageNodes = gsap.utils.toArray<HTMLElement>(".story-image")
-
-      gsap.set(stepNodes, { opacity: 0, y: 24 })
-      gsap.set(imageNodes, { opacity: 0, scale: 1.04 })
-
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: containerRef.current,
+          trigger: triggerRef.current,
           start: "top top",
-          end: `+=${Math.max(stepNodes.length, 1) * 120}%`,
-          scrub: 1,
+          end: "+=300%", // 4 sections -> 300% scroll distance
           pin: true,
+          scrub: 1,
           anticipatePin: 1,
-        },
+        }
       })
 
-      stepNodes.forEach((step, index) => {
-        const at = index * 1.2
-        const image = imageNodes[index]
-
-        tl.to(
-          step,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          at
+      chapters.forEach((_, i) => {
+        if (i === 0) return
+        tl.fromTo(`.chapter-${i}`, 
+          { opacity: 0, scale: 0.95 }, 
+          { opacity: 1, scale: 1, duration: 1, ease: "power2.inOut" }
         )
-
-        if (image) {
-          tl.to(
-            image,
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.6,
-              ease: "power2.out",
-            },
-            at
-          )
-        }
-
-        if (index < stepNodes.length - 1) {
-          tl.to(
-            step,
-            {
-              opacity: 0,
-              y: -18,
-              duration: 0.5,
-              ease: "power2.inOut",
-            },
-            at + 0.9
-          )
-
-          if (image) {
-            tl.to(
-              image,
-              {
-                opacity: 0,
-                scale: 1.02,
-                duration: 0.5,
-                ease: "power2.inOut",
-              },
-              at + 0.9
-            )
-          }
-        }
+        // Hide previous
+        .to(`.chapter-${i-1}`, 
+          { opacity: 0, scale: 1.05, duration: 1, ease: "power2.inOut" }, 
+          "<"
+        )
       })
     }, containerRef)
 
     return () => ctx.revert()
-  }, [isDesktop, motionEnabled, steps.length])
-
-  const stackedLayout = useMemo(() => !motionEnabled || !isDesktop, [motionEnabled, isDesktop])
-
-  if (stackedLayout) {
-    return (
-      <section className="section-spacing bg-gradient-to-b from-background via-muted/20 to-background">
-        <div className="editorial-container px-4">
-          <div className="mb-12">
-            <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">روایت مجموعه</p>
-            <h2 className="text-hero font-bold mt-4">از الهام تا پوشش نهایی</h2>
-          </div>
-          <div className="space-y-12">
-            {steps.map((step, index) => (
-              <div
-                key={`${step.title}-${index}`}
-                className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] items-center"
-              >
-                <div>
-                  {step.kicker ? (
-                    <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground mb-3">
-                      {step.kicker}
-                    </p>
-                  ) : null}
-                  <h3 className="text-title font-bold mb-4">{step.title}</h3>
-                  <p className="text-body text-muted-foreground leading-relaxed">{step.body}</p>
-                </div>
-                <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border/40 shadow-lg">
-                  <Image src={step.image} alt={step.title} fill className="object-cover" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    )
-  }
+  }, [])
 
   return (
-    <section
-      ref={containerRef}
-      className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-background via-muted/20 to-background"
-    >
-      <div className="absolute inset-0 grain-texture" />
-      <div className="editorial-container px-4 py-16 relative z-10">
-        <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
-          <div className="relative min-h-[28rem]">
-            {steps.map((step, index) => (
-              <div
-                key={`${step.title}-${index}`}
-                className={cn(
-                  "story-step absolute inset-0 flex items-center",
-                  index === 0 ? "opacity-100" : "opacity-0"
-                )}
-              >
-                <div className="max-w-xl">
-                  {step.kicker ? (
-                    <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground mb-3">
-                      {step.kicker}
-                    </p>
-                  ) : null}
-                  <h3 className="text-hero font-bold mb-6">{step.title}</h3>
-                  <p className="text-body text-muted-foreground leading-relaxed text-lg">{step.body}</p>
-                </div>
-              </div>
-            ))}
+    <div ref={containerRef} className="relative">
+      <div ref={triggerRef} className="h-screen w-full overflow-hidden relative">
+        {chapters.map((chapter, i) => (
+          <div
+            key={i}
+            className={cn(
+              `chapter-${i} absolute inset-0 w-full h-full flex flex-col md:flex-row items-center justify-center p-6 md:p-20 transition-colors duration-700`,
+              chapter.color,
+              i === 0 ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+            style={{ zIndex: i + 10 }}
+          >
+            <div className="flex-1 space-y-8 max-w-xl z-10">
+              <span className="text-accent text-sm tracking-widest uppercase font-medium">
+                {`0${i + 1} / 04`}
+              </span>
+              <h2 className="text-4xl md:text-6xl font-display font-light text-foreground">
+                {chapter.title}
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                {chapter.text}
+              </p>
+            </div>
+            
+            <div className="flex-1 mt-10 md:mt-0 relative w-full h-[40vh] md:h-[60vh] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 bg-accent/5 mix-blend-multiply pointer-events-none z-10" />
+               {/* Placeholder for now - can use a solid color div if image fails */}
+               <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+                  <span className="text-4xl opacity-20 font-display">{chapter.title}</span>
+               </div>
+            </div>
           </div>
-          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2.5rem] border border-border/50 shadow-xl bg-muted/30">
-            {steps.map((step, index) => (
-              <div key={step.image} className="story-image absolute inset-0">
-                <Image src={step.image} alt={step.title} fill className="object-cover" />
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
-    </section>
+    </div>
   )
 }

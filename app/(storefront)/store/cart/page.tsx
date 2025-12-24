@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useCartStore } from "@/store/cart-store"
 import { Button } from "@/components/ui/button"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,12 +12,27 @@ import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
+import gsap from "gsap"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal } = useCartStore()
   const [shippingCost, setShippingCost] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const itemsTotal = getTotal()
   const total = shippingCost === null ? null : itemsTotal + shippingCost
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".cart-item", {
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out",
+      })
+    }, containerRef)
+    return () => ctx.revert()
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -69,206 +84,203 @@ export default function CartPage() {
 
   return (
     <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
-      <SectionHeader
-        title="سبد خرید"
-        subtitle={`${items.length} محصول در سبد خرید`}
-      />
+      <div ref={containerRef}>
+        <SectionHeader
+          title="سبد خرید"
+          subtitle={`${items.length} محصول در سبد خرید`}
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="lg:col-span-2 space-y-6">
-          <StyledCard variant="elevated" className="border-border/40 hidden md:block">
-            <CardContent className="p-0">
-              <table className="w-full">
-                <thead className="border-b border-border/40 text-xs text-muted-foreground">
-                  <tr>
-                    <th className="text-right font-semibold px-6 py-4">محصول</th>
-                    <th className="text-center font-semibold px-4 py-4">تعداد</th>
-                    <th className="text-right font-semibold px-4 py-4">قیمت</th>
-                    <th className="text-left font-semibold px-6 py-4"> </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/30">
-                  {items.map((item) => (
-                    <tr key={item.variantId} className="align-top">
-                      <td className="px-6 py-5">
-                        <div className="flex gap-4">
-                          <Link
-                            href={`/store/products/${item.slug || item.productId}`}
-                            className="relative h-24 w-20 rounded-xl overflow-hidden bg-muted/20 flex-shrink-0 group"
-                          >
-                            {item.image && (
-                              <Image
-                                src={item.image}
-                                alt={item.productName}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                sizes="80px"
-                              />
-                            )}
-                          </Link>
-                          <div className="min-w-0">
-                            <Link href={`/store/products/${item.slug || item.productId}`}>
-                              <div className="text-sm font-semibold line-clamp-2 leading-relaxed">
-                                {item.productName}
-                              </div>
-                            </Link>
-                            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-3">
-                              <span className="flex items-center gap-2">
-                                <span className="font-medium">سایز:</span>
-                                <span>{item.variantSize}</span>
-                              </span>
-                              <span>×</span>
-                              <span className="flex items-center gap-2">
-                                <span className="font-medium">رنگ:</span>
-                                <span
-                                  className="inline-block w-4 h-4 rounded-full border-2 border-border/50 shadow-sm"
-                                  style={{ backgroundColor: item.variantColorHex }}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+          <div className="lg:col-span-2 space-y-6">
+            <StyledCard variant="elevated" className="border-border/40 hidden md:block cart-item">
+              <CardContent className="p-0">
+                <table className="w-full">
+                  <thead className="border-b border-border/40 text-xs text-muted-foreground">
+                    <tr>
+                      <th className="text-right font-semibold px-6 py-4">محصول</th>
+                      <th className="text-center font-semibold px-4 py-4">تعداد</th>
+                      <th className="text-right font-semibold px-4 py-4">قیمت</th>
+                      <th className="text-left font-semibold px-6 py-4"> </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/30">
+                    {items.map((item) => (
+                      <tr key={item.variantId} className="align-top">
+                        <td className="px-6 py-5">
+                          <div className="flex gap-4">
+                            <Link
+                              href={`/store/products/${item.slug || item.productId}`}
+                              className="relative h-24 w-20 rounded-xl overflow-hidden bg-muted/20 flex-shrink-0 group"
+                            >
+                              {item.image && (
+                                <Image
+                                  src={item.image}
+                                  alt={item.productName}
+                                  fill
+                                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                  sizes="80px"
                                 />
-                                <span>{item.variantColor}</span>
-                              </span>
+                              )}
+                            </Link>
+                            <div className="min-w-0">
+                              <Link href={`/store/products/${item.slug || item.productId}`}>
+                                <div className="text-sm font-semibold line-clamp-2 leading-relaxed hover:text-primary transition-colors">
+                                  {item.productName}
+                                </div>
+                              </Link>
+                              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-3">
+                                <span className="flex items-center gap-2">
+                                  <span className="font-medium">سایز:</span>
+                                  <span>{item.variantSize}</span>
+                                </span>
+                                <span>×</span>
+                                <span className="flex items-center gap-2">
+                                  <span className="font-medium">رنگ:</span>
+                                  <span
+                                    className="inline-block w-3 h-3 rounded-full border border-border/50 shadow-sm"
+                                    style={{ backgroundColor: item.variantColorHex }}
+                                  />
+                                  <span>{item.variantColor}</span>
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-5">
-                        <div className="flex items-center justify-center">
-                          <div className="flex items-center gap-2 border-2 border-border/50 rounded-xl p-1 bg-background">
+                        </td>
+                        <td className="px-4 py-5">
+                          <div className="flex items-center justify-center">
+                            <div className="flex items-center gap-1 border border-input rounded-lg p-1 bg-background shadow-sm">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                                aria-label="کاهش تعداد"
+                              >
+                                <Minus className="w-3.5 h-3.5" />
+                              </Button>
+                              <span className="w-8 text-center font-semibold text-sm persian-number">
+                                {item.quantity}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-md hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                                disabled={item.quantity >= item.stock}
+                                aria-label="افزایش تعداد"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-5">
+                          <Price price={item.price * item.quantity} size="sm" className="text-right font-bold" />
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex justify-end">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                              onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                              aria-label="کاهش تعداد"
+                              className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              onClick={() => removeItem(item.variantId)}
+                              aria-label="حذف از سبد خرید"
                             >
-                              <Minus className="w-4 h-4" />
+                              <Trash2 className="w-4.5 h-4.5" />
                             </Button>
-                            <span className="w-10 text-center font-semibold text-sm persian-number">
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </StyledCard>
+
+            <div className="space-y-4 md:hidden">
+              {items.map((item) => (
+                <StyledCard key={item.variantId} variant="elevated" className="overflow-hidden border-border/40 cart-item">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <Link
+                        href={`/store/products/${item.slug || item.productId}`}
+                        className="relative w-24 h-24 rounded-xl overflow-hidden bg-muted/20 flex-shrink-0"
+                      >
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt={item.productName}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                          />
+                        )}
+                      </Link>
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <Link href={`/store/products/${item.slug || item.productId}`}>
+                            <h3 className="text-sm font-semibold mb-1 line-clamp-2 leading-snug">
+                              {item.productName}
+                            </h3>
+                          </Link>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                            <span>{item.variantSize}</span>
+                            <span className="w-px h-3 bg-border" />
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="w-3 h-3 rounded-full border border-border/50"
+                                style={{ backgroundColor: item.variantColorHex }}
+                              />
+                              <span>{item.variantColor}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-auto">
+                          <Price price={item.price * item.quantity} size="sm" className="font-bold" />
+                          <div className="flex items-center gap-1 border border-input rounded-lg p-0.5 bg-background shadow-sm">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-md"
+                              onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </Button>
+                            <span className="w-6 text-center font-semibold text-sm persian-number">
                               {item.quantity}
                             </span>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-lg hover:bg-accent/50"
+                              className="h-7 w-7 rounded-md"
                               onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                               disabled={item.quantity >= item.stock}
-                              aria-label="افزایش تعداد"
                             >
-                              <Plus className="w-4 h-4" />
+                              <Plus className="w-3.5 h-3.5" />
                             </Button>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-4 py-5">
-                        <Price price={item.price * item.quantity} size="sm" className="text-right" />
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
-                            onClick={() => removeItem(item.variantId)}
-                            aria-label="حذف از سبد خرید"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </StyledCard>
-
-          <div className="space-y-6 md:hidden">
-            {items.map((item) => (
-              <StyledCard key={item.variantId} variant="elevated" className="overflow-hidden border-border/40">
-                <CardContent className="p-5">
-                  <div className="flex gap-4">
-                    <Link
-                      href={`/store/products/${item.slug || item.productId}`}
-                      className="relative w-24 h-28 rounded-2xl overflow-hidden bg-muted/20 flex-shrink-0 group"
-                    >
-                      {item.image && (
-                        <Image
-                          src={item.image}
-                          alt={item.productName}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
-                          sizes="96px"
-                        />
-                      )}
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/store/products/${item.slug || item.productId}`}>
-                        <h3 className="text-sm font-semibold mb-2 hover:text-primary transition-colors duration-300 line-clamp-2 leading-relaxed">
-                          {item.productName}
-                        </h3>
-                      </Link>
-                      <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-4">
-                        <span className="flex items-center gap-2">
-                          <span className="font-medium">سایز:</span>
-                          <span>{item.variantSize}</span>
-                        </span>
-                        <span>×</span>
-                        <span className="flex items-center gap-2">
-                          <span className="font-medium">رنگ:</span>
-                          <span
-                            className="inline-block w-4 h-4 rounded-full border-2 border-border/50 shadow-sm"
-                            style={{ backgroundColor: item.variantColorHex }}
-                          />
-                          <span>{item.variantColor}</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 border-2 border-border/50 rounded-xl p-1 bg-background">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                            aria-label="کاهش تعداد"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                          <span className="w-10 text-center font-semibold text-sm persian-number">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            disabled={item.quantity >= item.stock}
-                            aria-label="افزایش تعداد"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <Price price={item.price * item.quantity} size="sm" className="text-left" />
-                      </div>
-                      <div className="mt-4 flex justify-end">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-10 w-10 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
-                          onClick={() => removeItem(item.variantId)}
-                          aria-label="حذف از سبد خرید"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </Button>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </StyledCard>
-            ))}
+                    <div className="mt-3 pt-3 border-t border-border/40 flex justify-end">
+                       <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-3"
+                        onClick={() => removeItem(item.variantId)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 ml-1.5" />
+                        حذف محصول
+                      </Button>
+                    </div>
+                  </CardContent>
+                </StyledCard>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
-          <StyledCard variant="subtle" className="border-border/40">
+          <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last cart-summary">
+            <StyledCard variant="subtle" className="border-border/40 shadow-sm">
             <CardHeader className="pb-4 md:pb-6">
               <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
             </CardHeader>
@@ -311,6 +323,7 @@ export default function CartPage() {
           </StyledCard>
         </div>
       </div>
+    </div>
 
       <div className="lg:hidden sticky bottom-0 z-30 -mx-4 mt-8 border-t border-border/50 bg-background/95 backdrop-blur px-4 py-4">
         <div className="flex items-center justify-between text-sm mb-3">

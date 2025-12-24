@@ -45,7 +45,7 @@ export default async function AdminOrderDetailPage({
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
         title={`Order #${order.id.slice(0, 8)}`}
-        subtitle={`${formatDate(order.createdAt)} · ${statusLabels[order.status]}`}
+        subtitle={`${formatDate(order.createdAt)} â€¢ ${statusLabels[order.status]}`}
         actions={
           <Link
             href="/admin/orders"
@@ -79,7 +79,7 @@ export default async function AdminOrderDetailPage({
                 <div className="space-y-1">
                   <div className="font-semibold">{item.product.name}</div>
                   <div className="text-muted-foreground">
-                    {item.variant.size} / {item.variant.color} · Qty {item.quantity}
+                    {item.variant.size} / {item.variant.color} ï¿½ Qty {item.quantity}
                   </div>
                 </div>
                 <div className="font-semibold">

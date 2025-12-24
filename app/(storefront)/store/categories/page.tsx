@@ -9,8 +9,12 @@ import { StyledCard } from "@/components/ui/styled-card"
 import { SkeletonCard } from "@/components/ui/skeleton-kit"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FolderOpen } from "lucide-react"
+import { useEffect, useRef } from "react"
+import gsap from "gsap"
 
 export default function CategoriesPage() {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -19,6 +23,22 @@ export default function CategoriesPage() {
       return res.json()
     },
   })
+
+  useEffect(() => {
+    if (isLoading || !categories?.length) return
+
+    const ctx = gsap.context(() => {
+      gsap.from(".category-card", {
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out",
+      })
+    }, containerRef)
+
+    return () => ctx.revert()
+  }, [isLoading, categories])
 
   if (isLoading) {
     return (
@@ -34,50 +54,52 @@ export default function CategoriesPage() {
 
   return (
     <PageContainer className="py-12" dir="rtl">
-      <SectionHeader
-        title="دسته‌بندی‌ها"
-        subtitle="برای هر سلیقه، یک انتخاب"
-      />
+      <div ref={containerRef}>
+        <SectionHeader
+          title="دسته‌بندی‌ها"
+          subtitle="برای هر سلیقه، یک انتخاب"
+        />
 
-      {categories?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-          {categories?.map((category: any) => (
-            <Link key={category.id} href={`/store/products?category=${category.slug}`}>
-              <StyledCard variant="elevated" className="overflow-hidden hover:border-primary/30">
-                {category.image && (
-                  <div className="aspect-video relative bg-muted">
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-6 space-y-2">
-                  <h3 className="text-subtitle font-semibold">{category.name}</h3>
-                  {category.description && (
-                    <p className="text-body text-muted-foreground line-clamp-2">
-                      {category.description}
-                    </p>
+        {categories?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            {categories?.map((category: any) => (
+              <Link key={category.id} href={`/store/products?category=${category.slug}`}>
+                <StyledCard variant="elevated" className="overflow-hidden hover:border-primary/30 category-card h-full group">
+                  {category.image && (
+                    <div className="aspect-video relative bg-muted overflow-hidden">
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
                   )}
-                  <p className="text-caption text-primary">
-                    {category._count?.products || 0} محصول
-                  </p>
-                </div>
-              </StyledCard>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="mt-10">
-          <EmptyState
-            icon={<FolderOpen className="w-6 h-6 text-muted-foreground" />}
-            title="دسته‌بندی یافت نشد"
-            description="هنوز دسته‌بندی‌ای اضافه نشده است."
-          />
-        </div>
-      )}
+                  <div className="p-6 space-y-2">
+                    <h3 className="text-subtitle font-semibold">{category.name}</h3>
+                    {category.description && (
+                      <p className="text-body text-muted-foreground line-clamp-2">
+                        {category.description}
+                      </p>
+                    )}
+                    <p className="text-caption text-primary">
+                      {category._count?.products || 0} محصول
+                    </p>
+                  </div>
+                </StyledCard>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10">
+            <EmptyState
+              icon={<FolderOpen className="w-6 h-6 text-muted-foreground" />}
+              title="دسته‌بندی یافت نشد"
+              description="هنوز دسته‌بندی‌ای اضافه نشده است."
+            />
+          </div>
+        )}
+      </div>
     </PageContainer>
   )
 }

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
@@ -94,8 +94,8 @@ export default function AffiliateCommissionsPage() {
                 {commissions.map((commission: any) => (
                   <ListCard
                     key={commission.id}
-                    title={سفارش #}
-                    subtitle={سطح  · }
+                    title={`سفارش #${commission.orderId?.slice(0, 8) || 'Unknown'}`}
+                    subtitle={`سطح ${commission.level} · ${formatDate(commission.createdAt)}`}
                     meta={formatPrice(commission.amount)}
                   >
                     <div className="text-caption text-muted-foreground">

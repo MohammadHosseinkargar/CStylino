@@ -1,20 +1,22 @@
-﻿"use client"
+"use client"
 
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice } from "@/lib/utils"
 import { Wallet, TrendingUp, Users, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
+import gsap from "gsap"
 
 export default function AffiliateDashboard() {
   const { toast } = useToast()
   const [copied, setCopied] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const { data: userData } = useQuery({
     queryKey: ["affiliate-dashboard"],
@@ -24,6 +26,22 @@ export default function AffiliateDashboard() {
       return res.json()
     },
   })
+
+  useEffect(() => {
+    if (!userData) return
+
+    const ctx = gsap.context(() => {
+      gsap.from(".dashboard-card", {
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.out",
+      })
+    }, containerRef)
+
+    return () => ctx.revert()
+  }, [userData])
 
   if (!userData) {
     return (
@@ -44,7 +62,7 @@ export default function AffiliateDashboard() {
 
   if (!user || !user.affiliateCode) return null
 
-  const affiliateLink = ${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/store?ref=
+  const affiliateLink = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/store?ref=${user.affiliateCode}`
 
   const handleCopy = async (text: string) => {
     try {
@@ -66,13 +84,15 @@ export default function AffiliateDashboard() {
 
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
-      <SectionHeader
-        title="همکار فروش"
-        subtitle="داشبورد کمیسیون‌ها و لینک ارجاع شما"
-      />
+      <div ref={containerRef}>
+        <SectionHeader
+          title="همکار فروش"
+          subtitle="داشبورد کمیسیون‌ها و لینک ارجاع شما"
+          className="dashboard-card"
+        />
 
-      <StyledCard variant="glass" className="border-primary/20">
-        <CardContent className="p-6">
+        <StyledCard variant="glass" className="border-primary/20 dashboard-card mb-6">
+          <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground mb-2">کد معرف</p>
@@ -107,11 +127,11 @@ export default function AffiliateDashboard() {
         </CardContent>
       </StyledCard>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              موجودی قابل برداشت
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <StyledCard variant="elevated" className="dashboard-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                موجودی قابل برداشت
             </CardTitle>
             <Wallet className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -121,10 +141,10 @@ export default function AffiliateDashboard() {
           </CardContent>
         </StyledCard>
 
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              کمیسیون‌های در انتظار
+          <StyledCard variant="elevated" className="dashboard-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                کمیسیون‌های در انتظار
             </CardTitle>
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -134,10 +154,10 @@ export default function AffiliateDashboard() {
           </CardContent>
         </StyledCard>
 
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              کمیسیون‌های پرداخت‌شده
+          <StyledCard variant="elevated" className="dashboard-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                کمیسیون‌های پرداخت‌شده
             </CardTitle>
             <Wallet className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -147,10 +167,10 @@ export default function AffiliateDashboard() {
           </CardContent>
         </StyledCard>
 
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              زیرمجموعه‌ها
+          <StyledCard variant="elevated" className="dashboard-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                زیرمجموعه‌ها
             </CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -183,6 +203,7 @@ export default function AffiliateDashboard() {
             <p className="text-sm text-muted-foreground">درصد پرداختی از سفارش‌های سطح دوم</p>
           </CardContent>
         </StyledCard>
+        </div>
       </div>
     </PageContainer>
   )

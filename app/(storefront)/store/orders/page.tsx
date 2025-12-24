@@ -70,7 +70,8 @@ export default function OrdersPage() {
       ) : (
         <div className="space-y-4">
           {orders?.map((order: any) => {
-            const StatusIcon = statusIcons[order.status]
+            const status = order.status as OrderStatus
+            const StatusIcon = statusIcons[status]
             return (
               <StyledCard key={order.id} variant="elevated">
                 <CardHeader>
@@ -79,7 +80,7 @@ export default function OrdersPage() {
                       <div
                         className={cn(
                           "h-10 w-10 rounded-xl flex items-center justify-center",
-                          statusColors[order.status]
+                          statusColors[status]
                         )}
                       >
                         <StatusIcon className="w-5 h-5" />
@@ -98,10 +99,10 @@ export default function OrdersPage() {
                       <span
                         className={cn(
                           "text-xs px-2.5 py-1 rounded-full font-medium",
-                          statusColors[order.status]
+                          statusColors[status]
                         )}
                       >
-                        {statusLabels[order.status]}
+                        {statusLabels[status]}
                       </span>
                     </div>
                   </div>

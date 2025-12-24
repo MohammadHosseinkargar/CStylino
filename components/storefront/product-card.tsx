@@ -37,7 +37,10 @@ export function ProductCard({
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const hasStock = variants.some((v) => v.stock > 0)
+  
   const mainImage = images[0] || "/placeholder-product.jpg"
+  const hoverImage = images[1] || mainImage
+
   const uniqueColors = Array.from(
     new Set(variants.map((v) => ({ color: v.color, hex: v.colorHex })))
   )
@@ -45,7 +48,7 @@ export function ProductCard({
   return (
     <StyledCard
       variant="elevated"
-      className="group overflow-hidden h-full flex flex-col border-border/40"
+      className="group overflow-hidden h-full flex flex-col border-border/40 rounded-2xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -58,78 +61,94 @@ export function ProductCard({
           alt={name}
           fill
           className={cn(
-            "object-cover transition-transform duration-700 ease-out",
-            isHovered && "scale-110"
+            "object-cover transition-all duration-700 ease-out",
+            isHovered && hoverImage !== mainImage ? "opacity-0" : "opacity-100",
+            isHovered && "scale-105"
           )}
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
+        
+        {hoverImage !== mainImage && (
+          <Image
+            src={hoverImage}
+            alt={name}
+            fill
+            className={cn(
+              "object-cover transition-all duration-700 ease-out absolute inset-0",
+              isHovered ? "opacity-100 scale-105" : "opacity-0"
+            )}
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        )}
+
         {featured && (
-          <div className="absolute top-4 right-4 bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-md">
+          <div className="absolute top-4 right-4 bg-accent text-accent-foreground text-[10px] tracking-wider font-bold px-3 py-1 rounded-full uppercase shadow-sm">
             ویژه
           </div>
         )}
         {!hasStock && (
-          <div className="absolute inset-0 bg-background/90 flex items-center justify-center backdrop-blur-sm">
-            <span className="text-sm font-semibold text-muted-foreground">ناموجود</span>
+          <div className="absolute inset-0 bg-background/90 flex items-center justify-center backdrop-blur-sm z-10">
+            <span className="text-sm font-medium tracking-wide text-muted-foreground">ناموجود</span>
           </div>
         )}
-        {/* Quick actions overlay */}
+        
+        {/* Quick actions overlay - Mobile optimized: always show on touch, hover on desktop */}
         <div
           className={cn(
-            "absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-500 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100",
-            !hasStock && "opacity-0"
+            "absolute bottom-4 left-0 right-0 flex justify-center gap-3 transition-all duration-500 z-20",
+            isHovered || !hasStock ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           )}
         >
-          <Button
-            size="icon"
-            className="h-12 w-12 rounded-full bg-background/95 backdrop-blur-md shadow-xl hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
-            onClick={(e) => {
-              e.preventDefault()
-              // Add to cart logic
-            }}
-            aria-label="افزودن به سبد خرید"
-          >
-            <ShoppingCart className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-12 w-12 rounded-full bg-background/95 backdrop-blur-md shadow-xl hover:bg-destructive/10 hover:text-destructive transition-all duration-300 hover:scale-110"
-            onClick={(e) => {
-              e.preventDefault()
-              // Add to favorites logic
-            }}
-            aria-label="افزودن به علاقه‌مندی‌ها"
-          >
-            <Heart className="h-5 w-5" />
-          </Button>
+          {hasStock && (
+            <>
+               <Button
+                size="icon"
+                className="h-10 w-10 rounded-full bg-white text-black hover:bg-black hover:text-white shadow-lg transition-colors duration-300"
+                onClick={(e) => {
+                  e.preventDefault()
+                  // Add to cart logic
+                }}
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-10 w-10 rounded-full bg-white/90 hover:bg-white shadow-lg"
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
+              >
+                <Heart className="h-4 w-4" />
+              </Button>
+            </>
+          )}
         </div>
       </Link>
 
-      <CardContent className="p-5 flex-1 flex flex-col">
-        <Link href={`/store/products/${slug}`}>
-          <h3 className="font-semibold mb-3 line-clamp-2 hover:text-primary transition-colors duration-300 leading-relaxed">
-            {name}
-          </h3>
-        </Link>
-
-        <div className="mt-auto pt-3 flex items-end justify-between">
-          <Price price={basePrice} size="md" />
-          {uniqueColors.length > 0 && (
-            <div className="flex items-center gap-1.5">
-              {uniqueColors.slice(0, 4).map((colorItem, idx) => (
-                <div
-                  key={idx}
-                  className="h-4 w-4 rounded-full border border-border/50 shadow-sm"
-                  style={{ backgroundColor: colorItem.hex }}
-                  title={colorItem.color}
-                />
-              ))}
-              {uniqueColors.length > 4 && (
-                <span className="text-xs text-muted-foreground">+{uniqueColors.length - 4}</span>
-              )}
-            </div>
-          )}
+      <CardContent className="p-5 flex-1 flex flex-col justify-between">
+        <div className="space-y-2">
+          <Link href={`/store/products/${slug}`} className="block">
+            <h3 className="font-medium text-lg leading-tight group-hover:text-accent transition-colors duration-300">
+              {name}
+            </h3>
+          </Link>
+          <div className="flex items-center gap-1">
+             {uniqueColors.slice(0, 3).map((c, i) => (
+               <span 
+                 key={i} 
+                 className="w-3 h-3 rounded-full border border-border/50" 
+                 style={{ backgroundColor: c.hex }}
+               />
+             ))}
+             {uniqueColors.length > 3 && (
+               <span className="text-xs text-muted-foreground">+</span>
+             )}
+          </div>
+        </div>
+        
+        <div className="mt-4 flex items-center justify-between">
+          <Price price={basePrice} className="text-lg font-medium" />
         </div>
       </CardContent>
     </StyledCard>
