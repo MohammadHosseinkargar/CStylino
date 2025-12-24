@@ -168,6 +168,8 @@ model Order {
   userId             String
   user               User        @relation("UserOrders", fields: [userId], references: [id])
   status             OrderStatus @default(pending)
+  statusUpdatedAt    DateTime?
+  updatedBy          String?
   totalAmount        Int // Total in Toman
   shippingCost       Int         @default(0)
   refAffiliateId     String? // Affiliate who referred this order

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { checkoutSchema } from "@/lib/validations"
 import { getAffiliateRef } from "@/lib/affiliate"
 import { createCommissionsForOrder } from "@/lib/commission"
+import { getFlatShippingCost } from "@/lib/settings"
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,13 +51,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Get shipping cost from settings
-    const shippingCostSetting = await prisma.settings.findUnique({
-      where: { key: "shipping_cost" },
-    })
-    const shippingCost = shippingCostSetting
-      ? parseInt(shippingCostSetting.value)
-      : 0
+    // Get shipping cost from settings/env
+    const shippingCost = await getFlatShippingCost()
 
     totalAmount += shippingCost
 
@@ -106,18 +102,6 @@ export async function POST(request: NextRequest) {
         },
       },
     })
-
-    // Update stock
-    for (const item of orderItems) {
-      await prisma.productVariant.update({
-        where: { id: item.variantId },
-        data: {
-          stock: {
-            decrement: item.quantity,
-          },
-        },
-      })
-    }
 
     // Note: Commissions will be created after payment verification
     // See: app/api/payment/verify/route.ts

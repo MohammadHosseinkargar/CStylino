@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useCartStore } from "@/store/cart-store"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,8 +12,37 @@ import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react"
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal } =
     useCartStore()
-  const shippingCost = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_COST ?? 50000)
+  const [shippingCost, setShippingCost] = useState<number | null>(null)
   const itemsTotal = getTotal()
+  const total = shippingCost === null ? null : itemsTotal + shippingCost
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadShippingCost = async () => {
+      try {
+        const response = await fetch("/api/settings/public")
+        if (!response.ok) {
+          throw new Error("Failed to load shipping cost")
+        }
+        const data = await response.json()
+        if (isMounted) {
+          const parsed = Number(data.flatShippingCost)
+          setShippingCost(Number.isFinite(parsed) ? parsed : 0)
+        }
+      } catch (error) {
+        if (isMounted) {
+          setShippingCost(null)
+        }
+      }
+    }
+
+    loadShippingCost()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   if (items.length === 0) {
     return (
@@ -161,11 +191,19 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-body">
                   <span className="text-muted-foreground">هزینه ارسال:</span>
-                  <span className="font-semibold persian-number">۵۰,۰۰۰ تومان</span>
+                  <span className="font-semibold persian-number">
+                    {shippingCost === null
+                      ? "..."
+                      : `${shippingCost.toLocaleString("fa-IR")} تومان`}
+                  </span>
                 </div>
                 <div className="border-t border-border/50 pt-4 flex justify-between items-center">
                   <span className="text-subtitle font-bold">جمع کل:</span>
-                  <Price price={itemsTotal + shippingCost} size="lg" />
+                  {total === null ? (
+                    <span className="font-semibold persian-number">...</span>
+                  ) : (
+                    <Price price={total} size="lg" />
+                  )}
                 </div>
               </div>
               <Link href="/store/checkout" className="block">

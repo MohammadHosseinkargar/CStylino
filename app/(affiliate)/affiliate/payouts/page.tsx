@@ -1,18 +1,21 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatPrice, formatDate } from "@/lib/utils"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Wallet } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { formatDate, formatPrice } from "@/lib/utils"
 
 export default function AffiliatePayoutsPage() {
   const { toast } = useToast()
-  const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ["affiliate-dashboard"],
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { data: payoutData, isLoading, refetch } = useQuery({
+    queryKey: ["affiliate-payouts"],
     queryFn: async () => {
-      const res = await fetch("/api/affiliate/dashboard")
+      const res = await fetch("/api/affiliate/payouts")
       if (!res.ok) throw new Error("Failed to fetch")
       return res.json()
     },
@@ -20,25 +23,32 @@ export default function AffiliatePayoutsPage() {
 
   const handlePayoutRequest = async () => {
     try {
-      const res = await fetch("/api/payouts", {
+      setIsSubmitting(true)
+      const res = await fetch("/api/affiliate/payouts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: payoutData?.availableToRequest || 0 }),
       })
-      
-      if (res.ok) {
-        toast({
-          title: "درخواست ثبت شد",
-          description: "درخواست برداشت شما با موفقیت ثبت شد",
-        })
-      } else {
-        throw new Error("Failed to request payout")
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}))
+        throw new Error(error?.error || "Failed to request payout")
       }
+
+      toast({
+        title: "Payout request submitted",
+        description: "Your payout request is now pending review.",
+      })
+      await refetch()
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "خطا در ثبت درخواست برداشت",
+        title: "Request failed",
+        description:
+          error instanceof Error ? error.message : "Unable to request payout",
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -50,41 +60,48 @@ export default function AffiliatePayoutsPage() {
     )
   }
 
-  const availableCommissions = dashboardData?.availableCommissions || 0
+  const availableToRequest = payoutData?.availableToRequest || 0
+  const minimumPayoutAmount = payoutData?.minimumPayoutAmount || 0
+  const payouts = payoutData?.payouts || []
 
   return (
     <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
       <div>
-        <h1 className="text-4xl font-bold mb-2">درخواست پرداخت</h1>
-        <p className="text-muted-foreground">برداشت کمیسیون‌های خود</p>
+        <h1 className="text-4xl font-bold mb-2">Payouts</h1>
+        <p className="text-muted-foreground">
+          Request your available affiliate balance.
+        </p>
       </div>
 
       <Card className="card-luxury bg-gradient-to-l from-primary/5 to-background border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            موجودی قابل برداشت
+            Available balance
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center py-6">
             <div className="text-5xl font-bold mb-2">
-              {formatPrice(availableCommissions)}
+              {formatPrice(availableToRequest)}
             </div>
-            <p className="text-muted-foreground">موجودی شما</p>
+            <p className="text-muted-foreground">Available to request</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Minimum payout: {formatPrice(minimumPayoutAmount)}
+            </p>
           </div>
-          
+
           <Button
             className="btn-editorial w-full"
             onClick={handlePayoutRequest}
-            disabled={availableCommissions === 0}
+            disabled={availableToRequest < minimumPayoutAmount || isSubmitting}
           >
-            درخواست برداشت
+            Request payout
           </Button>
-          
-          {availableCommissions === 0 && (
+
+          {availableToRequest < minimumPayoutAmount && (
             <p className="text-sm text-center text-muted-foreground">
-              موجودی کافی برای برداشت ندارید
+              You need a higher balance before requesting a payout.
             </p>
           )}
         </CardContent>
@@ -92,15 +109,40 @@ export default function AffiliatePayoutsPage() {
 
       <Card className="card-luxury">
         <CardHeader>
-          <CardTitle>تاریخچه پرداخت‌ها</CardTitle>
+          <CardTitle>Recent payout requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            هنوز پرداختی ثبت نشده است
-          </div>
+          {payouts.length > 0 ? (
+            <div className="space-y-4">
+              {payouts.map((payout: any) => (
+                <div
+                  key={payout.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-border rounded-xl hover:bg-accent/50 transition-colors"
+                >
+                  <div className="space-y-1">
+                    <div className="font-semibold">
+                      {formatPrice(payout.amount)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {formatDate(payout.createdAt)}
+                    </div>
+                  </div>
+                  <div className="text-left text-xs text-muted-foreground capitalize">
+                    {payout.status === "pending" && "Pending"}
+                    {payout.status === "approved" && "Approved"}
+                    {payout.status === "paid" && "Paid"}
+                    {payout.status === "rejected" && "Rejected"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              No payout requests yet.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   )
 }
-

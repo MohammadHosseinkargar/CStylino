@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       // Update order status to canceled
       await prisma.order.update({
         where: { id: order.id },
-        data: { status: OrderStatus.canceled },
+        data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
       })
 
       return NextResponse.redirect(
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
       // Update order status to canceled
       await prisma.order.update({
         where: { id: order.id },
-        data: { status: OrderStatus.canceled },
+        data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
       })
 
       return NextResponse.redirect(
@@ -98,19 +98,108 @@ export async function GET(request: NextRequest) {
     }
 
     // Payment verified successfully
-    // Update order status to processing
-    await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        status: OrderStatus.processing,
-        zarinpalRefId: verificationResult.refId?.toString() || null,
-      },
-    })
+    let transactionResult: {
+      status: "paid" | "already_processed"
+      order: { id: string; status: OrderStatus; refAffiliateId: string | null }
+    }
+
+    try {
+      transactionResult = await prisma.$transaction(async (tx) => {
+        const freshOrder = await tx.order.findUnique({
+          where: { id: order.id },
+          include: { items: true },
+        })
+
+        if (!freshOrder) {
+          throw new Error("ORDER_NOT_FOUND")
+        }
+
+        if (freshOrder.status !== OrderStatus.pending) {
+          return {
+            status: "already_processed",
+            order: {
+              id: freshOrder.id,
+              status: freshOrder.status,
+              refAffiliateId: freshOrder.refAffiliateId,
+            },
+          }
+        }
+
+        for (const item of freshOrder.items) {
+          const updated = await tx.productVariant.updateMany({
+            where: {
+              id: item.variantId,
+              stock: { gte: item.quantity },
+            },
+            data: {
+              stock: { decrement: item.quantity },
+            },
+          })
+
+          if (updated.count === 0) {
+            throw new Error("OUT_OF_STOCK")
+          }
+        }
+
+        await tx.order.update({
+          where: { id: freshOrder.id },
+          data: {
+            status: OrderStatus.processing,
+            statusUpdatedAt: new Date(),
+            zarinpalRefId: verificationResult.refId?.toString() || null,
+          },
+        })
+
+        return {
+          status: "paid",
+          order: {
+            id: freshOrder.id,
+            status: OrderStatus.processing,
+            refAffiliateId: freshOrder.refAffiliateId,
+          },
+        }
+      })
+    } catch (error: any) {
+      if (error?.message === "OUT_OF_STOCK") {
+        await prisma.order.updateMany({
+          where: { id: order.id, status: OrderStatus.pending },
+          data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+        })
+
+        return NextResponse.redirect(
+          `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/failed?orderId=${order.id}&error=out_of_stock`
+        )
+      }
+
+      if (error?.message === "ORDER_NOT_FOUND") {
+        return NextResponse.redirect(
+          `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/failed?error=order_not_found`
+        )
+      }
+
+      throw error
+    }
+
+    if (transactionResult.status === "already_processed") {
+      if (
+        transactionResult.order.status === OrderStatus.processing ||
+        transactionResult.order.status === OrderStatus.shipped ||
+        transactionResult.order.status === OrderStatus.delivered
+      ) {
+        return NextResponse.redirect(
+          `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/success?orderId=${transactionResult.order.id}`
+        )
+      }
+
+      return NextResponse.redirect(
+        `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/failed?orderId=${transactionResult.order.id}`
+      )
+    }
 
     // Create commissions if affiliate exists (only if not already created)
-    if (order.refAffiliateId && !verificationResult.alreadyVerified) {
+    if (transactionResult.order.refAffiliateId && !verificationResult.alreadyVerified) {
       try {
-        await createCommissionsForOrder(order.id)
+        await createCommissionsForOrder(transactionResult.order.id)
       } catch (error) {
         console.error("Error creating commissions:", error)
         // Don't fail the payment if commission creation fails
@@ -119,7 +208,7 @@ export async function GET(request: NextRequest) {
 
     // Redirect to success page
     return NextResponse.redirect(
-      `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/success?orderId=${order.id}`
+      `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/success?orderId=${transactionResult.order.id}`
     )
   } catch (error: any) {
     console.error("Payment verification error:", error)

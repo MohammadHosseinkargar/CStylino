@@ -8,6 +8,16 @@ export default withAuth(
     const isAffiliate = token?.role === "affiliate" || token?.role === "admin"
     const path = req.nextUrl.pathname
 
+    // Affiliate API routes
+    if (path.startsWith("/api/affiliate")) {
+      if (!token) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (!isAffiliate) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
+    }
+
     // Admin routes
     if (path.startsWith("/admin") && !isAdmin) {
       return NextResponse.redirect(new URL("/auth/signin", req.url))

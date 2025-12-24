@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json(
-        { error: "لطفاً ابتدا وارد شوید" },
+        { error: "لطفاً ابتدا وارد شوید." },
         { status: 401 }
       )
     }
@@ -22,14 +22,14 @@ export async function POST(request: NextRequest) {
 
     if (!orderId) {
       return NextResponse.json(
-        { error: "orderId الزامی است" },
+        { error: "orderId الزامی است." },
         { status: 400 }
       )
     }
 
     // Find order
     const order = await prisma.order.findUnique({
-      where: { id: orderId, userId: session.user.id },
+      where: { id: orderId },
       include: {
         user: true,
       },
@@ -37,15 +37,23 @@ export async function POST(request: NextRequest) {
 
     if (!order) {
       return NextResponse.json(
-        { error: "سفارش یافت نشد" },
+        { error: "سفارشی با این شناسه پیدا نشد." },
         { status: 404 }
+      )
+    }
+
+    const isAdmin = session.user.role === "admin"
+    if (!isAdmin && order.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "شما دسترسی به این سفارش ندارید." },
+        { status: 403 }
       )
     }
 
     // Check if order is in pending status
     if (order.status !== "pending") {
       return NextResponse.json(
-        { error: "این سفارش قبلاً پردازش شده است" },
+        { error: "امکان پرداخت برای این سفارش وجود ندارد." },
         { status: 400 }
       )
     }
@@ -74,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     if (!paymentResult.success || !paymentResult.authority) {
       return NextResponse.json(
-        { error: paymentResult.error || "خطا در ایجاد درخواست پرداخت" },
+        { error: paymentResult.error || "خطا در ایجاد درخواست پرداخت." },
         { status: 400 }
       )
     }
@@ -93,7 +101,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Payment request error:", error)
     return NextResponse.json(
-      { error: error.message || "خطا در ایجاد درخواست پرداخت" },
+      { error: error.message || "خطا در ایجاد درخواست پرداخت." },
       { status: 500 }
     )
   }

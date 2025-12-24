@@ -14,6 +14,7 @@ import {
   LogOut,
   Store,
   FolderTree,
+  Wallet,
 } from "lucide-react"
 
 const menuItems = [
@@ -23,6 +24,7 @@ const menuItems = [
   { href: "/admin/orders", label: "سفارش‌ها", icon: ShoppingCart },
   { href: "/admin/users", label: "کاربران", icon: Users },
   { href: "/admin/affiliates", label: "همکاران", icon: TrendingUp },
+  { href: "/admin/payouts", label: "Affiliate payouts", icon: Wallet },
   { href: "/admin/settings", label: "تنظیمات", icon: Settings },
 ]
 

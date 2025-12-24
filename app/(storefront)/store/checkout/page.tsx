@@ -21,6 +21,7 @@ export default function CheckoutPage() {
   const { items, getTotal } = useCartStore()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [shippingCost, setShippingCost] = useState<number | null>(null)
 
   const {
     register,
@@ -45,6 +46,34 @@ export default function CheckoutPage() {
       setValue("customerName", session.user.name)
     }
   }, [session, setValue])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadShippingCost = async () => {
+      try {
+        const response = await fetch("/api/settings/public")
+        if (!response.ok) {
+          throw new Error("Failed to load shipping cost")
+        }
+        const data = await response.json()
+        if (isMounted) {
+          const parsed = Number(data.flatShippingCost)
+          setShippingCost(Number.isFinite(parsed) ? parsed : 0)
+        }
+      } catch (error) {
+        if (isMounted) {
+          setShippingCost(null)
+        }
+      }
+    }
+
+    loadShippingCost()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   if (!session || items.length === 0) {
     return null
@@ -92,9 +121,8 @@ export default function CheckoutPage() {
     }
   }
 
-  const shippingCost = Number(process.env.NEXT_PUBLIC_FLAT_SHIPPING_COST ?? 50000)
   const itemsTotal = getTotal()
-  const total = itemsTotal + shippingCost
+  const total = shippingCost === null ? null : itemsTotal + shippingCost
 
   return (
     <div className="editorial-container py-8 md:py-12 lg:py-20 px-4 md:px-0" dir="rtl">
@@ -292,14 +320,20 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-body">
                   <span className="text-muted-foreground">هزینه ارسال:</span>
                   <span className="font-semibold persian-number">
-                    {shippingCost.toLocaleString("fa-IR")} تومان
+                    {shippingCost === null
+                      ? "..."
+                      : `${shippingCost.toLocaleString("fa-IR")} تومان`}
                   </span>
                 </div>
               </div>
               <div className="border-t border-border/50 pt-6">
                 <div className="flex justify-between items-center">
                   <span className="text-subtitle font-bold">مبلغ نهایی:</span>
-                  <Price price={total} size="lg" />
+                  {total === null ? (
+                    <span className="font-semibold persian-number">...</span>
+                  ) : (
+                    <Price price={total} size="lg" />
+                  )}
                 </div>
               </div>
             </CardContent>
