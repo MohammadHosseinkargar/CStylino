@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
 const DEFAULT_FORM = {
   flatShippingCost: "50000",
@@ -22,22 +26,22 @@ const validateSettings = (payload: {
   commissionLevel2Percent: number
 }) => {
   if (Number.isNaN(payload.flatShippingCost)) {
-    return "هزینه ارسال عددی نیست."
+    return "????? ????? ???? ????."
   }
   if (payload.flatShippingCost < 0) {
-    return "هزینه ارسال نمی‌تواند منفی باشد."
+    return "????? ????? ???????? ???? ????."
   }
   if (Number.isNaN(payload.commissionLevel1Percent)) {
-    return "درصد کمیسیون سطح ۲ عددی نیست."
+    return "???? ??????? ??? ? ???? ????."
   }
   if (payload.commissionLevel1Percent < 0 || payload.commissionLevel1Percent > 100) {
-    return "درصد کمیسیون سطح ۲ باید بین ۰ تا ۱۰۰ باشد."
+    return "???? ??????? ??? ? ???? ??? ? ?? ??? ????."
   }
   if (Number.isNaN(payload.commissionLevel2Percent)) {
-    return "درصد کمیسیون سطح ۲ عددی نیست."
+    return "???? ??????? ??? ? ???? ????."
   }
   if (payload.commissionLevel2Percent < 0 || payload.commissionLevel2Percent > 100) {
-    return "درصد کمیسیون سطح ۲ باید بین ۰ تا ۱۰۰ باشد."
+    return "???? ??????? ??? ? ???? ??? ? ?? ??? ????."
   }
   return null
 }
@@ -53,7 +57,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/settings")
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "خطا در دریافت تنظیمات.")
+        throw new Error(error.error || "??? ?? ?????? ???????.")
       }
       return res.json()
     },
@@ -85,7 +89,7 @@ export default function AdminSettingsPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "خطا در به‌روزرسانی تنظیمات.")
+        throw new Error(error.error || "??? ?? ?????????? ???????.")
       }
       return res.json()
     },
@@ -97,13 +101,13 @@ export default function AdminSettingsPage() {
         commissionLevel2Percent: String(updated.commissionLevel2Percent),
       })
       toast({
-        title: "موفقیت",
-        description: "تنظیمات با موفقیت به‌روزرسانی شد.",
+        title: "??????",
+        description: "??????? ?? ?????? ?????????? ??.",
       })
     },
     onError: (error: any) => {
       toast({
-        title: "خطا",
+        title: "???",
         description: error.message,
         variant: "destructive",
       })
@@ -120,7 +124,7 @@ export default function AdminSettingsPage() {
     const validationError = validateSettings(payload)
     if (validationError) {
       toast({
-        title: "خطا",
+        title: "???",
         description: validationError,
         variant: "destructive",
       })
@@ -130,104 +134,98 @@ export default function AdminSettingsPage() {
     saveMutation.mutate(payload)
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
   return (
-    <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
-      <div>
-        <h1 className="text-2xl md:text-4xl font-bold mb-2">تنظیمات</h1>
-        <p className="text-sm md:text-base text-muted-foreground">
-          مدیریت کمیسیون‌ها و هزینه ارسال
-        </p>
-      </div>
+    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
+      <SectionHeader
+        title="???????"
+        subtitle="?????? ????????? ? ????? ?????"
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="card-editorial">
-          <CardHeader>
-            <CardTitle>تنظیمات کمیسیون</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="level1Commission">درصد کمیسیون سطح ۱ (درصد)</Label>
-              <Input
-                id="level1Commission"
-                type="number"
-                min={0}
-                max={100}
-                value={formData.commissionLevel1Percent}
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    commissionLevel1Percent: event.target.value,
-                  })
-                }
-                className="persian-number"
-              />
-            </div>
-            <div className="space-y-3">
-              <Label htmlFor="level2Commission">درصد کمیسیون سطح ۲ (درصد)</Label>
-              <Input
-                id="level2Commission"
-                type="number"
-                min={0}
-                max={100}
-                value={formData.commissionLevel2Percent}
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    commissionLevel2Percent: event.target.value,
-                  })
-                }
-                className="persian-number"
-              />
-            </div>
-            <Button
-              className="btn-editorial w-full"
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-            >
-              {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
-            </Button>
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <SkeletonTable rows={4} />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <StyledCard variant="elevated">
+            <CardHeader>
+              <CardTitle>??????? ???????</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="level1Commission">???? ??????? ??? ? (????)</Label>
+                <Input
+                  id="level1Commission"
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={formData.commissionLevel1Percent}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      commissionLevel1Percent: event.target.value,
+                    })
+                  }
+                  className="persian-number"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="level2Commission">???? ??????? ??? ? (????)</Label>
+                <Input
+                  id="level2Commission"
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={formData.commissionLevel2Percent}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      commissionLevel2Percent: event.target.value,
+                    })
+                  }
+                  className="persian-number"
+                />
+              </div>
+              <Button
+                className="btn-editorial w-full"
+                onClick={handleSave}
+                disabled={saveMutation.isPending}
+              >
+                {saveMutation.isPending ? "?? ??? ?????..." : "????? ???????"}
+              </Button>
+            </CardContent>
+          </StyledCard>
 
-        <Card className="card-editorial">
-          <CardHeader>
-            <CardTitle>تنظیمات ارسال</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="shippingCost">هزینه ارسال ثابت (تومان)</Label>
-              <Input
-                id="shippingCost"
-                type="number"
-                min={0}
-                value={formData.flatShippingCost}
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    flatShippingCost: event.target.value,
-                  })
-                }
-                className="persian-number"
-              />
-            </div>
-            <Button
-              className="btn-editorial w-full"
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-            >
-              {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          <StyledCard variant="elevated">
+            <CardHeader>
+              <CardTitle>??????? ?????</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="shippingCost">????? ????? ???? (?????)</Label>
+                <Input
+                  id="shippingCost"
+                  type="number"
+                  min={0}
+                  value={formData.flatShippingCost}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      flatShippingCost: event.target.value,
+                    })
+                  }
+                  className="persian-number"
+                />
+              </div>
+              <Button
+                className="btn-editorial w-full"
+                onClick={handleSave}
+                disabled={saveMutation.isPending}
+              >
+                {saveMutation.isPending ? "?? ??? ?????..." : "????? ???????"}
+              </Button>
+            </CardContent>
+          </StyledCard>
+        </div>
+      )}
+    </PageContainer>
   )
 }

@@ -61,7 +61,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="editorial-container flex items-center justify-center min-h-screen py-12" dir="rtl">
+    <div className="page-container flex items-center justify-center min-h-screen py-12" dir="rtl">
       <Card className="w-full max-w-md card-editorial border-border/40">
         <CardHeader className="text-center space-y-3 pb-8">
           <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -140,3 +140,4 @@ export default function SignInPage() {
     </div>
   )
 }
+

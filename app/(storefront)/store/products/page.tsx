@@ -4,10 +4,13 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { ProductCard } from "@/components/storefront/product-card"
 import { Filter, X, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { SkeletonCard } from "@/components/ui/skeleton-kit"
+import { EmptyState } from "@/components/ui/empty-state"
 
 interface Product {
   id: string
@@ -52,27 +55,24 @@ export default function ProductsPage() {
 
   if (isLoading) {
     return (
-      <div className="editorial-container py-20 min-h-screen flex items-center justify-center" dir="rtl">
-        <div className="text-center space-y-6">
-          <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-body text-muted-foreground">در حال بارگذاری...</p>
+      <PageContainer className="py-10 md:py-16" dir="rtl">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="editorial-container py-8 md:py-12 lg:py-20 px-4 md:px-0" dir="rtl">
-      {/* Header - Editorial */}
-      <div className="mb-8 md:mb-16">
-        <h1 className="text-2xl md:text-hero font-bold mb-3 md:mb-4">محصولات</h1>
-        <p className="text-sm md:text-body text-muted-foreground max-w-2xl leading-relaxed">
-          مجموعه کامل محصولات ما را کاوش کنید
-        </p>
-      </div>
+    <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
+      <SectionHeader
+        title="???????"
+        subtitle="?????? ???? ??????? ?? ?? ???? ????"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-        {/* Filters Sidebar - Premium */}
         <aside
           className={cn(
             "lg:block",
@@ -83,7 +83,7 @@ export default function ProductsPage() {
         >
           {showFilters && (
             <div className="flex items-center justify-between mb-8 lg:hidden">
-              <h2 className="text-title font-bold">فیلترها</h2>
+              <h2 className="text-title font-bold">???????</h2>
               <Button
                 variant="ghost"
                 size="icon"
@@ -98,7 +98,7 @@ export default function ProductsPage() {
           <div className="space-y-8">
             <div>
               <label className="block text-sm font-semibold mb-4 text-foreground">
-                محدوده قیمت
+                ?????? ????
               </label>
               <div className="space-y-3">
                 <Input
@@ -107,7 +107,7 @@ export default function ProductsPage() {
                   onChange={(e) =>
                     setFilters({ ...filters, minPrice: e.target.value })
                   }
-                  placeholder="حداقل قیمت"
+                  placeholder="????? ????"
                   className="persian-number"
                 />
                 <Input
@@ -116,7 +116,7 @@ export default function ProductsPage() {
                   onChange={(e) =>
                     setFilters({ ...filters, maxPrice: e.target.value })
                   }
-                  placeholder="حداکثر قیمت"
+                  placeholder="?????? ????"
                   className="persian-number"
                 />
               </div>
@@ -124,9 +124,7 @@ export default function ProductsPage() {
           </div>
         </aside>
 
-        {/* Products Grid - Editorial */}
         <div className="lg:col-span-3">
-          {/* Mobile Filter Toggle */}
           <div className="flex items-center justify-between mb-8 lg:hidden">
             <Button
               variant="outline"
@@ -134,11 +132,11 @@ export default function ProductsPage() {
               onClick={() => setShowFilters(!showFilters)}
             >
               <SlidersHorizontal className="w-4 h-4 ml-2" />
-              فیلترها
+              ???????
             </Button>
             {data?.products && (
               <p className="text-caption text-muted-foreground persian-number">
-                {data.products.length} محصول
+                {data.products.length} ?????
               </p>
             )}
           </div>
@@ -158,33 +156,31 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20">
-              <div className="h-24 w-24 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-6">
-                <Filter className="w-12 h-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-title font-bold mb-3">محصولی یافت نشد</h3>
-              <p className="text-body text-muted-foreground mb-8 leading-relaxed">
-                لطفاً فیلترهای خود را تغییر دهید
-              </p>
-              <Button
-                variant="outline"
-                className="btn-editorial"
-                onClick={() =>
-                  setFilters({
-                    category: "",
-                    minPrice: "",
-                    maxPrice: "",
-                    size: "",
-                    color: "",
-                  })
-                }
-              >
-                پاک کردن فیلترها
-              </Button>
-            </div>
+            <EmptyState
+              icon={<Filter className="w-7 h-7 text-muted-foreground" />}
+              title="?????? ???? ???"
+              description="????? ???????? ??? ?? ????? ????"
+              action={
+                <Button
+                  variant="outline"
+                  className="btn-editorial"
+                  onClick={() =>
+                    setFilters({
+                      category: "",
+                      minPrice: "",
+                      maxPrice: "",
+                      size: "",
+                      color: "",
+                    })
+                  }
+                >
+                  ??? ???? ???????
+                </Button>
+              }
+            />
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   )
 }

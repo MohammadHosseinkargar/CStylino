@@ -2,10 +2,19 @@
 
 import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { formatDate, formatPrice } from "@/lib/utils"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { DataTable } from "@/components/ui/data-table"
+import { TableCell, TableRow } from "@/components/ui/table"
+import { ListCard } from "@/components/ui/list-card"
+import { EmptyState } from "@/components/ui/empty-state"
+import { SkeletonTable } from "@/components/ui/skeleton-kit"
+import { Wallet } from "lucide-react"
 
 type PayoutAction = "approve" | "reject" | "markPaid"
 
@@ -54,99 +63,145 @@ export default function AdminPayoutsPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
   const payouts = data?.payouts || []
 
   return (
-    <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">Affiliate payouts</h1>
-        <p className="text-muted-foreground">
-          Review and process affiliate payout requests.
-        </p>
-      </div>
+    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
+      <SectionHeader
+        title="?????????? ??????"
+        subtitle="????? ? ????? ?????????? ??????"
+      />
 
-      <Card className="card-editorial">
+      <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>Payout requests</CardTitle>
+          <CardTitle>?????????</CardTitle>
         </CardHeader>
         <CardContent>
-          {payouts.length > 0 ? (
-            <div className="space-y-4">
-              {payouts.map((payout: any) => {
-                const isProcessing = activeId === payout.id
-                return (
-                  <div
-                    key={payout.id}
-                    className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 border border-border/40 rounded-xl hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="space-y-1">
-                      <div className="font-semibold">
-                        {payout.affiliate?.name || payout.affiliate?.email}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {payout.affiliate?.email}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : payouts.length > 0 ? (
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={[
+                    { key: "affiliate", header: "??????" },
+                    { key: "email", header: "?????" },
+                    { key: "date", header: "?????" },
+                    { key: "amount", header: "????" },
+                    { key: "status", header: "?????" },
+                    { key: "actions", header: "" },
+                  ]}
+                  data={payouts}
+                  renderRow={(payout: any) => {
+                    const isProcessing = activeId === payout.id
+                    return (
+                      <TableRow key={payout.id}>
+                        <TableCell className="font-semibold">
+                          {payout.affiliate?.name || payout.affiliate?.email}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {payout.affiliate?.email}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(payout.createdAt)}
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {formatPrice(payout.amount)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground capitalize">
+                          {payout.status}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              size="sm"
+                              className="btn-editorial"
+                              onClick={() => handleAction(payout.id, "approve")}
+                              disabled={isProcessing || payout.status !== "pending"}
+                            >
+                              ?????
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAction(payout.id, "reject")}
+                              disabled={isProcessing || payout.status === "paid"}
+                            >
+                              ??
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleAction(payout.id, "markPaid")}
+                              disabled={isProcessing || payout.status !== "approved"}
+                            >
+                              ?????? ??
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  }}
+                />
+              </div>
+              <div className="md:hidden space-y-4">
+                {payouts.map((payout: any) => {
+                  const isProcessing = activeId === payout.id
+                  return (
+                    <ListCard
+                      key={payout.id}
+                      title={payout.affiliate?.name || payout.affiliate?.email}
+                      subtitle={payout.affiliate?.email}
+                      meta={formatPrice(payout.amount)}
+                      actions={
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            className="btn-editorial"
+                            onClick={() => handleAction(payout.id, "approve")}
+                            disabled={isProcessing || payout.status !== "pending"}
+                          >
+                            ?????
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAction(payout.id, "reject")}
+                            disabled={isProcessing || payout.status === "paid"}
+                          >
+                            ??
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleAction(payout.id, "markPaid")}
+                            disabled={isProcessing || payout.status !== "approved"}
+                          >
+                            ?????? ??
+                          </Button>
+                        </div>
+                      }
+                    >
+                      <div className="text-caption text-muted-foreground">
                         {formatDate(payout.createdAt)}
                       </div>
-                    </div>
-                    <div className="text-left space-y-1">
-                      <div className="font-bold">
-                        {formatPrice(payout.amount)}
-                      </div>
-                      <div className="text-xs text-muted-foreground capitalize">
+                      <div className="text-caption text-muted-foreground capitalize">
                         {payout.status}
                       </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        className="btn-editorial"
-                        onClick={() => handleAction(payout.id, "approve")}
-                        disabled={
-                          isProcessing || payout.status !== "pending"
-                        }
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAction(payout.id, "reject")}
-                        disabled={isProcessing || payout.status === "paid"}
-                      >
-                        Reject
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleAction(payout.id, "markPaid")}
-                        disabled={
-                          isProcessing || payout.status !== "approved"
-                        }
-                      >
-                        Mark paid
-                      </Button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                    </ListCard>
+                  )
+                })}
+              </div>
+            </>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              No payout requests found.
-            </div>
+            <EmptyState
+              icon={<Wallet className="h-6 w-6 text-muted-foreground" />}
+              title="???????? ???? ???"
+              description="???? ???????? ??? ???? ???."
+            />
           )}
         </CardContent>
-      </Card>
-    </div>
+      </StyledCard>
+    </PageContainer>
   )
 }

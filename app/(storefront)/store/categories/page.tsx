@@ -2,8 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
-import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { SkeletonCard } from "@/components/ui/skeleton-kit"
+import { EmptyState } from "@/components/ui/empty-state"
+import { FolderOpen } from "lucide-react"
 
 export default function CategoriesPage() {
   const { data: categories, isLoading } = useQuery({
@@ -17,46 +22,62 @@ export default function CategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="container py-12">
-        <div className="text-center">در حال بارگذاری...</div>
-      </div>
+      <PageContainer className="py-12" dir="rtl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="container py-12" dir="rtl">
-      <h1 className="text-4xl font-bold mb-8">دسته‌بندی‌ها</h1>
+    <PageContainer className="py-12" dir="rtl">
+      <SectionHeader
+        title="??????????"
+        subtitle="?? ??????? ????? ?? ?? ?????"
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {categories?.map((category: any) => (
-          <Link key={category.id} href={`/store/products?category=${category.slug}`}>
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-              {category.image && (
-                <div className="aspect-video relative bg-gray-100">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{category.name}</h3>
-                {category.description && (
-                  <p className="text-muted-foreground text-sm mb-2">
-                    {category.description}
-                  </p>
+      {categories?.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+          {categories?.map((category: any) => (
+            <Link key={category.id} href={`/store/products?category=${category.slug}`}>
+              <StyledCard variant="elevated" className="overflow-hidden hover:border-primary/30">
+                {category.image && (
+                  <div className="aspect-video relative bg-muted">
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 )}
-                <p className="text-sm text-primary">
-                  {category._count?.products || 0} محصول
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    </div>
+                <div className="p-6 space-y-2">
+                  <h3 className="text-subtitle font-semibold">{category.name}</h3>
+                  {category.description && (
+                    <p className="text-body text-muted-foreground line-clamp-2">
+                      {category.description}
+                    </p>
+                  )}
+                  <p className="text-caption text-primary">
+                    {category._count?.products || 0} ?????
+                  </p>
+                </div>
+              </StyledCard>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-10">
+          <EmptyState
+            icon={<FolderOpen className="w-6 h-6 text-muted-foreground" />}
+            title="?????? ???? ???"
+            description="???? ?????? ??? ???? ???."
+          />
+        </div>
+      )}
+    </PageContainer>
   )
 }
-

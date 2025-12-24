@@ -11,7 +11,7 @@ export default function PaymentFailedPage() {
   const orderId = searchParams.get("orderId")
 
   return (
-    <div className="editorial-container py-12 md:py-20 flex items-center justify-center min-h-screen" dir="rtl">
+    <div className="page-container py-12 md:py-20 flex items-center justify-center min-h-screen" dir="rtl">
       <Card className="w-full max-w-2xl card-editorial border-border/40">
         <CardContent className="p-12 md:p-16 text-center">
           <div className="relative inline-flex mb-8">
@@ -51,3 +51,4 @@ export default function PaymentFailedPage() {
     </div>
   )
 }
+

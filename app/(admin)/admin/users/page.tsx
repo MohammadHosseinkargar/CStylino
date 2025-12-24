@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/lib/utils"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { DataTable } from "@/components/ui/data-table"
+import { TableCell, TableRow } from "@/components/ui/table"
+import { ListCard } from "@/components/ui/list-card"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Users } from "lucide-react"
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
@@ -8,48 +16,76 @@ export default async function AdminUsersPage() {
   })
 
   return (
-    <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">کاربران</h1>
-        <p className="text-muted-foreground">مدیریت کاربران سیستم</p>
-      </div>
+    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
+      <SectionHeader
+        title="???????"
+        subtitle="?????? ??????? ???????."
+      />
 
-      <Card className="card-editorial">
+      <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>لیست کاربران</CardTitle>
+          <CardTitle>???? ???????</CardTitle>
         </CardHeader>
         <CardContent>
           {users.length > 0 ? (
-            <div className="space-y-4">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-border/40 rounded-xl hover:bg-accent/50 transition-colors"
-                >
-                  <div className="space-y-1">
-                    <div className="font-semibold">{user.name || "بدون نام"}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {user.email} • {formatDate(user.createdAt)}
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={[
+                    { key: "name", header: "?????" },
+                    { key: "email", header: "?????" },
+                    { key: "date", header: "?????" },
+                    { key: "role", header: "???" },
+                  ]}
+                  data={users}
+                  renderRow={(user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-semibold">
+                        {user.name || "???? ???"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.email}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatDate(user.createdAt)}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">
+                          {user.role === "admin" && "????"}
+                          {user.role === "affiliate" && "??????"}
+                          {user.role === "customer" && "?????"}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                />
+              </div>
+              <div className="md:hidden space-y-4">
+                {users.map((user) => (
+                  <ListCard
+                    key={user.id}
+                    title={user.name || "???? ???"}
+                    subtitle={user.email}
+                    meta={formatDate(user.createdAt)}
+                  >
+                    <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">
+                      {user.role === "admin" && "????"}
+                      {user.role === "affiliate" && "??????"}
+                      {user.role === "customer" && "?????"}
                     </div>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">
-                      {user.role === "admin" && "مدیر"}
-                      {user.role === "affiliate" && "همکار"}
-                      {user.role === "customer" && "مشتری"}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </ListCard>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              هنوز کاربری ثبت نشده است
-            </div>
+            <EmptyState
+              icon={<Users className="h-6 w-6 text-muted-foreground" />}
+              title="?????? ???? ???"
+              description="???? ?????? ??? ???? ???."
+            />
           )}
         </CardContent>
-      </Card>
-    </div>
+      </StyledCard>
+    </PageContainer>
   )
 }
-

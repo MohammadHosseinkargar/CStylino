@@ -4,88 +4,75 @@
 
 @layer base {
   :root {
-    /* Luxury Fashion Palette - Muted Gold Accent */
     --background: 45 20% 98%;
     --foreground: 0 0% 8%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 0 0% 8%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 8%;
-    
-    /* Primary: Muted Gold (luxury fashion accent) */
-    --primary: 45 65% 55%;
-    --primary-foreground: 0 0% 8%;
-    
-    /* Secondary: Warm neutral */
+
     --secondary: 45 15% 96%;
     --secondary-foreground: 0 0% 15%;
-    
-    /* Muted: Very light warm gray */
+
     --muted: 45 10% 97%;
     --muted-foreground: 0 0% 45%;
-    
-    /* Accent: Subtle gold tint */
+
     --accent: 45 30% 95%;
     --accent-foreground: 45 65% 45%;
-    
+
+    --primary: 45 65% 55%;
+    --primary-foreground: 0 0% 8%;
+
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --border: 45 10% 88%;
     --input: 45 15% 94%;
     --ring: 45 65% 55%;
-    
-    /* Radius scale - generous and soft */
-    --radius-sm: 0.5rem;
-    --radius-md: 0.75rem;
-    --radius-lg: 1rem;
+
+    --radius-xs: 0.4rem;
+    --radius-sm: 0.55rem;
+    --radius-md: 0.85rem;
+    --radius-lg: 1.1rem;
     --radius-xl: 1.5rem;
     --radius-2xl: 2rem;
-    --radius: var(--radius-xl);
-    
-    /* Shadow scale - soft and elegant */
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.03);
-    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -1px rgb(0 0 0 / 0.04);
-    --shadow-lg: 0 10px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
-    --shadow-xl: 0 20px 40px -8px rgb(0 0 0 / 0.12), 0 8px 16px -4px rgb(0 0 0 / 0.08);
-    
-    /* Typography scale */
-    --font-display: 3.5rem;
-    --font-hero: 2.5rem;
-    --font-title: 1.875rem;
-    --font-subtitle: 1.25rem;
-    --font-body: 1rem;
-    --font-caption: 0.875rem;
+    --radius: var(--radius-lg);
+
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+    --shadow-md: 0 6px 18px -4px rgb(0 0 0 / 0.1), 0 2px 6px -2px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 16px 32px -8px rgb(0 0 0 / 0.12), 0 6px 16px -4px rgb(0 0 0 / 0.08);
+    --shadow-xl: 0 24px 48px -10px rgb(0 0 0 / 0.16), 0 10px 20px -6px rgb(0 0 0 / 0.1);
+
     --storefront-header-height: 4rem;
   }
 
   .dark {
     --background: 0 0% 8%;
     --foreground: 45 20% 98%;
-    
+
     --card: 0 0% 10%;
     --card-foreground: 45 20% 98%;
-    
+
     --popover: 0 0% 10%;
     --popover-foreground: 45 20% 98%;
-    
-    --primary: 45 65% 60%;
-    --primary-foreground: 0 0% 8%;
-    
+
     --secondary: 0 0% 15%;
     --secondary-foreground: 45 20% 98%;
-    
+
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
-    
+
     --accent: 45 20% 20%;
     --accent-foreground: 45 65% 70%;
-    
+
+    --primary: 45 65% 60%;
+    --primary-foreground: 0 0% 8%;
+
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
-    
+
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 45 65% 60%;
@@ -114,47 +101,27 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
     line-height: 1.8;
-    letter-spacing: -0.01em;
-  }
-  
-  /* Editorial Typography Hierarchy */
-  h1, .h1 {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.03em;
-  }
-  
-  h2, .h2 {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-  }
-  
-  h3, .h3 {
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-  }
-  
-  h4, .h4 {
-    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-    font-weight: 600;
-    line-height: 1.4;
-  }
-  
-  p, .body {
-    font-size: 1rem;
-    line-height: 1.8;
-    letter-spacing: -0.01em;
-  }
-  
-  .caption {
-    font-size: 0.875rem;
-    line-height: 1.6;
     letter-spacing: 0;
+  }
+
+  h1 {
+    @apply text-hero font-bold;
+  }
+
+  h2 {
+    @apply text-title font-bold;
+  }
+
+  h3 {
+    @apply text-subtitle font-semibold;
+  }
+
+  h4 {
+    @apply text-body font-semibold;
+  }
+
+  p {
+    @apply text-body;
   }
   
   /* Subtle grain texture for luxury feel */
@@ -180,6 +147,35 @@
 }
 
 @layer utilities {
+  .text-hero {
+    @apply font-bold leading-tight tracking-[-0.01em];
+  }
+
+  .text-title {
+    @apply font-semibold leading-snug tracking-[-0.005em];
+  }
+
+  .text-subtitle {
+    @apply font-medium leading-relaxed;
+  }
+
+  .text-body {
+    @apply leading-loose;
+  }
+
+  .text-caption {
+    @apply leading-relaxed;
+  }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-spacing {
+    padding-top: clamp(3rem, 6vw, 6rem);
+    padding-bottom: clamp(3rem, 6vw, 6rem);
+  }
+
   /* Luxury card - editorial feel */
   .card-editorial {
     @apply rounded-2xl border border-border/40 bg-card shadow-md backdrop-blur-sm;

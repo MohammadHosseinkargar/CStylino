@@ -3,15 +3,18 @@
 import { useEffect, useState } from "react"
 import { useCartStore } from "@/store/cart-store"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Price } from "@/components/storefront/price"
 import Image from "next/image"
 import Link from "next/link"
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, getTotal } =
-    useCartStore()
+  const { items, updateQuantity, removeItem, getTotal } = useCartStore()
   const [shippingCost, setShippingCost] = useState<number | null>(null)
   const itemsTotal = getTotal()
   const total = shippingCost === null ? null : itemsTotal + shippingCost
@@ -46,46 +49,41 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="editorial-container py-20 min-h-screen flex items-center justify-center" dir="rtl">
-        <div className="text-center max-w-md">
-          <div className="h-32 w-32 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-8">
-            <ShoppingBag className="w-16 h-16 text-muted-foreground" />
-          </div>
-          <h2 className="text-hero font-bold mb-4">سبد خرید شما خالی است</h2>
-          <p className="text-body text-muted-foreground mb-12 leading-relaxed">
-            برای شروع خرید، به صفحه محصولات بروید و محصولات مورد علاقه خود را به سبد خرید اضافه کنید
-          </p>
-          <Link href="/store/products">
-            <Button size="lg" className="btn-editorial">
-              <ArrowLeft className="w-5 h-5 ml-2" />
-              مشاهده محصولات
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <PageContainer className="py-20 min-h-screen flex items-center justify-center" dir="rtl">
+        <EmptyState
+          icon={<ShoppingBag className="w-10 h-10 text-muted-foreground" />}
+          title="??? ???? ??? ???? ???"
+          description="???? ???? ????? ?? ???? ??????? ????? ? ??????? ???? ????? ??? ?? ?? ??? ???? ????? ????"
+          action={
+            <Link href="/store/products">
+              <Button size="lg" className="btn-editorial">
+                <ArrowLeft className="w-5 h-5 ml-2" />
+                ?????? ???????
+              </Button>
+            </Link>
+          }
+        />
+      </PageContainer>
     )
   }
 
   return (
-    <div className="editorial-container py-8 md:py-12 lg:py-20 px-4 md:px-0" dir="rtl">
-      <div className="mb-8 md:mb-16">
-        <h1 className="text-2xl md:text-hero font-bold mb-3 md:mb-4">سبد خرید</h1>
-        <p className="text-sm md:text-body text-muted-foreground persian-number">
-          {items.length} محصول در سبد خرید
-        </p>
-      </div>
+    <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
+      <SectionHeader
+        title="??? ????"
+        subtitle={`${items.length} ????? ?? ??? ????`}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        {/* Cart Items - Editorial */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="card-editorial border-border/40 hidden md:block">
+          <StyledCard variant="elevated" className="border-border/40 hidden md:block">
             <CardContent className="p-0">
               <table className="w-full">
                 <thead className="border-b border-border/40 text-xs text-muted-foreground">
                   <tr>
-                    <th className="text-right font-semibold px-6 py-4">محصول</th>
-                    <th className="text-center font-semibold px-4 py-4">تعداد</th>
-                    <th className="text-right font-semibold px-4 py-4">قیمت</th>
+                    <th className="text-right font-semibold px-6 py-4">?????</th>
+                    <th className="text-center font-semibold px-4 py-4">?????</th>
+                    <th className="text-right font-semibold px-4 py-4">????</th>
                     <th className="text-left font-semibold px-6 py-4"> </th>
                   </tr>
                 </thead>
@@ -116,12 +114,12 @@ export default function CartPage() {
                             </Link>
                             <div className="mt-2 text-xs text-muted-foreground flex items-center gap-3">
                               <span className="flex items-center gap-2">
-                                <span className="font-medium">سایز:</span>
+                                <span className="font-medium">????:</span>
                                 <span>{item.variantSize}</span>
                               </span>
-                              <span>?</span>
+                              <span>�</span>
                               <span className="flex items-center gap-2">
-                                <span className="font-medium">رنگ:</span>
+                                <span className="font-medium">???:</span>
                                 <span
                                   className="inline-block w-4 h-4 rounded-full border-2 border-border/50 shadow-sm"
                                   style={{ backgroundColor: item.variantColorHex }}
@@ -139,10 +137,8 @@ export default function CartPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                              onClick={() =>
-                                updateQuantity(item.variantId, item.quantity - 1)
-                              }
-                              aria-label="کاهش تعداد"
+                              onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                              aria-label="???? ?????"
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
@@ -153,11 +149,9 @@ export default function CartPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                              onClick={() =>
-                                updateQuantity(item.variantId, item.quantity + 1)
-                              }
+                              onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                               disabled={item.quantity >= item.stock}
-                              aria-label="افزایش تعداد"
+                              aria-label="?????? ?????"
                             >
                               <Plus className="w-4 h-4" />
                             </Button>
@@ -165,11 +159,7 @@ export default function CartPage() {
                         </div>
                       </td>
                       <td className="px-4 py-5">
-                        <Price
-                          price={item.price * item.quantity}
-                          size="sm"
-                          className="text-right"
-                        />
+                        <Price price={item.price * item.quantity} size="sm" className="text-right" />
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex justify-end">
@@ -178,7 +168,7 @@ export default function CartPage() {
                             size="icon"
                             className="h-10 w-10 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
                             onClick={() => removeItem(item.variantId)}
-                            aria-label="حذف از سبد خرید"
+                            aria-label="??? ?? ??? ????"
                           >
                             <Trash2 className="w-5 h-5" />
                           </Button>
@@ -189,14 +179,11 @@ export default function CartPage() {
                 </tbody>
               </table>
             </CardContent>
-          </Card>
+          </StyledCard>
 
           <div className="space-y-6 md:hidden">
             {items.map((item) => (
-              <Card
-                key={item.variantId}
-                className="card-editorial overflow-hidden border-border/40"
-              >
+              <StyledCard key={item.variantId} variant="elevated" className="overflow-hidden border-border/40">
                 <CardContent className="p-5">
                   <div className="flex gap-4">
                     <Link
@@ -221,12 +208,12 @@ export default function CartPage() {
                       </Link>
                       <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-4">
                         <span className="flex items-center gap-2">
-                          <span className="font-medium">سایز:</span>
+                          <span className="font-medium">????:</span>
                           <span>{item.variantSize}</span>
                         </span>
-                        <span>?</span>
+                        <span>�</span>
                         <span className="flex items-center gap-2">
-                          <span className="font-medium">رنگ:</span>
+                          <span className="font-medium">???:</span>
                           <span
                             className="inline-block w-4 h-4 rounded-full border-2 border-border/50 shadow-sm"
                             style={{ backgroundColor: item.variantColorHex }}
@@ -240,10 +227,8 @@ export default function CartPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                            onClick={() =>
-                              updateQuantity(item.variantId, item.quantity - 1)
-                            }
-                            aria-label="کاهش تعداد"
+                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            aria-label="???? ?????"
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
@@ -254,20 +239,14 @@ export default function CartPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 rounded-lg hover:bg-accent/50"
-                            onClick={() =>
-                              updateQuantity(item.variantId, item.quantity + 1)
-                            }
+                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                             disabled={item.quantity >= item.stock}
-                            aria-label="افزایش تعداد"
+                            aria-label="?????? ?????"
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
                         </div>
-                        <Price
-                          price={item.price * item.quantity}
-                          size="sm"
-                          className="text-left"
-                        />
+                        <Price price={item.price * item.quantity} size="sm" className="text-left" />
                       </div>
                       <div className="mt-4 flex justify-end">
                         <Button
@@ -275,7 +254,7 @@ export default function CartPage() {
                           size="icon"
                           className="h-10 w-10 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
                           onClick={() => removeItem(item.variantId)}
-                          aria-label="حذف از سبد خرید"
+                          aria-label="??? ?? ??? ????"
                         >
                           <Trash2 className="w-5 h-5" />
                         </Button>
@@ -283,35 +262,34 @@ export default function CartPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </StyledCard>
             ))}
           </div>
         </div>
 
-        {/* Order Summary - Sticky */}
         <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
-          <Card className="card-editorial border-border/40">
+          <StyledCard variant="subtle" className="border-border/40">
             <CardHeader className="pb-4 md:pb-6">
-              <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
+              <CardTitle className="text-base md:text-title">????? ?????</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">جمع محصولات:</span>
+                  <span className="text-muted-foreground">??? ???????:</span>
                   <span className="font-semibold persian-number">
-                    {itemsTotal.toLocaleString("fa-IR")} تومان
+                    {itemsTotal.toLocaleString("fa-IR")} ?????
                   </span>
                 </div>
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">هزینه ارسال:</span>
+                  <span className="text-muted-foreground">????? ?????:</span>
                   <span className={`font-semibold persian-number ${shippingCost === null ? "animate-pulse" : ""}`}>
                     {shippingCost === null
                       ? "..."
-                      : `${shippingCost.toLocaleString("fa-IR")} تومان`}
+                      : `${shippingCost.toLocaleString("fa-IR")} ?????`}
                   </span>
                 </div>
                 <div className="border-t border-border/50 pt-4 flex justify-between items-center">
-                  <span className="text-subtitle font-bold">جمع کل:</span>
+                  <span className="text-subtitle font-bold">??? ??:</span>
                   {total === null ? (
                     <span className="font-semibold persian-number animate-pulse">...</span>
                   ) : (
@@ -321,34 +299,34 @@ export default function CartPage() {
               </div>
               <Link href="/store/checkout" className="block">
                 <Button className="w-full btn-editorial h-14 text-base" size="lg">
-                  ادامه به پرداخت!
+                  ????? ?? ??????!
                 </Button>
               </Link>
               <Link href="/store/products" className="block">
                 <Button variant="outline" className="w-full">
-                  ادامه خرید
+                  ????? ????
                 </Button>
               </Link>
             </CardContent>
-          </Card>
+          </StyledCard>
         </div>
       </div>
 
       <div className="lg:hidden sticky bottom-0 z-30 -mx-4 mt-8 border-t border-border/50 bg-background/95 backdrop-blur px-4 py-4">
         <div className="flex items-center justify-between text-sm mb-3">
-          <span className="text-muted-foreground">جمع کل:</span>
+          <span className="text-muted-foreground">??? ??:</span>
           {total === null ? (
             <span className="font-semibold persian-number animate-pulse">...</span>
           ) : (
             <span className="font-semibold persian-number">
-              {total.toLocaleString("fa-IR")} تومان
+              {total.toLocaleString("fa-IR")} ?????
             </span>
           )}
         </div>
         <Link href="/store/checkout" className="block">
-          <Button className="w-full btn-editorial h-12 text-base">ادامه به پرداخت!</Button>
+          <Button className="w-full btn-editorial h-12 text-base">????? ?? ??????!</Button>
         </Link>
       </div>
-    </div>
+    </PageContainer>
   )
 }

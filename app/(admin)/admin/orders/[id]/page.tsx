@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate, formatPrice } from "@/lib/utils"
 import { OrderStatusSelect } from "@/components/admin/order-status-select"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
 
 const statusLabels: Record<string, string> = {
   pending: "Pending",
@@ -39,38 +42,31 @@ export default async function AdminOrderDetailPage({
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-bold mb-2">
-            Order #{order.id.slice(0, 8)}
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            {formatDate(order.createdAt)} Â· {statusLabels[order.status]}
-          </p>
-        </div>
-        <Link
-          href="/admin/orders"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          Back to orders
-        </Link>
-      </div>
+    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
+      <SectionHeader
+        title={`Order #${order.id.slice(0, 8)}`}
+        subtitle={`${formatDate(order.createdAt)} · ${statusLabels[order.status]}`}
+        actions={
+          <Link
+            href="/admin/orders"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Back to orders
+          </Link>
+        }
+      />
 
-      <Card className="card-editorial">
+      <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle>Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <OrderStatusSelect
-            orderId={order.id}
-            initialStatus={order.status}
-          />
+          <OrderStatusSelect orderId={order.id} initialStatus={order.status} />
         </CardContent>
-      </Card>
+      </StyledCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="card-editorial lg:col-span-2">
+        <StyledCard variant="elevated" className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Items</CardTitle>
           </CardHeader>
@@ -83,7 +79,7 @@ export default async function AdminOrderDetailPage({
                 <div className="space-y-1">
                   <div className="font-semibold">{item.product.name}</div>
                   <div className="text-muted-foreground">
-                    {item.variant.size} / {item.variant.color} Â· Qty {item.quantity}
+                    {item.variant.size} / {item.variant.color} · Qty {item.quantity}
                   </div>
                 </div>
                 <div className="font-semibold">
@@ -92,9 +88,9 @@ export default async function AdminOrderDetailPage({
               </div>
             ))}
           </CardContent>
-        </Card>
+        </StyledCard>
 
-        <Card className="card-editorial">
+        <StyledCard variant="elevated">
           <CardHeader>
             <CardTitle>Customer</CardTitle>
           </CardHeader>
@@ -117,10 +113,10 @@ export default async function AdminOrderDetailPage({
               <div className="text-muted-foreground">Notes: {order.notes}</div>
             )}
           </CardContent>
-        </Card>
+        </StyledCard>
       </div>
 
-      <Card className="card-editorial">
+      <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle>Totals</CardTitle>
         </CardHeader>
@@ -140,7 +136,7 @@ export default async function AdminOrderDetailPage({
             <span>{formatPrice(order.totalAmount)}</span>
           </div>
         </CardContent>
-      </Card>
-    </div>
+      </StyledCard>
+    </PageContainer>
   )
 }

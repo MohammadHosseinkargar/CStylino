@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Price } from "@/components/storefront/price"
 import { ShoppingCart, Heart } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { StyledCard } from "@/components/ui/styled-card"
 
 interface ProductCardProps {
   id: string
@@ -42,8 +43,9 @@ export function ProductCard({
   )
 
   return (
-    <Card
-      className="group card-editorial overflow-hidden h-full flex flex-col border-border/40"
+    <StyledCard
+      variant="elevated"
+      className="group overflow-hidden h-full flex flex-col border-border/40"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -130,6 +132,6 @@ export function ProductCard({
           )}
         </div>
       </CardContent>
-    </Card>
+    </StyledCard>
   )
 }

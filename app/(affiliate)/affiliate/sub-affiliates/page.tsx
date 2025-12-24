@@ -1,9 +1,17 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { Users } from "lucide-react"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { DataTable } from "@/components/ui/data-table"
+import { TableCell, TableRow } from "@/components/ui/table"
+import { ListCard } from "@/components/ui/list-card"
+import { EmptyState } from "@/components/ui/empty-state"
+import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
 export default function AffiliateSubAffiliatesPage() {
   const { data: dashboardData, isLoading } = useQuery({
@@ -15,62 +23,80 @@ export default function AffiliateSubAffiliatesPage() {
     },
   })
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
   const subAffiliates = dashboardData?.user?.subAffiliates || []
 
   return (
-    <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">زیرمجموعه‌ها</h1>
-        <p className="text-muted-foreground">همکارانی که از طریق شما ثبت‌نام کرده‌اند</p>
-      </div>
+    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
+      <SectionHeader
+        title="???????????"
+        subtitle="???????? ?? ?? ???? ??? ?????? ???????"
+      />
 
-      <Card className="card-luxury">
+      <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            لیست زیرمجموعه‌ها ({subAffiliates.length})
+            ???? ??????????? ({subAffiliates.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {subAffiliates.length > 0 ? (
-            <div className="space-y-4">
-              {subAffiliates.map((subAffiliate: any) => (
-                <div
-                  key={subAffiliate.id}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-border rounded-xl hover:bg-accent/50 transition-colors"
-                >
-                  <div className="space-y-1">
-                    <div className="font-semibold">
-                      {subAffiliate.name || subAffiliate.email}
+          {isLoading ? (
+            <SkeletonTable rows={5} />
+          ) : subAffiliates.length > 0 ? (
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={[
+                    { key: "name", header: "???" },
+                    { key: "code", header: "?? ????" },
+                    { key: "date", header: "?????" },
+                    { key: "status", header: "?????" },
+                  ]}
+                  data={subAffiliates}
+                  renderRow={(subAffiliate: any) => (
+                    <TableRow key={subAffiliate.id}>
+                      <TableCell className="font-semibold">
+                        {subAffiliate.name || subAffiliate.email}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {subAffiliate.affiliateCode}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatDate(subAffiliate.createdAt)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
+                          ????
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                />
+              </div>
+              <div className="md:hidden space-y-4">
+                {subAffiliates.map((subAffiliate: any) => (
+                  <ListCard
+                    key={subAffiliate.id}
+                    title={subAffiliate.name || subAffiliate.email}
+                    subtitle={`??: ${subAffiliate.affiliateCode}`}
+                    meta={formatDate(subAffiliate.createdAt)}
+                  >
+                    <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
+                      ????
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      کد: {subAffiliate.affiliateCode} • {formatDate(subAffiliate.createdAt)}
-                    </div>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
-                      فعال
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </ListCard>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              هنوز زیرمجموعه‌ای ثبت نشده است
-            </div>
+            <EmptyState
+              icon={<Users className="h-6 w-6 text-muted-foreground" />}
+              title="??????????? ???? ???"
+              description="???? ??????????? ??? ???? ???."
+            />
           )}
         </CardContent>
-      </Card>
-    </div>
+      </StyledCard>
+    </PageContainer>
   )
 }
-

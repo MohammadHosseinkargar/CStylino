@@ -28,7 +28,7 @@ export default function PaymentCallbackPage() {
   }, [searchParams])
 
   return (
-    <div className="container py-12 flex items-center justify-center min-h-screen" dir="rtl">
+    <div className="page-container py-12 flex items-center justify-center min-h-screen" dir="rtl">
       <div className="text-center">
         <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
         <p className="text-lg">در حال تایید پرداخت...</p>
@@ -36,4 +36,5 @@ export default function PaymentCallbackPage() {
     </div>
   )
 }
+
 

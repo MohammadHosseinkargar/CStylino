@@ -54,16 +54,15 @@ export function VariantSelector({
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Size Selector */}
       {availableSizes.length > 0 && (
         <div>
-          <label className="block text-sm font-semibold mb-3 md:mb-4 text-foreground">
-            سایز
+          <label className="block text-caption font-semibold mb-3 text-foreground">
+            ????
             {selectedSize && (
-              <span className="text-muted-foreground font-normal mr-2 text-xs">
+              <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
                 ({getVariantStock(selectedSize, selectedColor || undefined) > 0
-                  ? `${getVariantStock(selectedSize, selectedColor || undefined)} عدد موجود`
-                  : "ناموجود"})
+                  ? `${getVariantStock(selectedSize, selectedColor || undefined)} ?????`
+                  : "???????"})
               </span>
             )}
           </label>
@@ -81,7 +80,7 @@ export function VariantSelector({
                   onClick={() => !isDisabled && onSizeSelect(size)}
                   disabled={isDisabled}
                   className={cn(
-                    "relative px-4 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl border-2 font-medium text-xs md:text-sm transition-all duration-300",
+                    "relative px-4 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl border-2 font-medium text-xs md:text-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
                     isSelected
                       ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
                       : "border-border bg-background hover:border-primary/50 hover:bg-accent/50",
@@ -101,16 +100,15 @@ export function VariantSelector({
         </div>
       )}
 
-      {/* Color Selector */}
       {availableColors.length > 0 && (
         <div>
-          <label className="block text-sm font-semibold mb-3 md:mb-4 text-foreground">
-            رنگ
+          <label className="block text-caption font-semibold mb-3 text-foreground">
+            ???
             {selectedColor && (
-              <span className="text-muted-foreground font-normal mr-2 text-xs">
+              <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
                 ({getVariantStock(selectedSize || undefined, selectedColor) > 0
-                  ? `${getVariantStock(selectedSize || undefined, selectedColor)} عدد موجود`
-                  : "ناموجود"})
+                  ? `${getVariantStock(selectedSize || undefined, selectedColor)} ?????`
+                  : "???????"})
               </span>
             )}
           </label>
@@ -128,7 +126,7 @@ export function VariantSelector({
                   onClick={() => !isDisabled && onColorSelect(colorItem.color)}
                   disabled={isDisabled}
                   className={cn(
-                    "relative h-12 w-12 md:h-14 md:w-14 rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md",
+                    "relative h-12 w-12 md:h-14 md:w-14 rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
                     isSelected
                       ? "border-primary ring-2 md:ring-4 ring-primary/20 ring-offset-1 md:ring-offset-2 ring-offset-background scale-110"
                       : "border-border/50 hover:border-primary/50",
@@ -136,6 +134,7 @@ export function VariantSelector({
                   )}
                   style={{ backgroundColor: colorItem.hex }}
                   title={colorItem.color}
+                  aria-label={`??? ${colorItem.color}`}
                   aria-pressed={isSelected}
                   aria-disabled={isDisabled}
                 >
