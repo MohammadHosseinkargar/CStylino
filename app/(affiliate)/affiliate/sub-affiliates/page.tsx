@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/lib/utils"
@@ -12,6 +12,19 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { ListCard } from "@/components/ui/list-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
+
+const getStatusLabel = (status?: string) => {
+  switch (status) {
+    case "active":
+      return "فعال"
+    case "pending":
+      return "در انتظار تأیید"
+    case "rejected":
+      return "رد شده"
+    default:
+      return "در انتظار تأیید"
+  }
+}
 
 export default function AffiliateSubAffiliatesPage() {
   const { data: dashboardData, isLoading } = useQuery({
@@ -28,15 +41,15 @@ export default function AffiliateSubAffiliatesPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="???????????"
-        subtitle="???????? ?? ?? ???? ??? ?????? ???????"
+        title="زیرمجموعه‌ها"
+        subtitle="پیش‌نمایش زیرمجموعه‌های فعال و در انتظار تأیید"
       />
 
       <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            ???? ??????????? ({subAffiliates.length})
+            زیرمجموعه‌ها ({subAffiliates.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -47,10 +60,10 @@ export default function AffiliateSubAffiliatesPage() {
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "name", header: "???" },
-                    { key: "code", header: "?? ????" },
-                    { key: "date", header: "?????" },
-                    { key: "status", header: "?????" },
+                    { key: "name", header: "نام" },
+                    { key: "code", header: "کد معرف" },
+                    { key: "date", header: "تاریخ ثبت" },
+                    { key: "status", header: "وضعیت" },
                   ]}
                   data={subAffiliates}
                   renderRow={(subAffiliate: any) => (
@@ -66,7 +79,7 @@ export default function AffiliateSubAffiliatesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
-                          ????
+                          {getStatusLabel(subAffiliate.status)}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -78,11 +91,11 @@ export default function AffiliateSubAffiliatesPage() {
                   <ListCard
                     key={subAffiliate.id}
                     title={subAffiliate.name || subAffiliate.email}
-                    subtitle={`??: ${subAffiliate.affiliateCode}`}
+                    subtitle={کد معرف: }
                     meta={formatDate(subAffiliate.createdAt)}
                   >
                     <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
-                      ????
+                      {getStatusLabel(subAffiliate.status)}
                     </div>
                   </ListCard>
                 ))}
@@ -91,8 +104,8 @@ export default function AffiliateSubAffiliatesPage() {
           ) : (
             <EmptyState
               icon={<Users className="h-6 w-6 text-muted-foreground" />}
-              title="??????????? ???? ???"
-              description="???? ??????????? ??? ???? ???."
+              title="زیرمجموعه‌ای برای نمایش وجود ندارد"
+              description="در حال حاضر زیرمجموعه‌ای ثبت نشده است."
             />
           )}
         </CardContent>
@@ -100,3 +113,4 @@ export default function AffiliateSubAffiliatesPage() {
     </PageContainer>
   )
 }
+

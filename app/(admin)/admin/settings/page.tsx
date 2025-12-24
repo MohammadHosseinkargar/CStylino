@@ -26,22 +26,22 @@ const validateSettings = (payload: {
   commissionLevel2Percent: number
 }) => {
   if (Number.isNaN(payload.flatShippingCost)) {
-    return "????? ????? ???? ????."
+    return "هزینه ارسال باید عددی معتبر باشد."
   }
   if (payload.flatShippingCost < 0) {
-    return "????? ????? ???????? ???? ????."
+    return "هزینه ارسال نمی‌تواند منفی باشد."
   }
   if (Number.isNaN(payload.commissionLevel1Percent)) {
-    return "???? ??????? ??? ? ???? ????."
+    return "درصد کمیسیون سطح اول باید عددی معتبر باشد."
   }
   if (payload.commissionLevel1Percent < 0 || payload.commissionLevel1Percent > 100) {
-    return "???? ??????? ??? ? ???? ??? ? ?? ??? ????."
+    return "درصد کمیسیون سطح اول باید بین ۰ تا ۱۰۰ باشد."
   }
   if (Number.isNaN(payload.commissionLevel2Percent)) {
-    return "???? ??????? ??? ? ???? ????."
+    return "درصد کمیسیون سطح دوم باید عددی معتبر باشد."
   }
   if (payload.commissionLevel2Percent < 0 || payload.commissionLevel2Percent > 100) {
-    return "???? ??????? ??? ? ???? ??? ? ?? ??? ????."
+    return "درصد کمیسیون سطح دوم باید بین ۰ تا ۱۰۰ باشد."
   }
   return null
 }
@@ -57,7 +57,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/settings")
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "??? ?? ?????? ???????.")
+        throw new Error(error.error || "بارگذاری تنظیمات ممکن نیست.")
       }
       return res.json()
     },
@@ -87,10 +87,10 @@ export default function AdminSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "??? ?? ?????????? ???????.")
-      }
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.error || "ذخیره تنظیمات ممکن نیست.")
+        }
       return res.json()
     },
     onSuccess: (updated) => {
@@ -101,13 +101,13 @@ export default function AdminSettingsPage() {
         commissionLevel2Percent: String(updated.commissionLevel2Percent),
       })
       toast({
-        title: "??????",
-        description: "??????? ?? ?????? ?????????? ??.",
+        title: "تغییرات ذخیره شد",
+        description: "تنظیمات کمیسیون و ارسال با موفقیت به‌روزرسانی شد.",
       })
     },
     onError: (error: any) => {
       toast({
-        title: "???",
+        title: "خطا",
         description: error.message,
         variant: "destructive",
       })
@@ -124,7 +124,7 @@ export default function AdminSettingsPage() {
     const validationError = validateSettings(payload)
     if (validationError) {
       toast({
-        title: "???",
+        title: "خطا",
         description: validationError,
         variant: "destructive",
       })
@@ -137,8 +137,8 @@ export default function AdminSettingsPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="???????"
-        subtitle="?????? ????????? ? ????? ?????"
+        title="تنظیمات"
+        subtitle="پیکربندی کمیسیون همکاری در فروش و ارسال"
       />
 
       {isLoading ? (
@@ -147,11 +147,11 @@ export default function AdminSettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <StyledCard variant="elevated">
             <CardHeader>
-              <CardTitle>??????? ???????</CardTitle>
+              <CardTitle>کمیسیون همکاران</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="level1Commission">???? ??????? ??? ? (????)</Label>
+                <Label htmlFor="level1Commission">درصد کمیسیون سطح اول (%)</Label>
                 <Input
                   id="level1Commission"
                   type="number"
@@ -168,7 +168,7 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div className="space-y-3">
-                <Label htmlFor="level2Commission">???? ??????? ??? ? (????)</Label>
+                <Label htmlFor="level2Commission">درصد کمیسیون سطح دوم (%)</Label>
                 <Input
                   id="level2Commission"
                   type="number"
@@ -189,18 +189,18 @@ export default function AdminSettingsPage() {
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
               >
-                {saveMutation.isPending ? "?? ??? ?????..." : "????? ???????"}
+                {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
               </Button>
             </CardContent>
           </StyledCard>
 
           <StyledCard variant="elevated">
             <CardHeader>
-              <CardTitle>??????? ?????</CardTitle>
+              <CardTitle>حمل و نقل</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="shippingCost">????? ????? ???? (?????)</Label>
+                <Label htmlFor="shippingCost">هزینه ثابت ارسال (تومان)</Label>
                 <Input
                   id="shippingCost"
                   type="number"
@@ -220,7 +220,7 @@ export default function AdminSettingsPage() {
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
               >
-                {saveMutation.isPending ? "?? ??? ?????..." : "????? ???????"}
+                {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
               </Button>
             </CardContent>
           </StyledCard>

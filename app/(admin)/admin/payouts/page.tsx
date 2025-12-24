@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
@@ -18,6 +18,21 @@ import { Wallet } from "lucide-react"
 
 type PayoutAction = "approve" | "reject" | "markPaid"
 
+const getPayoutStatusLabel = (status?: string) => {
+  switch (status) {
+    case "pending":
+      return "در انتظار"
+    case "approved":
+      return "تایید شده"
+    case "paid":
+      return "پرداخت‌شده"
+    case "rejected":
+      return "رد شده"
+    default:
+      return "در حال بررسی"
+  }
+}
+
 export default function AdminPayoutsPage() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -27,7 +42,7 @@ export default function AdminPayoutsPage() {
     queryKey: ["admin-payouts"],
     queryFn: async () => {
       const res = await fetch("/api/admin/payouts")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) throw new Error("بارگیری درخواست‌ها امکان‌پذیر نیست")
       return res.json()
     },
   })
@@ -43,19 +58,19 @@ export default function AdminPayoutsPage() {
 
       if (!res.ok) {
         const error = await res.json().catch(() => ({}))
-        throw new Error(error?.error || "Failed to update payout")
+        throw new Error(error?.error || "بروزرسانی برداشت ممکن نیست")
       }
 
       toast({
-        title: "Payout updated",
-        description: "The payout status has been updated successfully.",
+        title: "وضعیت برداشت به‌روزرسانی شد",
+        description: "وضعیت برداشت با موفقیت به‌روزرسانی شد.",
       })
       await queryClient.invalidateQueries({ queryKey: ["admin-payouts"] })
     } catch (error) {
       toast({
-        title: "Update failed",
+        title: "خطا",
         description:
-          error instanceof Error ? error.message : "Unable to update payout",
+          error instanceof Error ? error.message : "امکان به‌روزرسانی برداشت وجود ندارد",
         variant: "destructive",
       })
     } finally {
@@ -68,13 +83,13 @@ export default function AdminPayoutsPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="?????????? ??????"
-        subtitle="????? ? ????? ?????????? ??????"
+        title="درخواست‌های برداشت"
+        subtitle="بررسی و تایید درخواست‌های برداشت همکاران"
       />
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>?????????</CardTitle>
+          <CardTitle>لیست برداشت‌ها</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -84,12 +99,12 @@ export default function AdminPayoutsPage() {
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "affiliate", header: "??????" },
-                    { key: "email", header: "?????" },
-                    { key: "date", header: "?????" },
-                    { key: "amount", header: "????" },
-                    { key: "status", header: "?????" },
-                    { key: "actions", header: "" },
+                    { key: "affiliate", header: "همکار" },
+                    { key: "email", header: "ایمیل" },
+                    { key: "date", header: "تاریخ" },
+                    { key: "amount", header: "مبلغ" },
+                    { key: "status", header: "وضعیت" },
+                    { key: "actions", header: "اقدامات" },
                   ]}
                   data={payouts}
                   renderRow={(payout: any) => {
@@ -108,8 +123,8 @@ export default function AdminPayoutsPage() {
                         <TableCell className="font-semibold">
                           {formatPrice(payout.amount)}
                         </TableCell>
-                        <TableCell className="text-muted-foreground capitalize">
-                          {payout.status}
+                        <TableCell className="text-muted-foreground">
+                          {getPayoutStatusLabel(payout.status)}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-2">
@@ -119,7 +134,7 @@ export default function AdminPayoutsPage() {
                               onClick={() => handleAction(payout.id, "approve")}
                               disabled={isProcessing || payout.status !== "pending"}
                             >
-                              ?????
+                              تایید
                             </Button>
                             <Button
                               size="sm"
@@ -127,7 +142,7 @@ export default function AdminPayoutsPage() {
                               onClick={() => handleAction(payout.id, "reject")}
                               disabled={isProcessing || payout.status === "paid"}
                             >
-                              ??
+                              رد کردن
                             </Button>
                             <Button
                               size="sm"
@@ -135,7 +150,7 @@ export default function AdminPayoutsPage() {
                               onClick={() => handleAction(payout.id, "markPaid")}
                               disabled={isProcessing || payout.status !== "approved"}
                             >
-                              ?????? ??
+                              پرداخت شده
                             </Button>
                           </div>
                         </TableCell>
@@ -161,7 +176,7 @@ export default function AdminPayoutsPage() {
                             onClick={() => handleAction(payout.id, "approve")}
                             disabled={isProcessing || payout.status !== "pending"}
                           >
-                            ?????
+                            تایید
                           </Button>
                           <Button
                             size="sm"
@@ -169,7 +184,7 @@ export default function AdminPayoutsPage() {
                             onClick={() => handleAction(payout.id, "reject")}
                             disabled={isProcessing || payout.status === "paid"}
                           >
-                            ??
+                            رد کردن
                           </Button>
                           <Button
                             size="sm"
@@ -177,7 +192,7 @@ export default function AdminPayoutsPage() {
                             onClick={() => handleAction(payout.id, "markPaid")}
                             disabled={isProcessing || payout.status !== "approved"}
                           >
-                            ?????? ??
+                            پرداخت شده
                           </Button>
                         </div>
                       }
@@ -185,8 +200,8 @@ export default function AdminPayoutsPage() {
                       <div className="text-caption text-muted-foreground">
                         {formatDate(payout.createdAt)}
                       </div>
-                      <div className="text-caption text-muted-foreground capitalize">
-                        {payout.status}
+                      <div className="text-caption text-muted-foreground">
+                        {getPayoutStatusLabel(payout.status)}
                       </div>
                     </ListCard>
                   )
@@ -196,8 +211,8 @@ export default function AdminPayoutsPage() {
           ) : (
             <EmptyState
               icon={<Wallet className="h-6 w-6 text-muted-foreground" />}
-              title="???????? ???? ???"
-              description="???? ???????? ??? ???? ???."
+              title="درخواستی ثبت نشده"
+              description="فعلاً برداشت جدیدی وجود ندارد."
             />
           )}
         </CardContent>

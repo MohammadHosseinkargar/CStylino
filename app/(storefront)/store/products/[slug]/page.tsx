@@ -293,7 +293,7 @@ export default function ProductPage() {
       <div className="page-container py-20 min-h-screen flex items-center justify-center" dir="rtl">
         <div className="text-center space-y-6">
           <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-caption text-muted-foreground">?? ??? ?????? ???????...</p>
+          <p className="text-caption text-muted-foreground">در حال دریافت اطلاعات...</p>
         </div>
       </div>
     )
@@ -303,9 +303,9 @@ export default function ProductPage() {
     return (
       <div className="page-container py-20 min-h-screen flex items-center justify-center" dir="rtl">
         <div className="text-center">
-          <h2 className="text-title font-bold mb-3">????? ???? ???</h2>
+          <h2 className="text-title font-bold mb-3">محصول پیدا نشد</h2>
           <p className="text-body text-muted-foreground">
-            ????? ?????? ???? ???? ?? ?? ???? ??????? ????????.
+            محصول مورد نظر شما یافت نشد یا از فروشگاه حذف شده است.
           </p>
         </div>
       </div>
@@ -324,7 +324,7 @@ export default function ProductPage() {
               type="button"
               onClick={() => openLightbox(selectedImage)}
               className="relative aspect-[4/5] w-full bg-muted/20 rounded-2xl overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-              aria-label="?????? ????? ????"
+              aria-label="مشاهده تصویر بزرگ"
             >
               {!loadedImages[selectedImage] && (
                 <div className="absolute inset-0 animate-pulse motion-reduce:animate-none bg-muted/30" />
@@ -359,7 +359,7 @@ export default function ProductPage() {
                         ? "border-primary ring-2 ring-primary/20 scale-105"
                         : "border-border/40 hover:border-primary/50"
                     )}
-                    aria-label={`????? ${idx + 1}`}
+                    aria-label={`تصویر ${idx + 1}`}
                   >
                     {!loadedImages[idx] && (
                       <div className="absolute inset-0 bg-muted/30 animate-pulse motion-reduce:animate-none" />
@@ -395,7 +395,7 @@ export default function ProductPage() {
                   type="button"
                   onClick={() => openLightbox(idx)}
                   className="relative w-full flex-shrink-0 snap-center px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-                  aria-label={`????? ${idx + 1}`}
+                  aria-label={`تصویر ${idx + 1}`}
                 >
                   <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-muted/20">
                     {!loadedImages[idx] && (
@@ -429,7 +429,7 @@ export default function ProductPage() {
                     scrollToImage(idx)
                   }}
                   className="h-2 w-6 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-                  aria-label={`???? ?? ????? ${idx + 1}`}
+                  aria-label={`رفتن به تصویر ${idx + 1}`}
                 >
                   <span
                     className={cn(
@@ -450,7 +450,7 @@ export default function ProductPage() {
               <span
                 className={cn(
                   "text-caption font-semibold px-3 py-1 rounded-full border",
-                  stockBadge === "?????"
+                  stockBadge === "موجود"
                     ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"
                     : "border-rose-500/30 text-rose-500 bg-rose-500/10"
                 )}
@@ -480,14 +480,14 @@ export default function ProductPage() {
             />
 
             <div>
-              <label className="block text-caption font-semibold mb-3 text-foreground">?????</label>
+              <label className="block text-caption font-semibold mb-3 text-foreground">تعداد</label>
               <div className="flex items-center gap-3 w-fit">
                 <Button
                   variant="outline"
                   size="icon"
                   className="h-10 w-10 rounded-lg"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  aria-label="???? ?????"
+                  aria-label="کاهش تعداد"
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
@@ -500,21 +500,21 @@ export default function ProductPage() {
                   className="h-10 w-10 rounded-lg"
                   onClick={() => setQuantity(Math.min(stock, quantity + 1))}
                   disabled={quantity >= stock || !selectedVariant}
-                  aria-label="?????? ?????"
+                  aria-label="افزایش تعداد"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
               {needsSelection ? (
                 <p className="text-caption text-muted-foreground mt-3">
-                  ????? ????/??? ?? ?????? ????.
+                  لطفاً سایز/رنگ را انتخاب کنید.
                 </p>
               ) : stock > 0 ? (
                 <p className="text-caption text-muted-foreground mt-3 persian-number">
-                  ??????: {stock} ???
+                  موجودی: {stock} عدد
                 </p>
               ) : (
-                <p className="text-caption text-destructive mt-3">???????</p>
+                <p className="text-caption text-destructive mt-3">ناموجود</p>
               )}
             </div>
           </div>
@@ -544,7 +544,7 @@ export default function ProductPage() {
                 }}
               >
                 <Heart className="w-4 h-4 ml-2" />
-                ?????? ?? ?????????????
+                افزودن به علاقه‌مندی‌ها
               </Button>
               <Button
                 variant="outline"
@@ -554,7 +554,7 @@ export default function ProductPage() {
                 }}
               >
                 <Share2 className="w-4 h-4 ml-2" />
-                ????????????
+                اشتراک‌گذاری
               </Button>
             </div>
           </div>
@@ -565,9 +565,9 @@ export default function ProductPage() {
                 <Truck className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <div className="text-body font-semibold mb-1">????? ????</div>
+                <div className="text-body font-semibold mb-1">ارسال رایگان</div>
                 <div className="text-caption text-muted-foreground leading-relaxed">
-                  ????? ?????? ???? ????????? ????? ?? ????
+                  ارسال رایگان برای سفارش‌های بالای ۲ میلیون تومان
                 </div>
               </div>
             </div>
@@ -576,9 +576,9 @@ export default function ProductPage() {
                 <Shield className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <div className="text-body font-semibold mb-1">????? ?????</div>
+                <div className="text-body font-semibold mb-1">ضمانت اصالت</div>
                 <div className="text-caption text-muted-foreground leading-relaxed">
-                  ????? ????? ???? ????? ?? ????? ??????
+                  تضمین اصالت کالا و گارانتی بازگشت وجه
                 </div>
               </div>
             </div>
@@ -586,21 +586,21 @@ export default function ProductPage() {
 
           <Accordion type="single" collapsible className="w-full border-t border-border/40 pt-6">
             <AccordionItem value="description">
-              <AccordionTrigger className="text-body font-semibold">???????</AccordionTrigger>
+              <AccordionTrigger className="text-body font-semibold">توضیحات</AccordionTrigger>
               <AccordionContent className="text-body text-muted-foreground leading-relaxed pt-2">
-                {product.description || "???? ??? ????? ???? ?????? ??? ???? ???."}
+                {product.description || "هیچ توضیحی برای این محصول ثبت نشده است."}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="sizing">
-              <AccordionTrigger className="text-body font-semibold">????????</AccordionTrigger>
+              <AccordionTrigger className="text-body font-semibold">راهنمای سایز</AccordionTrigger>
               <AccordionContent className="text-body text-muted-foreground leading-relaxed pt-2">
-                ????? ??????? ???????? ?? ????? ???? ?? ?????? ???????? ????? ?????.
+                برای انتخاب بهترین سایز، لطفاً به جدول راهنمای سایز مراجعه کنید.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="shipping">
-              <AccordionTrigger className="text-body font-semibold">????? ? ??????</AccordionTrigger>
+              <AccordionTrigger className="text-body font-semibold">ارسال و مرجوعی</AccordionTrigger>
               <AccordionContent className="text-body text-muted-foreground leading-relaxed pt-2">
-                ????? ? ?????? ??? ?????? ??????? ????? ??????. ???? ??????? ????? ??? ?????? ?? ??????.
+                ارسال و مرجوعی برای تمامی سفارش‌ها رایگان است. تا ۷ روز ضمانت بازگشت کالا وجود دارد.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -611,7 +611,7 @@ export default function ProductPage() {
         <div className="page-container px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="text-caption text-muted-foreground mb-1">????</div>
+              <div className="text-caption text-muted-foreground mb-1">قیمت</div>
               <Price price={price} size="lg" />
             </div>
             <Button
@@ -689,7 +689,7 @@ export default function ProductPage() {
 
       {relatedProducts.length > 0 && (
         <div className="mt-32 pt-16 border-t border-border/40">
-          <h2 className="text-hero font-bold mb-12">??????? ?????</h2>
+          <h2 className="text-hero font-bold mb-12">محصولات مرتبط</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
             {relatedProducts.map((related: any) => (
               <ProductCard
@@ -708,4 +708,3 @@ export default function ProductPage() {
     </div>
   )
 }
-

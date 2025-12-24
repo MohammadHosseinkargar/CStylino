@@ -68,8 +68,8 @@ export default function ProductsPage() {
   return (
     <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
       <SectionHeader
-        title="???????"
-        subtitle="?????? ???? ??????? ?? ?? ???? ????"
+        title="محصولات"
+        subtitle="مجموعه کامل محصولات ما را کاوش کنید"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
@@ -83,7 +83,7 @@ export default function ProductsPage() {
         >
           {showFilters && (
             <div className="flex items-center justify-between mb-8 lg:hidden">
-              <h2 className="text-title font-bold">???????</h2>
+              <h2 className="text-title font-bold">فیلترها</h2>
               <Button
                 variant="ghost"
                 size="icon"
@@ -98,7 +98,7 @@ export default function ProductsPage() {
           <div className="space-y-8">
             <div>
               <label className="block text-sm font-semibold mb-4 text-foreground">
-                ?????? ????
+                محدوده قیمت
               </label>
               <div className="space-y-3">
                 <Input
@@ -107,7 +107,7 @@ export default function ProductsPage() {
                   onChange={(e) =>
                     setFilters({ ...filters, minPrice: e.target.value })
                   }
-                  placeholder="????? ????"
+                  placeholder="حداقل قیمت"
                   className="persian-number"
                 />
                 <Input
@@ -116,7 +116,7 @@ export default function ProductsPage() {
                   onChange={(e) =>
                     setFilters({ ...filters, maxPrice: e.target.value })
                   }
-                  placeholder="?????? ????"
+                  placeholder="حداکثر قیمت"
                   className="persian-number"
                 />
               </div>
@@ -126,17 +126,17 @@ export default function ProductsPage() {
 
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-8 lg:hidden">
-            <Button
-              variant="outline"
-              className="btn-editorial"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <SlidersHorizontal className="w-4 h-4 ml-2" />
-              ???????
-            </Button>
+              <Button
+                variant="outline"
+                className="btn-editorial"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <SlidersHorizontal className="w-4 h-4 ml-2" />
+                فیلترها
+              </Button>
             {data?.products && (
               <p className="text-caption text-muted-foreground persian-number">
-                {data.products.length} ?????
+                {data.products.length} محصول
               </p>
             )}
           </div>
@@ -158,8 +158,8 @@ export default function ProductsPage() {
           ) : (
             <EmptyState
               icon={<Filter className="w-7 h-7 text-muted-foreground" />}
-              title="?????? ???? ???"
-              description="????? ???????? ??? ?? ????? ????"
+              title="محصولی یافت نشد"
+              description="لطفاً فیلترهای خود را تغییر دهید"
               action={
                 <Button
                   variant="outline"
@@ -174,7 +174,7 @@ export default function ProductsPage() {
                     })
                   }
                 >
-                  ??? ???? ???????
+                  پاک کردن فیلترها
                 </Button>
               }
             />

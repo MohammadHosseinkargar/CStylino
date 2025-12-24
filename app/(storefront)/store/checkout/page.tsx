@@ -97,7 +97,7 @@ export default function CheckoutPage() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || "??? ?? ??? ?????")
+        throw new Error(error.error || "خطا در ثبت سفارش")
       }
 
       const { order } = await response.json()
@@ -110,15 +110,15 @@ export default function CheckoutPage() {
 
       if (!paymentResponse.ok) {
         const error = await paymentResponse.json()
-        throw new Error(error.error || "??? ?? ????? ??????? ??????")
+        throw new Error(error.error || "خطا در دریافت درگاه پرداخت")
       }
 
       const { url } = await paymentResponse.json()
       window.location.href = url
     } catch (error: any) {
       toast({
-        title: "???",
-        description: error.message || "??? ?? ??? ?????",
+        title: "خطا",
+        description: error.message || "خطا در ثبت سفارش",
         variant: "destructive",
       })
       setIsLoading(false)
@@ -131,8 +131,8 @@ export default function CheckoutPage() {
   return (
     <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
       <SectionHeader
-        title="??? ?????"
-        subtitle="???? ??????? ??? ? ???? ????? ?? ????? ???? ?? ?? ????? ?????? ????? ????."
+        title="ثبت سفارش"
+        subtitle="لطفاً اطلاعات خود را وارد کنید تا سفارش شما در سریع‌ترین زمان ممکن پردازش شود."
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
@@ -143,19 +143,19 @@ export default function CheckoutPage() {
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
                   <User className="w-6 h-6 text-primary" />
                 </div>
-                ??????? ?????
+                اطلاعات تماس
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 sm:space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <Label htmlFor="customerName" className="mb-3 block text-sm font-semibold">
-                    ??? ? ??? ????????
+                    نام و نام خانوادگی
                   </Label>
                   <Input
                     id="customerName"
                     {...register("customerName")}
-                    placeholder="??? ? ??? ????????"
+                    placeholder="نام و نام خانوادگی"
                     className={cn(
                       "h-12",
                       errors.customerName &&
@@ -171,7 +171,7 @@ export default function CheckoutPage() {
                 <div>
                   <Label htmlFor="shippingPhone" className="mb-3 block text-sm font-semibold flex items-center gap-2">
                     <Phone className="w-4 h-4" />
-                    ????? ??????
+                    شماره موبایل
                   </Label>
                   <Input
                     id="shippingPhone"
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
-                ???? ?????
+                آدرس ارسال
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -207,12 +207,12 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <Label htmlFor="shippingProvince" className="mb-3 block text-sm font-semibold">
-                      ?????
+                      استان
                     </Label>
                     <Input
                       id="shippingProvince"
                       {...register("shippingProvince")}
-                      placeholder="?????"
+                      placeholder="استان"
                       className={cn(
                         "h-12",
                         errors.shippingProvince &&
@@ -227,12 +227,12 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <Label htmlFor="shippingCity" className="mb-3 block text-sm font-semibold">
-                      ???
+                      شهر
                     </Label>
                     <Input
                       id="shippingCity"
                       {...register("shippingCity")}
-                      placeholder="?????"
+                      placeholder="شهر"
                       className={cn(
                         "h-12",
                         errors.shippingCity &&
@@ -249,12 +249,12 @@ export default function CheckoutPage() {
 
                 <div>
                   <Label htmlFor="shippingAddress" className="mb-3 block text-sm font-semibold">
-                    ???? ????
+                    آدرس دقیق
                   </Label>
                   <Input
                     id="shippingAddress"
                     {...register("shippingAddress")}
-                    placeholder="??????? ????? ????? ????"
+                    placeholder="خیابان، کوچه، پلاک، واحد"
                     className={cn(
                       "h-12",
                       errors.shippingAddress &&
@@ -271,7 +271,7 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <Label htmlFor="shippingPostalCode" className="mb-3 block text-sm font-semibold">
-                      ?? ????
+                      کد پستی
                     </Label>
                     <Input
                       id="shippingPostalCode"
@@ -290,13 +290,13 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div className="flex items-end text-xs text-muted-foreground">
-                    ??? ?????: ??? ?????? (????? ????)
+                    کد پستی: ۱۰ رقم (بدون خط تیره)
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="notes" className="mb-3 block text-sm font-semibold">
-                    ??????? ????? (???????)
+                    توضیحات سفارش (اختیاری)
                   </Label>
                   <textarea
                     id="notes"
@@ -306,7 +306,7 @@ export default function CheckoutPage() {
                       errors.notes &&
                         "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5"
                     )}
-                    placeholder="??????? ???? ???? ???? ?????..."
+                    placeholder="توضیحات خاصی اگر دارید بنویسید..."
                   />
                 </div>
 
@@ -317,9 +317,9 @@ export default function CheckoutPage() {
                   disabled={isLoading}
                 >
                   {isLoading && <Loader2 className="w-5 h-5 ml-2 animate-spin" />}
-                  ?????? ? ????!
+                  پرداخت و تکمیل خرید
                 </Button>
-                <p className="text-xs text-muted-foreground">??? ??????: ???? ???</p>
+                <p className="text-xs text-muted-foreground">روش پرداخت: درگاه امن</p>
               </form>
             </CardContent>
           </StyledCard>
@@ -328,7 +328,7 @@ export default function CheckoutPage() {
         <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
           <StyledCard variant="subtle" className="border-border/40">
             <CardHeader className="pb-4 md:pb-6">
-              <CardTitle className="text-base md:text-title">????? ?????</CardTitle>
+              <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 sm:space-y-6">
               <div className="space-y-3 pb-6 border-b border-border/50">
@@ -338,30 +338,30 @@ export default function CheckoutPage() {
                       {item.productName} - {item.quantity}
                     </span>
                     <span className="font-semibold persian-number">
-                      {(item.price * item.quantity).toLocaleString("fa-IR")} ?????
+                      {(item.price * item.quantity).toLocaleString("fa-IR")} تومان
                     </span>
                   </div>
                 ))}
               </div>
               <div className="space-y-3 pt-2">
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">??? ???????:</span>
+                  <span className="text-muted-foreground">جمع محصولات:</span>
                   <span className="font-semibold persian-number">
-                    {itemsTotal.toLocaleString("fa-IR")} ?????
+                    {itemsTotal.toLocaleString("fa-IR")} تومان
                   </span>
                 </div>
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">????? ?????:</span>
+                  <span className="text-muted-foreground">هزینه ارسال:</span>
                   <span className="font-semibold persian-number">
                     {shippingCost === null
                       ? "..."
-                      : `${shippingCost.toLocaleString("fa-IR")} ?????`}
+                      : `${shippingCost.toLocaleString("fa-IR")} تومان`}
                   </span>
                 </div>
               </div>
               <div className="border-t border-border/50 pt-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-subtitle font-bold">???? ?????:</span>
+                  <span className="text-subtitle font-bold">مبلغ قابل پرداخت:</span>
                   {total === null ? (
                     <span className="font-semibold persian-number">...</span>
                   ) : (

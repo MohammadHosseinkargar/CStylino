@@ -25,13 +25,13 @@ export default async function AdminProductsPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="???????"
-        subtitle="?????? ??????? ???????"
+        title="محصولات"
+        subtitle="مدیریت جامع محصولات فروشگاه"
         actions={
           <Link href="/admin/products/new">
             <Button className="btn-editorial w-full sm:w-auto">
               <Plus className="w-5 h-5 ml-2" />
-              ?????? ?????
+              افزودن محصول
             </Button>
           </Link>
         }
@@ -39,7 +39,7 @@ export default async function AdminProductsPage() {
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>???? ???????</CardTitle>
+        <CardTitle>لیست محصولات</CardTitle>
         </CardHeader>
         <CardContent>
           {products.length > 0 ? (
@@ -47,18 +47,18 @@ export default async function AdminProductsPage() {
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "name", header: "?????" },
-                    { key: "category", header: "????" },
-                    { key: "price", header: "????" },
-                    { key: "stock", header: "??????" },
-                    { key: "actions", header: "" },
+                    { key: "name", header: "نام" },
+                    { key: "category", header: "دسته‌بندی" },
+                    { key: "price", header: "قیمت" },
+                    { key: "stock", header: "موجودی" },
+                    { key: "actions", header: "اقدامات" },
                   ]}
                   data={products}
                   renderRow={(product) => (
                     <TableRow key={product.id}>
                       <TableCell className="font-semibold">{product.name}</TableCell>
                       <TableCell className="text-muted-foreground">
-                        {product.category?.name || "???? ????????"}
+                        {product.category?.name || "بدون دسته‌بندی"}
                       </TableCell>
                       <TableCell className="font-semibold">
                         {formatPrice(product.basePrice)}
@@ -69,7 +69,7 @@ export default async function AdminProductsPage() {
                       <TableCell className="flex items-center gap-2">
                         <Link href={`/admin/products/${product.id}/edit`}>
                           <Button size="sm" variant="outline">
-                            ??????
+                            ویرایش
                           </Button>
                         </Link>
                         <DeleteProductButton productId={product.id} />
@@ -80,31 +80,34 @@ export default async function AdminProductsPage() {
               </div>
               <div className="md:hidden space-y-4">
                 {products.map((product) => (
-                  <ListCard
-                    key={product.id}
-                    title={product.name}
-                    subtitle={product.category?.name || "???? ????????"}
-                    meta={formatPrice(product.basePrice)}
-                    actions={
-                      <div className="flex items-center gap-2">
-                        <Link href={`/admin/products/${product.id}/edit`}>
-                          <Button size="sm" variant="outline">
-                            ??????
-                          </Button>
-                        </Link>
-                        <DeleteProductButton productId={product.id} />
+                    <ListCard
+                      key={product.id}
+                      title={product.name}
+                      subtitle={product.category?.name || "بدون دسته‌بندی"}
+                      meta={formatPrice(product.basePrice)}
+                      actions={
+                        <div className="flex items-center gap-2">
+                          <Link href={`/admin/products/${product.id}/edit`}>
+                            <Button size="sm" variant="outline">
+                              ویرایش
+                            </Button>
+                          </Link>
+                          <DeleteProductButton productId={product.id} />
+                        </div>
+                      }
+                    >
+                      <div className="text-caption text-muted-foreground">
+                        موجودی: {product.variants.reduce((sum, v) => sum + v.stock, 0)}
                       </div>
-                    }
-                  >
-                    <div className="text-caption text-muted-foreground">
-                      ??????: {product.variants.reduce((sum, v) => sum + v.stock, 0)}
-                    </div>
-                  </ListCard>
+                    </ListCard>
                 ))}
               </div>
             </>
           ) : (
-            <EmptyState title="?????? ???? ???" description="???? ?????? ??? ???? ???." />
+            <EmptyState
+              title="محصولی برای نمایش وجود ندارد"
+              description="فعلاً محصولی ثبت نشده است."
+            />
           )}
         </CardContent>
       </StyledCard>

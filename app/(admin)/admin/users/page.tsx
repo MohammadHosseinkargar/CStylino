@@ -18,30 +18,30 @@ export default async function AdminUsersPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="???????"
-        subtitle="?????? ??????? ???????."
+        title="کاربران"
+        subtitle="لیست کامل کاربران ثبت‌شده"
       />
 
       <StyledCard variant="elevated">
-        <CardHeader>
-          <CardTitle>???? ???????</CardTitle>
-        </CardHeader>
+          <CardHeader>
+            <CardTitle>کاربران ثبت‌شده</CardTitle>
+          </CardHeader>
         <CardContent>
           {users.length > 0 ? (
             <>
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "name", header: "?????" },
-                    { key: "email", header: "?????" },
-                    { key: "date", header: "?????" },
-                    { key: "role", header: "???" },
+                    { key: "name", header: "نام" },
+                    { key: "email", header: "ایمیل" },
+                    { key: "date", header: "تاریخ ثبت" },
+                    { key: "role", header: "نقش" },
                   ]}
                   data={users}
                   renderRow={(user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-semibold">
-                        {user.name || "???? ???"}
+                        {user.name || "نامی ثبت نشده است"}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {user.email}
@@ -51,9 +51,9 @@ export default async function AdminUsersPage() {
                       </TableCell>
                       <TableCell>
                         <span className="text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">
-                          {user.role === "admin" && "????"}
-                          {user.role === "affiliate" && "??????"}
-                          {user.role === "customer" && "?????"}
+                          {user.role === "admin" && "مدیر"}
+                          {user.role === "affiliate" && "همکار فروش"}
+                          {user.role === "customer" && "مشتری"}
                         </span>
                       </TableCell>
                     </TableRow>
@@ -62,27 +62,27 @@ export default async function AdminUsersPage() {
               </div>
               <div className="md:hidden space-y-4">
                 {users.map((user) => (
-                  <ListCard
-                    key={user.id}
-                    title={user.name || "???? ???"}
-                    subtitle={user.email}
-                    meta={formatDate(user.createdAt)}
-                  >
-                    <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">
-                      {user.role === "admin" && "????"}
-                      {user.role === "affiliate" && "??????"}
-                      {user.role === "customer" && "?????"}
-                    </div>
-                  </ListCard>
+                    <ListCard
+                      key={user.id}
+                      title={user.name || "نامی ثبت نشده است"}
+                      subtitle={user.email}
+                      meta={formatDate(user.createdAt)}
+                    >
+                      <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">
+                        {user.role === "admin" && "مدیر"}
+                        {user.role === "affiliate" && "همکار فروش"}
+                        {user.role === "customer" && "مشتری"}
+                      </div>
+                    </ListCard>
                 ))}
               </div>
             </>
           ) : (
-            <EmptyState
-              icon={<Users className="h-6 w-6 text-muted-foreground" />}
-              title="?????? ???? ???"
-              description="???? ?????? ??? ???? ???."
-            />
+              <EmptyState
+                icon={<Users className="h-6 w-6 text-muted-foreground" />}
+                title="کاربری برای نمایش وجود ندارد"
+                description="فعلاً کاربری یافته نشد."
+              />
           )}
         </CardContent>
       </StyledCard>

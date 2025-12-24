@@ -35,8 +35,8 @@ export default function CategoriesPage() {
   return (
     <PageContainer className="py-12" dir="rtl">
       <SectionHeader
-        title="??????????"
-        subtitle="?? ??????? ????? ?? ?? ?????"
+        title="دسته‌بندی‌ها"
+        subtitle="برای هر سلیقه، یک انتخاب"
       />
 
       {categories?.length > 0 ? (
@@ -62,7 +62,7 @@ export default function CategoriesPage() {
                     </p>
                   )}
                   <p className="text-caption text-primary">
-                    {category._count?.products || 0} ?????
+                    {category._count?.products || 0} محصول
                   </p>
                 </div>
               </StyledCard>
@@ -73,8 +73,8 @@ export default function CategoriesPage() {
         <div className="mt-10">
           <EmptyState
             icon={<FolderOpen className="w-6 h-6 text-muted-foreground" />}
-            title="?????? ???? ???"
-            description="???? ?????? ??? ???? ???."
+            title="دسته‌بندی یافت نشد"
+            description="هنوز دسته‌بندی‌ای اضافه نشده است."
           />
         </div>
       )}

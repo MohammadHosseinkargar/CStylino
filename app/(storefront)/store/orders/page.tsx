@@ -13,12 +13,12 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
 const statusLabels: Record<OrderStatus, string> = {
-  pending: "?? ?????? ??????",
-  processing: "?? ??? ??????",
-  shipped: "????? ???",
-  delivered: "????? ???? ???",
-  canceled: "??? ???",
-  refunded: "?????? ???",
+  pending: "در انتظار پرداخت",
+  processing: "در حال پردازش",
+  shipped: "ارسال شده",
+  delivered: "تحویل شده",
+  canceled: "لغو شده",
+  refunded: "مرجوع شده",
 }
 
 const statusIcons: Record<OrderStatus, typeof Package> = {
@@ -59,13 +59,13 @@ export default function OrdersPage() {
 
   return (
     <PageContainer className="py-8 md:py-12" dir="rtl">
-      <SectionHeader title="???????? ??" subtitle="??????? ???? ???????? ???" />
+      <SectionHeader title="سفارش‌های من" subtitle="پیگیری وضعیت سفارش‌های ثبت شده" />
 
       {orders?.length === 0 ? (
         <EmptyState
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
-          title="???? ?????? ??? ????????"
-          description="???? ???? ????? ?? ???? ??????? ?????"
+          title="هنوز سفارشی ثبت نکرده‌اید"
+          description="برای دیدن محصولات به بخش فروشگاه بروید"
         />
       ) : (
         <div className="space-y-4">
@@ -85,7 +85,7 @@ export default function OrdersPage() {
                         <StatusIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg">????? #{order.id.slice(0, 8)}</CardTitle>
+                        <CardTitle className="text-lg">سفارش #{order.id.slice(0, 8)}</CardTitle>
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {formatDate(order.createdAt)}
                         </p>
@@ -111,7 +111,7 @@ export default function OrdersPage() {
                     {order.items.map((item: any) => (
                       <div key={item.id} className="flex justify-between items-center text-sm">
                         <span className="text-muted-foreground">
-                          {item.product.name} - {item.variant.size} / {item.variant.color} � {item.quantity}
+                          {item.product.name} - {item.variant.size} / {item.variant.color} × {item.quantity}
                         </span>
                         <span className="font-semibold persian-number">
                           {formatPrice(item.price * item.quantity)}

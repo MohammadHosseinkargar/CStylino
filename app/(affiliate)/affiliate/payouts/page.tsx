@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
@@ -16,6 +16,21 @@ import { ListCard } from "@/components/ui/list-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
+const getPayoutStatusLabel = (status?: string) => {
+  switch (status) {
+    case "pending":
+      return "در انتظار"
+    case "approved":
+      return "در حال تایید"
+    case "paid":
+      return "پرداخت‌شده"
+    case "rejected":
+      return "رد شده"
+    default:
+      return "در حال بررسی"
+  }
+}
+
 export default function AffiliatePayoutsPage() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -24,7 +39,7 @@ export default function AffiliatePayoutsPage() {
     queryKey: ["affiliate-payouts"],
     queryFn: async () => {
       const res = await fetch("/api/affiliate/payouts")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) throw new Error("بارگیری داده‌های برداشت ممکن نیست")
       return res.json()
     },
   })
@@ -40,19 +55,19 @@ export default function AffiliatePayoutsPage() {
 
       if (!res.ok) {
         const error = await res.json().catch(() => ({}))
-        throw new Error(error?.error || "Failed to request payout")
+        throw new Error(error?.error || "درخواست برداشت امکان‌پذیر نیست")
       }
 
       toast({
-        title: "??????? ??? ??",
-        description: "??????? ??? ?? ??? ????? ???.",
+        title: "درخواست برداشت ثبت شد",
+        description: "تقاضای برداشت شما با موفقیت ارسال شد.",
       })
       await refetch()
     } catch (error) {
       toast({
-        title: "???",
+        title: "خطا",
         description:
-          error instanceof Error ? error.message : "??? ?? ????? ???????",
+          error instanceof Error ? error.message : "امکان ثبت درخواست وجود ندارد",
         variant: "destructive",
       })
     } finally {
@@ -67,25 +82,23 @@ export default function AffiliatePayoutsPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="????????"
-        subtitle="??????? ?????? ?????? ??????"
+        title="درخواست‌های برداشت"
+        subtitle="مدیریت موجودی و تاریخچه برداشت‌ها"
       />
 
       <StyledCard variant="glass" className="border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            ?????? ???? ??????
+            موجودی قابل برداشت
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center py-6">
-            <div className="text-5xl font-bold mb-2">
-              {formatPrice(availableToRequest)}
-            </div>
-            <p className="text-muted-foreground">?????? ???? ???????</p>
+            <div className="text-5xl font-bold mb-2">{formatPrice(availableToRequest)}</div>
+            <p className="text-muted-foreground">موجودی فعلی شما</p>
             <p className="text-xs text-muted-foreground mt-2">
-              ????? ??????: {formatPrice(minimumPayoutAmount)}
+              حداقل برداشت: {formatPrice(minimumPayoutAmount)}
             </p>
           </div>
 
@@ -94,12 +107,12 @@ export default function AffiliatePayoutsPage() {
             onClick={handlePayoutRequest}
             disabled={availableToRequest < minimumPayoutAmount || isSubmitting}
           >
-            ??????? ??????
+            {isSubmitting ? "در حال ارسال درخواست..." : "درخواست برداشت"}
           </Button>
 
           {availableToRequest < minimumPayoutAmount && (
             <p className="text-sm text-center text-muted-foreground">
-              ?????? ???? ???? ?????? ??????.
+              برای ثبت درخواست برداشت حداقل به {formatPrice(minimumPayoutAmount)} نیاز است.
             </p>
           )}
         </CardContent>
@@ -107,7 +120,7 @@ export default function AffiliatePayoutsPage() {
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>?????????? ????</CardTitle>
+          <CardTitle>سوابق برداشت</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -117,9 +130,9 @@ export default function AffiliatePayoutsPage() {
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "amount", header: "????" },
-                    { key: "date", header: "?????" },
-                    { key: "status", header: "?????" },
+                    { key: "amount", header: "مبلغ" },
+                    { key: "date", header: "تاریخ" },
+                    { key: "status", header: "وضعیت" },
                   ]}
                   data={payouts}
                   renderRow={(payout: any) => (
@@ -130,11 +143,8 @@ export default function AffiliatePayoutsPage() {
                       <TableCell className="text-muted-foreground">
                         {formatDate(payout.createdAt)}
                       </TableCell>
-                      <TableCell className="text-muted-foreground capitalize">
-                        {payout.status === "pending" && "?? ??????"}
-                        {payout.status === "approved" && "????? ???"}
-                        {payout.status === "paid" && "?????? ???"}
-                        {payout.status === "rejected" && "?? ???"}
+                      <TableCell className="text-muted-foreground">
+                        {getPayoutStatusLabel(payout.status)}
                       </TableCell>
                     </TableRow>
                   )}
@@ -146,15 +156,7 @@ export default function AffiliatePayoutsPage() {
                     key={payout.id}
                     title={formatPrice(payout.amount)}
                     subtitle={formatDate(payout.createdAt)}
-                    meta={
-                      payout.status === "pending"
-                        ? "?? ??????"
-                        : payout.status === "approved"
-                          ? "????? ???"
-                          : payout.status === "paid"
-                            ? "?????? ???"
-                            : "?? ???"
-                    }
+                    meta={getPayoutStatusLabel(payout.status)}
                   />
                 ))}
               </div>
@@ -162,8 +164,8 @@ export default function AffiliatePayoutsPage() {
           ) : (
             <EmptyState
               icon={<Wallet className="h-6 w-6 text-muted-foreground" />}
-              title="???????? ??? ????"
-              description="???? ??????? ??????? ??????."
+              title="هنوز درخواستی ثبت نشده"
+              description="پس از ثبت اولین برداشت، سابقه در اینجا نمایش داده می‌شود."
             />
           )}
         </CardContent>

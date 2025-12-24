@@ -12,32 +12,33 @@ import { StyledCard } from "@/components/ui/styled-card"
 export default function AffiliateSettingsPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
-      <SectionHeader title="???????" subtitle="??????? ??? ??????" />
+      <SectionHeader title="تنظیمات" subtitle="تنظیمات حساب کاربری" />
 
       <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" />
-            ??????? ???? ??????
+            تنظیمات بانکی
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3">
-            <Label htmlFor="bankAccount">????? ???? ?????</Label>
+            <Label htmlFor="bankAccount">شماره کارت بانکی</Label>
             <Input
               id="bankAccount"
               type="text"
-              placeholder="???? ?????? ????????"
+              placeholder="شماره ۱۶ رقمی کارت"
               className="persian-number"
             />
           </div>
           <div className="space-y-3">
-            <Label htmlFor="shaba">????? ???</Label>
+            <Label htmlFor="shaba">شماره شبا</Label>
             <Input id="shaba" type="text" placeholder="IR..." className="persian-number" />
           </div>
-          <Button className="btn-editorial w-full">????? ???????</Button>
+          <Button className="btn-editorial w-full">ذخیره تغییرات</Button>
         </CardContent>
       </StyledCard>
     </PageContainer>
   )
 }
+

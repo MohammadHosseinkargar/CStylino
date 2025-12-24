@@ -57,14 +57,14 @@ export function VariantSelector({
       {availableSizes.length > 0 && (
         <div>
           <label className="block text-caption font-semibold mb-3 text-foreground">
-            ????
+            سایز
             {selectedSize && (
-              <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
-                ({getVariantStock(selectedSize, selectedColor || undefined) > 0
-                  ? `${getVariantStock(selectedSize, selectedColor || undefined)} ?????`
-                  : "???????"})
-              </span>
-            )}
+                <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
+                  ({getVariantStock(selectedSize, selectedColor || undefined) > 0
+                    ? `${getVariantStock(selectedSize, selectedColor || undefined)} عدد موجود`
+                  : "ناموجود"})
+                </span>
+              )}
           </label>
           <div className="flex flex-wrap gap-2 md:gap-2.5">
             {availableSizes.map((size) => {
@@ -103,14 +103,14 @@ export function VariantSelector({
       {availableColors.length > 0 && (
         <div>
           <label className="block text-caption font-semibold mb-3 text-foreground">
-            ???
+            رنگ
             {selectedColor && (
-              <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
-                ({getVariantStock(selectedSize || undefined, selectedColor) > 0
-                  ? `${getVariantStock(selectedSize || undefined, selectedColor)} ?????`
-                  : "???????"})
-              </span>
-            )}
+                <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
+                  ({getVariantStock(selectedSize || undefined, selectedColor) > 0
+                    ? `${getVariantStock(selectedSize || undefined, selectedColor)} عدد موجود`
+                  : "ناموجود"})
+                </span>
+              )}
           </label>
           <div className="flex flex-wrap gap-2 md:gap-3">
             {availableColors.map((colorItem, idx) => {
@@ -134,7 +134,7 @@ export function VariantSelector({
                   )}
                   style={{ backgroundColor: colorItem.hex }}
                   title={colorItem.color}
-                  aria-label={`??? ${colorItem.color}`}
+                  aria-label={`رنگ ${colorItem.color}`}
                   aria-pressed={isSelected}
                   aria-disabled={isDisabled}
                 >

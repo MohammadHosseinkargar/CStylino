@@ -70,7 +70,7 @@ export default function AdminCategoriesPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "??? ?? ????? ????????")
+        throw new Error(error.error || "خطا در ایجاد دسته‌بندی")
       }
       return res.json()
     },
@@ -88,13 +88,13 @@ export default function AdminCategoriesPage() {
         isActive: true,
       })
       toast({
-        title: "????",
-        description: "???????? ?? ?????? ????? ??.",
+        title: "موفق",
+        description: "دسته‌بندی با موفقیت ایجاد شد.",
       })
     },
     onError: (error: any) => {
       toast({
-        title: "???",
+        title: "خطا",
         description: error.message,
         variant: "destructive",
       })
@@ -110,7 +110,7 @@ export default function AdminCategoriesPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "??? ?? ????????? ????????")
+        throw new Error(error.error || "خطا در ویرایش دسته‌بندی")
       }
       return res.json()
     },
@@ -120,13 +120,13 @@ export default function AdminCategoriesPage() {
       setEditingId(null)
       setEditData(null)
       toast({
-        title: "????",
-        description: "???????? ?? ?????? ????????? ??.",
+        title: "موفق",
+        description: "دسته‌بندی با موفقیت ویرایش شد.",
       })
     },
     onError: (error: any) => {
       toast({
-        title: "???",
+        title: "خطا",
         description: error.message,
         variant: "destructive",
       })
@@ -140,7 +140,7 @@ export default function AdminCategoriesPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "??? ?? ??? ????????")
+        throw new Error(error.error || "خطا در حذف دسته‌بندی")
       }
       return res.json()
     },
@@ -148,13 +148,13 @@ export default function AdminCategoriesPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] })
       queryClient.invalidateQueries({ queryKey: ["categories"] })
       toast({
-        title: "????",
-        description: "???????? ??? ??.",
+        title: "موفق",
+        description: "دسته‌بندی حذف شد.",
       })
     },
     onError: (error: any) => {
       toast({
-        title: "???",
+        title: "خطا",
         description: error.message,
         variant: "destructive",
       })
@@ -164,8 +164,8 @@ export default function AdminCategoriesPage() {
   const handleCreate = () => {
     if (!formData.name || !formData.slug) {
       toast({
-        title: "???",
-        description: "??? ? ????? ???????? ?????? ???.",
+        title: "خطا",
+        description: "نام و اسلاگ دسته‌بندی الزامی است.",
         variant: "destructive",
       })
       return
@@ -189,8 +189,8 @@ export default function AdminCategoriesPage() {
   const handleUpdate = (id: string) => {
     if (!editData?.name || !editData?.slug) {
       toast({
-        title: "???",
-        description: "??? ? ????? ???????? ?????? ???.",
+        title: "خطا",
+        description: "نام و اسلاگ دسته‌بندی الزامی است.",
         variant: "destructive",
       })
       return
@@ -199,7 +199,7 @@ export default function AdminCategoriesPage() {
   }
 
   const handleDelete = (id: string) => {
-    if (confirm("??? ?? ??? ???????? ??????? ??????")) {
+    if (confirm("آیا از حذف این دسته‌بندی اطمینان دارید؟")) {
       deleteMutation.mutate(id)
     }
   }
@@ -207,15 +207,15 @@ export default function AdminCategoriesPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="??????????"
-        subtitle="?????? ??????????? ???????"
+        title="دسته‌بندی‌ها"
+        subtitle="مدیریت دسته‌بندی‌های محصولات"
         actions={
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <div className="w-full sm:w-72">
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="????? ?? ??????????"
+                placeholder="جستجو در دسته‌بندی‌ها..."
               />
             </div>
             <Button
@@ -223,7 +223,7 @@ export default function AdminCategoriesPage() {
               onClick={() => setIsCreating(!isCreating)}
             >
               <Plus className="w-5 h-5 ml-2" />
-              {isCreating ? "????" : "?????? ????"}
+              {isCreating ? "لغو" : "افزودن دسته"}
             </Button>
           </div>
         }
@@ -232,12 +232,12 @@ export default function AdminCategoriesPage() {
       {isCreating && (
         <StyledCard variant="subtle">
           <CardHeader>
-            <CardTitle>????? ???? ????</CardTitle>
+            <CardTitle>افزودن دسته جدید</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">??? ???? *</Label>
+                <Label htmlFor="name">نام دسته *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -251,7 +251,7 @@ export default function AdminCategoriesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="slug">????? *</Label>
+                <Label htmlFor="slug">اسلاگ *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
@@ -260,7 +260,7 @@ export default function AdminCategoriesPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">???????</Label>
+              <Label htmlFor="description">توضیحات</Label>
               <textarea
                 id="description"
                 value={formData.description}
@@ -269,7 +269,7 @@ export default function AdminCategoriesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">?????</Label>
+              <Label htmlFor="image">تصویر</Label>
               <Input
                 id="image"
                 type="url"
@@ -284,14 +284,14 @@ export default function AdminCategoriesPage() {
                 disabled={createMutation.isPending}
                 className="btn-editorial"
               >
-                {createMutation.isPending ? "?? ??? ???..." : "???"}
+                {createMutation.isPending ? "در حال ثبت..." : "ثبت"}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setIsCreating(false)}
                 disabled={createMutation.isPending}
               >
-                ??????
+                انصراف
               </Button>
             </div>
           </CardContent>
@@ -300,7 +300,7 @@ export default function AdminCategoriesPage() {
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>???? ??????????</CardTitle>
+          <CardTitle>لیست دسته‌بندی‌ها</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -310,9 +310,9 @@ export default function AdminCategoriesPage() {
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "name", header: "???" },
-                    { key: "slug", header: "?????" },
-                    { key: "count", header: "?????" },
+                    { key: "name", header: "نام" },
+                    { key: "slug", header: "اسلاگ" },
+                    { key: "count", header: "تعداد" },
                     { key: "actions", header: "" },
                   ]}
                   data={filteredCategories}
@@ -347,7 +347,7 @@ export default function AdminCategoriesPage() {
                                 disabled={updateMutation.isPending}
                               >
                                 <Save className="w-4 h-4 ml-2" />
-                                ?????
+                                ذخیره
                               </Button>
                               <Button
                                 size="sm"
@@ -358,7 +358,7 @@ export default function AdminCategoriesPage() {
                                 }}
                               >
                                 <X className="w-4 h-4 ml-2" />
-                                ??????
+                                انصراف
                               </Button>
                             </div>
                           </TableCell>
@@ -376,7 +376,7 @@ export default function AdminCategoriesPage() {
                             <div className="flex items-center gap-2">
                               <Button size="sm" variant="outline" onClick={() => handleEdit(category)}>
                                 <Edit2 className="w-4 h-4 ml-2" />
-                                ??????
+                                ویرایش
                               </Button>
                               <Button
                                 size="sm"
@@ -386,7 +386,7 @@ export default function AdminCategoriesPage() {
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="w-4 h-4 ml-2" />
-                                ???
+                                حذف
                               </Button>
                             </div>
                           </TableCell>
@@ -401,8 +401,8 @@ export default function AdminCategoriesPage() {
                   <ListCard
                     key={category.id}
                     title={category.name}
-                    subtitle={`?????: ${category.slug}`}
-                    meta={`${category._count?.products || 0} ?????`}
+                    subtitle={`اسلاگ: ${category.slug}`}
+                    meta={`${category._count?.products || 0} محصول`}
                     actions={
                       editingId === category.id ? (
                         <div className="flex items-center gap-2">
@@ -412,7 +412,7 @@ export default function AdminCategoriesPage() {
                             disabled={updateMutation.isPending}
                           >
                             <Save className="w-4 h-4 ml-2" />
-                            ?????
+                            ذخیره
                           </Button>
                           <Button
                             size="sm"
@@ -423,14 +423,14 @@ export default function AdminCategoriesPage() {
                             }}
                           >
                             <X className="w-4 h-4 ml-2" />
-                            ??????
+                            انصراف
                           </Button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
                           <Button size="sm" variant="outline" onClick={() => handleEdit(category)}>
                             <Edit2 className="w-4 h-4 ml-2" />
-                            ??????
+                            ویرایش
                           </Button>
                           <Button
                             size="sm"
@@ -440,7 +440,7 @@ export default function AdminCategoriesPage() {
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="w-4 h-4 ml-2" />
-                            ???
+                            حذف
                           </Button>
                         </div>
                       )
@@ -471,7 +471,7 @@ export default function AdminCategoriesPage() {
               </div>
             </>
           ) : (
-            <EmptyState title="?????? ???? ???" description="???? ?????? ??? ???? ???." />
+            <EmptyState title="دسته‌بندی یافت نشد" description="هنوز دسته‌بندی‌ای اضافه نشده است." />
           )}
         </CardContent>
       </StyledCard>

@@ -10,6 +10,21 @@ import { ListCard } from "@/components/ui/list-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { UsersRound } from "lucide-react"
 
+const getCommissionStatusLabel = (status?: string) => {
+  switch (status) {
+    case "pending":
+      return "در انتظار"
+    case "available":
+      return "قابل برداشت"
+    case "paid":
+      return "پرداخت‌شده"
+    case "void":
+      return "باطل‌شده"
+    default:
+      return "در انتظار"
+  }
+}
+
 export default async function AdminAffiliatesPage() {
   const affiliates = await prisma.user.findMany({
     where: {
@@ -36,19 +51,20 @@ export default async function AdminAffiliatesPage() {
         select: { name: true, email: true },
       },
     },
+    orderBy: { createdAt: "desc" },
   })
 
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="????????"
-        subtitle="?????? ???? ???????? ? ?????? ???????"
+        title="همکاران فروش"
+        subtitle="مرور عملکرد و وضعیت کمیسیون همکاران"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StyledCard variant="elevated">
           <CardHeader>
-            <CardTitle>???? ????????</CardTitle>
+            <CardTitle>همکاران فعال</CardTitle>
           </CardHeader>
           <CardContent>
             {affiliates.length > 0 ? (
@@ -56,9 +72,9 @@ export default async function AdminAffiliatesPage() {
                 <div className="hidden md:block">
                   <DataTable
                     columns={[
-                      { key: "name", header: "???" },
-                      { key: "code", header: "??" },
-                      { key: "orders", header: "?????" },
+                      { key: "name", header: "نام" },
+                      { key: "code", header: "کد معرف" },
+                      { key: "orders", header: "سفارش‌ها" },
                     ]}
                     data={affiliates}
                     renderRow={(affiliate) => (
@@ -70,7 +86,7 @@ export default async function AdminAffiliatesPage() {
                           {affiliate.affiliateCode}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {affiliate._count.referredOrdersAsAffiliate} ?????
+                          {affiliate._count.referredOrdersAsAffiliate} سفارش
                         </TableCell>
                       </TableRow>
                     )}
@@ -81,8 +97,8 @@ export default async function AdminAffiliatesPage() {
                     <ListCard
                       key={affiliate.id}
                       title={affiliate.name || affiliate.email}
-                      subtitle={`??: ${affiliate.affiliateCode}`}
-                      meta={`${affiliate._count.referredOrdersAsAffiliate} ?????`}
+                      subtitle={`کد معرف: ${affiliate.affiliateCode}`}
+                      meta={`${affiliate._count.referredOrdersAsAffiliate} سفارش`}
                     />
                   ))}
                 </div>
@@ -90,8 +106,8 @@ export default async function AdminAffiliatesPage() {
             ) : (
               <EmptyState
                 icon={<UsersRound className="h-6 w-6 text-muted-foreground" />}
-                title="??????? ???? ???"
-                description="???? ??????? ??? ???? ???."
+                title="همکاری یافت نشد"
+                description="فعلاً همکار فروشی ثبت نشده است."
               />
             )}
           </CardContent>
@@ -99,7 +115,7 @@ export default async function AdminAffiliatesPage() {
 
         <StyledCard variant="elevated">
           <CardHeader>
-            <CardTitle>?????????</CardTitle>
+            <CardTitle>کمیسیون‌ها</CardTitle>
           </CardHeader>
           <CardContent>
             {commissions.length > 0 ? (
@@ -107,11 +123,11 @@ export default async function AdminAffiliatesPage() {
                 <div className="hidden md:block">
                   <DataTable
                     columns={[
-                      { key: "affiliate", header: "??????" },
-                      { key: "level", header: "???" },
-                      { key: "date", header: "?????" },
-                      { key: "amount", header: "????" },
-                      { key: "status", header: "?????" },
+                      { key: "affiliate", header: "همکار" },
+                      { key: "level", header: "سطح" },
+                      { key: "date", header: "تاریخ" },
+                      { key: "amount", header: "مبلغ" },
+                      { key: "status", header: "وضعیت" },
                     ]}
                     data={commissions.slice(0, 10)}
                     renderRow={(commission) => (
@@ -120,7 +136,7 @@ export default async function AdminAffiliatesPage() {
                           {commission.affiliate.name || commission.affiliate.email}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          ??? {commission.level}
+                          سطح {commission.level}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatDate(commission.createdAt)}
@@ -129,10 +145,7 @@ export default async function AdminAffiliatesPage() {
                           {formatPrice(commission.amount)}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {commission.status === "pending" && "?? ??????"}
-                          {commission.status === "available" && "???? ??????"}
-                          {commission.status === "paid" && "?????? ???"}
-                          {commission.status === "void" && "???? ???"}
+                          {getCommissionStatusLabel(commission.status)}
                         </TableCell>
                       </TableRow>
                     )}
@@ -143,14 +156,11 @@ export default async function AdminAffiliatesPage() {
                     <ListCard
                       key={commission.id}
                       title={commission.affiliate.name || commission.affiliate.email}
-                      subtitle={`??? ${commission.level} � ${formatDate(commission.createdAt)}`}
+                      subtitle={`سطح ${commission.level}`}
                       meta={formatPrice(commission.amount)}
                     >
                       <div className="text-caption text-muted-foreground">
-                        {commission.status === "pending" && "?? ??????"}
-                        {commission.status === "available" && "???? ??????"}
-                        {commission.status === "paid" && "?????? ???"}
-                        {commission.status === "void" && "???? ???"}
+                        {getCommissionStatusLabel(commission.status)}
                       </div>
                     </ListCard>
                   ))}
@@ -159,8 +169,8 @@ export default async function AdminAffiliatesPage() {
             ) : (
               <EmptyState
                 icon={<UsersRound className="h-6 w-6 text-muted-foreground" />}
-                title="???????? ???? ???"
-                description="???? ???????? ??? ???? ???."
+                title="کمیسیونی ثبت نشده"
+                description="فعلاً گزارشی از کمیسیون‌ها وجود ندارد."
               />
             )}
           </CardContent>

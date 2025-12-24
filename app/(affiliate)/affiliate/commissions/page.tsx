@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
@@ -13,12 +13,27 @@ import { ListCard } from "@/components/ui/list-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
+const getCommissionStatusLabel = (status?: string) => {
+  switch (status) {
+    case "pending":
+      return "در انتظار"
+    case "available":
+      return "قابل برداشت"
+    case "paid":
+      return "پرداخت‌شده"
+    case "void":
+      return "باطل‌شده"
+    default:
+      return "در حال بررسی"
+  }
+}
+
 export default function AffiliateCommissionsPage() {
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ["affiliate-commissions"],
     queryFn: async () => {
       const res = await fetch("/api/affiliate/dashboard")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) throw new Error("بارگیری داده‌ها امکان‌پذیر نیست")
       return res.json()
     },
   })
@@ -28,15 +43,15 @@ export default function AffiliateCommissionsPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="?????????"
-        subtitle="?????? ?????????? ???"
+        title="کمیسیون‌های من"
+        subtitle="گزارش مالی کمیسیون‌ها و وضعیت هر برداشت"
       />
 
       <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            ???? ?????????
+            کمیسیون‌های اخیر
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -47,19 +62,21 @@ export default function AffiliateCommissionsPage() {
               <div className="hidden md:block">
                 <DataTable
                   columns={[
-                    { key: "order", header: "?????" },
-                    { key: "level", header: "???" },
-                    { key: "date", header: "?????" },
-                    { key: "amount", header: "????" },
-                    { key: "status", header: "?????" },
+                    { key: "order", header: "سفارش" },
+                    { key: "level", header: "سطح" },
+                    { key: "date", header: "تاریخ" },
+                    { key: "amount", header: "مبلغ" },
+                    { key: "status", header: "وضعیت" },
                   ]}
                   data={commissions}
                   renderRow={(commission: any) => (
                     <TableRow key={commission.id}>
                       <TableCell className="font-semibold">
-                        ????? #{commission.orderId?.slice(0, 8) || "N/A"}
+                        سفارش #{commission.orderId?.slice(0, 8) || "N/A"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">??? {commission.level}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        سطح {commission.level}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {formatDate(commission.createdAt)}
                       </TableCell>
@@ -67,10 +84,7 @@ export default function AffiliateCommissionsPage() {
                         {formatPrice(commission.amount)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {commission.status === "pending" && "?? ??????"}
-                        {commission.status === "available" && "???? ??????"}
-                        {commission.status === "paid" && "?????? ???"}
-                        {commission.status === "void" && "???? ???"}
+                        {getCommissionStatusLabel(commission.status)}
                       </TableCell>
                     </TableRow>
                   )}
@@ -80,15 +94,12 @@ export default function AffiliateCommissionsPage() {
                 {commissions.map((commission: any) => (
                   <ListCard
                     key={commission.id}
-                    title={`????? #${commission.orderId?.slice(0, 8) || "N/A"}`}
-                    subtitle={`??? ${commission.level} � ${formatDate(commission.createdAt)}`}
+                    title={سفارش #}
+                    subtitle={سطح  · }
                     meta={formatPrice(commission.amount)}
                   >
                     <div className="text-caption text-muted-foreground">
-                      {commission.status === "pending" && "?? ??????"}
-                      {commission.status === "available" && "???? ??????"}
-                      {commission.status === "paid" && "?????? ???"}
-                      {commission.status === "void" && "???? ???"}
+                      {getCommissionStatusLabel(commission.status)}
                     </div>
                   </ListCard>
                 ))}
@@ -97,8 +108,8 @@ export default function AffiliateCommissionsPage() {
           ) : (
             <EmptyState
               icon={<TrendingUp className="h-6 w-6 text-muted-foreground" />}
-              title="???????? ???? ???"
-              description="???? ???????? ??? ???? ???."
+              title="هنوز کمیسیونی ثبت نشده"
+              description="فعلاً هیچ کمیسیونی برای نمایش وجود ندارد."
             />
           )}
         </CardContent>
