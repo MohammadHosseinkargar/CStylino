@@ -22,22 +22,22 @@ const validateSettings = (payload: {
   commissionLevel2Percent: number
 }) => {
   if (Number.isNaN(payload.flatShippingCost)) {
-    return "????? ????? ????? ????."
+    return "هزینه ارسال عددی نیست."
   }
   if (payload.flatShippingCost < 0) {
-    return "????? ????? ????????? ???? ????."
+    return "هزینه ارسال نمی‌تواند منفی باشد."
   }
   if (Number.isNaN(payload.commissionLevel1Percent)) {
-    return "???? ??????? ??? ??? ????? ????."
+    return "درصد کمیسیون سطح ۲ عددی نیست."
   }
   if (payload.commissionLevel1Percent < 0 || payload.commissionLevel1Percent > 100) {
-    return "???? ??????? ??? ??? ???? ??? ? ?? ??? ????."
+    return "درصد کمیسیون سطح ۲ باید بین ۰ تا ۱۰۰ باشد."
   }
   if (Number.isNaN(payload.commissionLevel2Percent)) {
-    return "???? ??????? ??? ??? ????? ????."
+    return "درصد کمیسیون سطح ۲ عددی نیست."
   }
   if (payload.commissionLevel2Percent < 0 || payload.commissionLevel2Percent > 100) {
-    return "???? ??????? ??? ??? ???? ??? ? ?? ??? ????."
+    return "درصد کمیسیون سطح ۲ باید بین ۰ تا ۱۰۰ باشد."
   }
   return null
 }
@@ -53,7 +53,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/settings")
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "??? ?? ?????? ???????.")
+        throw new Error(error.error || "خطا در دریافت تنظیمات.")
       }
       return res.json()
     },
@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "??? ?? ??????????? ???????.")
+        throw new Error(error.error || "خطا در به‌روزرسانی تنظیمات.")
       }
       return res.json()
     },
@@ -97,13 +97,13 @@ export default function AdminSettingsPage() {
         commissionLevel2Percent: String(updated.commissionLevel2Percent),
       })
       toast({
-        title: "????? ??",
-        description: "??????? ?? ?????? ??????????? ??.",
+        title: "موفقیت",
+        description: "تنظیمات با موفقیت به‌روزرسانی شد.",
       })
     },
     onError: (error: any) => {
       toast({
-        title: "???",
+        title: "خطا",
         description: error.message,
         variant: "destructive",
       })
@@ -120,7 +120,7 @@ export default function AdminSettingsPage() {
     const validationError = validateSettings(payload)
     if (validationError) {
       toast({
-        title: "???",
+        title: "خطا",
         description: validationError,
         variant: "destructive",
       })
@@ -141,20 +141,20 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6 md:space-y-8 px-4 md:px-0" dir="rtl">
       <div>
-        <h1 className="text-2xl md:text-4xl font-bold mb-2">???????</h1>
+        <h1 className="text-2xl md:text-4xl font-bold mb-2">تنظیمات</h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          ?????? ??? ??????? ? ????? ????? ???????
+          مدیریت کمیسیون‌ها و هزینه ارسال
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="card-editorial">
           <CardHeader>
-            <CardTitle>??????? ???????</CardTitle>
+            <CardTitle>تنظیمات کمیسیون</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="level1Commission">???? ??????? ??? ? (????)</Label>
+              <Label htmlFor="level1Commission">درصد کمیسیون سطح ۱ (درصد)</Label>
               <Input
                 id="level1Commission"
                 type="number"
@@ -171,7 +171,7 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="level2Commission">???? ??????? ??? ? (????)</Label>
+              <Label htmlFor="level2Commission">درصد کمیسیون سطح ۲ (درصد)</Label>
               <Input
                 id="level2Commission"
                 type="number"
@@ -192,18 +192,18 @@ export default function AdminSettingsPage() {
               onClick={handleSave}
               disabled={saveMutation.isPending}
             >
-              {saveMutation.isPending ? "?? ??? ?????..." : "????? ???????"}
+              {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="card-editorial">
           <CardHeader>
-            <CardTitle>??????? ?????</CardTitle>
+            <CardTitle>تنظیمات ارسال</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="shippingCost">????? ????? ???? (?????)</Label>
+              <Label htmlFor="shippingCost">هزینه ارسال ثابت (تومان)</Label>
               <Input
                 id="shippingCost"
                 type="number"
@@ -223,7 +223,7 @@ export default function AdminSettingsPage() {
               onClick={handleSave}
               disabled={saveMutation.isPending}
             >
-              {saveMutation.isPending ? "?? ??? ?????..." : "????? ???????"}
+              {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
             </Button>
           </CardContent>
         </Card>

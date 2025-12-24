@@ -12,7 +12,9 @@ export default function StoreLayout({
     <div className="min-h-screen flex flex-col">
       <AffiliateTracker />
       <Header />
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 pb-20 md:pb-0 pt-[var(--storefront-header-height)]">
+        {children}
+      </main>
       <MobileBottomNav />
       <Footer />
     </div>

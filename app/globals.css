@@ -58,6 +58,7 @@
     --font-subtitle: 1.25rem;
     --font-body: 1rem;
     --font-caption: 0.875rem;
+    --storefront-header-height: 4rem;
   }
 
   .dark {
@@ -88,6 +89,12 @@
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 45 65% 60%;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --storefront-header-height: 6rem;
   }
 }
 

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Price } from "@/components/storefront/price"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 import { Loader2, MapPin, Phone, User } from "lucide-react"
 
 export default function CheckoutPage() {
@@ -144,8 +145,8 @@ export default function CheckoutPage() {
                 اطلاعات مشتری
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CardContent className="space-y-5 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <Label htmlFor="customerName" className="mb-3 block text-sm font-semibold">
                     نام و نام خانوادگی
@@ -154,10 +155,10 @@ export default function CheckoutPage() {
                     id="customerName"
                     {...register("customerName")}
                     placeholder="نام و نام خانوادگی"
-                    className="h-12"
+                    className={cn("h-12", errors.customerName && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                   />
                   {errors.customerName && (
-                    <p className="text-sm text-destructive mt-2">
+                    <p className="text-xs font-medium text-destructive mt-2">
                       {errors.customerName.message as string}
                     </p>
                   )}
@@ -171,10 +172,10 @@ export default function CheckoutPage() {
                     id="shippingPhone"
                     {...register("shippingPhone")}
                     placeholder="09123456789"
-                    className="h-12 persian-number"
+                    className={cn("h-12 persian-number", errors.shippingPhone && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                   />
                   {errors.shippingPhone && (
-                    <p className="text-sm text-destructive mt-2">
+                    <p className="text-xs font-medium text-destructive mt-2">
                       {errors.shippingPhone.message as string}
                     </p>
                   )}
@@ -193,8 +194,8 @@ export default function CheckoutPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <Label htmlFor="shippingProvince" className="mb-3 block text-sm font-semibold">
                       استان
@@ -203,10 +204,10 @@ export default function CheckoutPage() {
                       id="shippingProvince"
                       {...register("shippingProvince")}
                       placeholder="تهران"
-                      className="h-12"
+                      className={cn("h-12", errors.shippingProvince && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                     />
                     {errors.shippingProvince && (
-                      <p className="text-sm text-destructive mt-2">
+                      <p className="text-xs font-medium text-destructive mt-2">
                         {errors.shippingProvince.message as string}
                       </p>
                     )}
@@ -219,10 +220,10 @@ export default function CheckoutPage() {
                       id="shippingCity"
                       {...register("shippingCity")}
                       placeholder="تهران"
-                      className="h-12"
+                      className={cn("h-12", errors.shippingCity && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                     />
                     {errors.shippingCity && (
-                      <p className="text-sm text-destructive mt-2">
+                      <p className="text-xs font-medium text-destructive mt-2">
                         {errors.shippingCity.message as string}
                       </p>
                     )}
@@ -237,16 +238,16 @@ export default function CheckoutPage() {
                     id="shippingAddress"
                     {...register("shippingAddress")}
                     placeholder="خیابان، کوچه، پلاک، واحد"
-                    className="h-12"
+                    className={cn("h-12", errors.shippingAddress && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                   />
                   {errors.shippingAddress && (
-                    <p className="text-sm text-destructive mt-2">
+                    <p className="text-xs font-medium text-destructive mt-2">
                       {errors.shippingAddress.message as string}
                     </p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <Label htmlFor="shippingPostalCode" className="mb-3 block text-sm font-semibold">
                       کد پستی
@@ -255,8 +256,13 @@ export default function CheckoutPage() {
                       id="shippingPostalCode"
                       {...register("shippingPostalCode")}
                       placeholder="1234567890"
-                      className="h-12 persian-number"
+                      className={cn("h-12 persian-number", errors.shippingPostalCode && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                     />
+                    {errors.shippingPostalCode && (
+                      <p className="text-xs font-medium text-destructive mt-2">
+                        {errors.shippingPostalCode.message as string}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-end text-xs text-muted-foreground">
                     روش ارسال: پست پیشتاز (هزینه ثابت)
@@ -270,7 +276,7 @@ export default function CheckoutPage() {
                   <textarea
                     id="notes"
                     {...register("notes")}
-                    className="w-full px-5 py-4 border-2 border-input bg-background rounded-xl min-h-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-4 focus-visible:border-primary/50 transition-all duration-300 resize-none focus-editorial"
+                    className={cn("w-full px-5 py-4 border-2 border-input bg-background rounded-xl min-h-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-4 focus-visible:border-primary/50 transition-all duration-300 resize-none focus-editorial", errors.notes && "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5")}
                     placeholder="توضیحات مورد نیاز برای سفارش..."
                   />
                 </div>
@@ -297,7 +303,7 @@ export default function CheckoutPage() {
             <CardHeader className="pb-4 md:pb-6">
               <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-5 sm:space-y-6">
               <div className="space-y-3 pb-6 border-b border-border/50">
                 {items.map((item) => (
                   <div key={item.variantId} className="flex justify-between text-body">
