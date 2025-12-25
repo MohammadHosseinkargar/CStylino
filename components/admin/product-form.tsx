@@ -81,7 +81,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     queryKey: ["admin-categories"],
     queryFn: async () => {
       const res = await fetch("/api/admin/categories")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) throw new Error("خطا در دریافت دسته‌بندی‌ها")
       return res.json()
     },
   })
@@ -126,8 +126,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
     try {
       if (!formData.name || !formData.slug || !formData.basePrice || !formData.categoryId) {
         toast({
-          title: "Error",
-          description: "Name, slug, base price, and category are required.",
+          title: "خطا",
+          description: "نام، اسلاگ، قیمت پایه و دسته‌بندی الزامی هستند.",
           variant: "destructive",
         })
         setIsSubmitting(false)
@@ -136,8 +136,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
       if (variants.length === 0 || variants.some((v) => !v.size || !v.color || !v.sku)) {
         toast({
-          title: "Error",
-          description: "All variants must include size, color, and SKU.",
+          title: "خطا",
+          description: "برای همه تنوع‌ها وارد کردن سایز، رنگ و کد SKU الزامی است.",
           variant: "destructive",
         })
         setIsSubmitting(false)
@@ -146,8 +146,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
       if (formData.images.filter((img) => img.trim()).length === 0) {
         toast({
-          title: "Error",
-          description: "At least one image is required.",
+          title: "خطا",
+          description: "حداقل یک تصویر الزامی است.",
           variant: "destructive",
         })
         setIsSubmitting(false)
@@ -183,20 +183,20 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "Failed to save product")
+        throw new Error(error.error || "ذخیره محصول با خطا مواجه شد.")
       }
 
       toast({
-        title: "Success",
-        description: isEdit ? "Product updated." : "Product created.",
+        title: "موفق",
+        description: isEdit ? "محصول با موفقیت به‌روزرسانی شد." : "محصول با موفقیت ثبت شد.",
       })
 
       router.push("/admin/products")
       router.refresh()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to save product.",
+        title: "خطا",
+        description: error.message || "ذخیره محصول با خطا مواجه شد.",
         variant: "destructive",
       })
     } finally {
@@ -207,23 +207,23 @@ export function ProductForm({ initialData }: ProductFormProps) {
   return (
     <div className="space-y-8" dir="rtl">
       <div>
-        <h1 className="text-4xl font-bold mb-2">
-          {isEdit ? "Edit Product" : "Create New Product"}
+        <h1 className="text-4xl font-bold tracking-tight mb-2">
+          {isEdit ? "ویرایش محصول" : "ایجاد محصول جدید"}
         </h1>
         <p className="text-muted-foreground">
-          {isEdit ? "Update the product details." : "Fill in the details to create a product."}
+          {isEdit ? "جزئیات محصول را به‌روزرسانی کنید." : "اطلاعات زیر را برای ثبت محصول جدید وارد کنید."}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 pb-24">
         <Card className="card-editorial">
           <CardHeader>
-            <CardTitle>Basic Details</CardTitle>
+            <CardTitle>اطلاعات اصلی</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Product Name *</Label>
+                <Label htmlFor="name">نام محصول (فارسی) *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -232,39 +232,27 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="nameEn">Product Name (English)</Label>
+                <Label htmlFor="nameEn">نام محصول (انگلیسی – اختیاری)</Label>
                 <Input
                   id="nameEn"
                   value={formData.nameEn}
                   onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="basePrice">Base Price (Toman) *</Label>
+                <Label htmlFor="slug">اسلاگ (آدرس محصول) *</Label>
                 <Input
-                  id="basePrice"
-                  type="number"
-                  value={formData.basePrice}
-                  onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
-                  className="persian-number"
+                  id="slug"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  در صورت خالی بودن، به‌صورت خودکار ساخته می‌شود.
+                </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="categoryId">Category *</Label>
+                <Label htmlFor="categoryId">دسته‌بندی *</Label>
                 <select
                   id="categoryId"
                   value={formData.categoryId}
@@ -272,7 +260,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   required
                 >
-                  <option value="">Select a category</option>
+                  <option value="">انتخاب دسته‌بندی</option>
                   {categories?.map((category: any) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
@@ -280,32 +268,54 @@ export function ProductForm({ initialData }: ProductFormProps) {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="basePrice">قیمت پایه (تومان) *</Label>
+                <div className="relative">
+                  <Input
+                    id="basePrice"
+                    type="number"
+                    value={formData.basePrice}
+                    onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                    className="persian-number pe-12"
+                    required
+                  />
+                  <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                    تومان
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">قیمت نهایی بر اساس تومان ثبت می‌شود.</p>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="description">توضیحات محصول</Label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="card-editorial">
           <CardHeader>
-            <CardTitle>Images</CardTitle>
+            <CardTitle>تصاویر محصول</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <Label className="text-sm">آدرس تصویر</Label>
+              <p className="text-xs text-muted-foreground">
+                اولین تصویر به‌عنوان تصویر اصلی نمایش داده می‌شود.
+              </p>
+            </div>
             {formData.images.map((image, index) => (
               <div key={index} className="flex gap-2">
                 <Input
                   type="url"
                   value={image}
                   onChange={(e) => handleImageChange(index, e.target.value)}
-                  placeholder="Image URL"
+                  placeholder="آدرس تصویر"
                 />
                 {formData.images.length > 1 && (
                   <Button
@@ -319,22 +329,22 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 )}
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={addImageField}>
-              <Plus className="w-4 h-4 ml-2" />
-              Add Image
+            <Button type="button" variant="outline" onClick={addImageField} className="gap-2">
+              <Plus className="w-4 h-4" />
+              افزودن تصویر
             </Button>
           </CardContent>
         </Card>
 
         <Card className="card-editorial">
           <CardHeader>
-            <CardTitle>Variants *</CardTitle>
+            <CardTitle>تنوع‌ها *</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {variants.map((variant, index) => (
               <div key={variant.id ?? index} className="p-4 border border-border rounded-xl space-y-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-semibold">Variant {index + 1}</h4>
+                  <h4 className="font-semibold">تنوع {index + 1}</h4>
                   {variants.length > 1 && (
                     <Button
                       type="button"
@@ -348,25 +358,25 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Size *</Label>
+                    <Label>سایز *</Label>
                     <Input
                       value={variant.size}
                       onChange={(e) => handleVariantChange(index, "size", e.target.value)}
-                      placeholder="e.g. S, M, L"
+                      placeholder="مثلاً S، M، L"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Color *</Label>
+                    <Label>رنگ *</Label>
                     <Input
                       value={variant.color}
                       onChange={(e) => handleVariantChange(index, "color", e.target.value)}
-                      placeholder="e.g. Red"
+                      placeholder="مثلاً قرمز"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Color Hex</Label>
+                    <Label>کد رنگ</Label>
                     <div className="flex gap-2">
                       <Input
                         type="color"
@@ -382,7 +392,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Stock *</Label>
+                    <Label>موجودی *</Label>
                     <Input
                       type="number"
                       min={0}
@@ -396,16 +406,16 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>SKU *</Label>
+                    <Label>کد SKU *</Label>
                     <Input
                       value={variant.sku}
                       onChange={(e) => handleVariantChange(index, "sku", e.target.value)}
-                      placeholder="Unique SKU"
+                      placeholder="شناسه یکتا"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Price Override</Label>
+                    <Label>قیمت جایگزین</Label>
                     <Input
                       type="number"
                       value={variant.priceOverride ?? ""}
@@ -417,27 +427,34 @@ export function ProductForm({ initialData }: ProductFormProps) {
                         )
                       }
                       className="persian-number"
-                      placeholder="Leave empty to use base price"
+                      placeholder="در صورت نیاز، جایگزین قیمت پایه می‌شود"
                     />
                   </div>
                 </div>
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={addVariant}>
-              <Plus className="w-4 h-4 ml-2" />
-              Add Variant
+            <Button type="button" variant="outline" onClick={addVariant} className="gap-2">
+              <Plus className="w-4 h-4" />
+              افزودن تنوع
             </Button>
           </CardContent>
         </Card>
 
-        <div className="flex gap-4">
-          <Button type="submit" className="btn-editorial" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
-            <ArrowRight className="w-4 h-4 mr-2" />
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
-            Cancel
-          </Button>
+        <div className="sticky bottom-0 z-10">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background/95 px-4 py-3 shadow-sm backdrop-blur pb-[calc(env(safe-area-inset-bottom)+0.75rem)] supports-[backdrop-filter]:bg-background/80">
+            <div className="text-xs text-muted-foreground">
+              تا قبل از ثبت، اطلاعات ذخیره نمی‌شود.
+            </div>
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+                انصراف
+              </Button>
+              <Button type="submit" className="btn-editorial gap-2" disabled={isSubmitting}>
+                <ArrowRight className="w-4 h-4" />
+                {isSubmitting ? "در حال ذخیره..." : isEdit ? "ذخیره تغییرات" : "ثبت محصول"}
+              </Button>
+            </div>
+          </div>
         </div>
       </form>
     </div>

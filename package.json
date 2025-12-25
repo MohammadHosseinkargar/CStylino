@@ -14,6 +14,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/client": "^5.9.1",
     "@radix-ui/react-accordion": "^1.1.2",
@@ -38,6 +39,7 @@
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "formidable": "^3.5.4",
     "gsap": "^3.12.5",
     "lenis": "^1.0.45",
     "lucide-react": "^0.309.0",
@@ -46,7 +48,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.49.2",
-    "@hookform/resolvers": "^3.3.4",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4",
@@ -67,4 +68,3 @@
     "typescript": "^5.3.3"
   }
 }
-
