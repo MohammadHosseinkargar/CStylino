@@ -5,11 +5,11 @@ services:
     image: postgres:15-alpine
     container_name: stylino-db
     environment:
-      POSTGRES_USER: stylino
-      POSTGRES_PASSWORD: stylino123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Mohamad6610061
       POSTGRES_DB: stylino
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
