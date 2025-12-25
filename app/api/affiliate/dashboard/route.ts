@@ -1,33 +1,47 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { CommissionStatus } from "@prisma/client"
+import { requireAffiliate } from "@/lib/rbac"
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-    if (session.user.role !== "affiliate" && session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    const guard = await requireAffiliate()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: guard.user.id },
       include: {
         commissions: true,
-        subAffiliates: true,
+        subAffiliates: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            affiliateCode: true,
+            role: true,
+            affiliateStatus: true,
+            createdAt: true,
+          },
+        },
       },
     })
 
     if (!user || !user.affiliateCode) {
       return NextResponse.json(
-        { error: "کاربر یافت نشد" },
+        { error: "????? ???? ???? ???." },
         { status: 404 }
       )
     }
+
+    const subAffiliates = user.subAffiliates.map((subAffiliate) => {
+      const status =
+        subAffiliate.affiliateStatus ??
+        (subAffiliate.role === "affiliate" ? "active" : "pending")
+
+      return { ...subAffiliate, status }
+    })
 
     const availableCommissions = user.commissions
       .filter((c) => c.status === CommissionStatus.available)
@@ -53,7 +67,7 @@ export async function GET() {
       user: {
         id: user.id,
         affiliateCode: user.affiliateCode,
-        subAffiliates: user.subAffiliates,
+        subAffiliates,
         commissions: user.commissions,
       },
       availableCommissions,
@@ -65,9 +79,8 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching affiliate dashboard:", error)
     return NextResponse.json(
-      { error: "خطا در دریافت اطلاعات" },
+      { error: "?????? ??????? ??????? ?????? ???." },
       { status: 500 }
     )
   }
 }
-

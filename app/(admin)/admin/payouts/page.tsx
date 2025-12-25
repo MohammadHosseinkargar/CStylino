@@ -25,11 +25,11 @@ const getPayoutStatusLabel = (status?: string) => {
     case "approved":
       return "تایید شده"
     case "paid":
-      return "پرداخت‌شده"
+      return "پرداخت شده"
     case "rejected":
       return "رد شده"
     default:
-      return "در حال بررسی"
+      return "نامشخص"
   }
 }
 
@@ -42,7 +42,7 @@ export default function AdminPayoutsPage() {
     queryKey: ["admin-payouts"],
     queryFn: async () => {
       const res = await fetch("/api/admin/payouts")
-      if (!res.ok) throw new Error("بارگیری درخواست‌ها امکان‌پذیر نیست")
+      if (!res.ok) throw new Error("خطا در دریافت اطلاعات تسویه ها.")
       return res.json()
     },
   })
@@ -58,19 +58,19 @@ export default function AdminPayoutsPage() {
 
       if (!res.ok) {
         const error = await res.json().catch(() => ({}))
-        throw new Error(error?.error || "بروزرسانی برداشت ممکن نیست")
+        throw new Error(error?.error || "خطا در ثبت عملیات تسویه")
       }
 
       toast({
-        title: "وضعیت برداشت به‌روزرسانی شد",
-        description: "وضعیت برداشت با موفقیت به‌روزرسانی شد.",
+        title: "عملیات با موفقیت انجام شد",
+        description: "وضعیت تسویه بروزرسانی شد.",
       })
       await queryClient.invalidateQueries({ queryKey: ["admin-payouts"] })
     } catch (error) {
       toast({
         title: "خطا",
         description:
-          error instanceof Error ? error.message : "امکان به‌روزرسانی برداشت وجود ندارد",
+          error instanceof Error ? error.message : "خطا در ثبت عملیات تسویه",
         variant: "destructive",
       })
     } finally {
@@ -82,14 +82,11 @@ export default function AdminPayoutsPage() {
 
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
-      <SectionHeader
-        title="درخواست‌های برداشت"
-        subtitle="بررسی و تایید درخواست‌های برداشت همکاران"
-      />
+      <SectionHeader title="تسویه ها" subtitle="مدیریت درخواست های تسویه" />
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>لیست برداشت‌ها</CardTitle>
+          <CardTitle>درخواست های تسویه</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -104,7 +101,7 @@ export default function AdminPayoutsPage() {
                     { key: "date", header: "تاریخ" },
                     { key: "amount", header: "مبلغ" },
                     { key: "status", header: "وضعیت" },
-                    { key: "actions", header: "اقدامات" },
+                    { key: "actions", header: "عملیات" },
                   ]}
                   data={payouts}
                   renderRow={(payout: any) => {
@@ -142,7 +139,7 @@ export default function AdminPayoutsPage() {
                               onClick={() => handleAction(payout.id, "reject")}
                               disabled={isProcessing || payout.status === "paid"}
                             >
-                              رد کردن
+                              رد
                             </Button>
                             <Button
                               size="sm"
@@ -150,7 +147,7 @@ export default function AdminPayoutsPage() {
                               onClick={() => handleAction(payout.id, "markPaid")}
                               disabled={isProcessing || payout.status !== "approved"}
                             >
-                              پرداخت شده
+                              ثبت پرداخت
                             </Button>
                           </div>
                         </TableCell>
@@ -184,7 +181,7 @@ export default function AdminPayoutsPage() {
                             onClick={() => handleAction(payout.id, "reject")}
                             disabled={isProcessing || payout.status === "paid"}
                           >
-                            رد کردن
+                            رد
                           </Button>
                           <Button
                             size="sm"
@@ -192,7 +189,7 @@ export default function AdminPayoutsPage() {
                             onClick={() => handleAction(payout.id, "markPaid")}
                             disabled={isProcessing || payout.status !== "approved"}
                           >
-                            پرداخت شده
+                            ثبت پرداخت
                           </Button>
                         </div>
                       }
@@ -212,7 +209,7 @@ export default function AdminPayoutsPage() {
             <EmptyState
               icon={<Wallet className="h-6 w-6 text-muted-foreground" />}
               title="درخواستی ثبت نشده"
-              description="فعلاً برداشت جدیدی وجود ندارد."
+              description="هنوز درخواستی برای تسویه ثبت نشده است."
             />
           )}
         </CardContent>

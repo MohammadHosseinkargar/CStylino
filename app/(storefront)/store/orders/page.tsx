@@ -1,25 +1,24 @@
-"use client"
+﻿"use client"
 
 import { useQuery } from "@tanstack/react-query"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { OrderStatus } from "@prisma/client"
-import { Package, Truck, CheckCircle2, XCircle, RotateCcw } from "lucide-react"
+import {
+  Package,
+  Truck,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  CornerUpLeft,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
-
-const statusLabels: Record<OrderStatus, string> = {
-  pending: "در انتظار پرداخت",
-  processing: "در حال پردازش",
-  shipped: "ارسال شده",
-  delivered: "تحویل شده",
-  canceled: "لغو شده",
-  refunded: "مرجوع شده",
-}
+import { ORDER_STATUS_LABELS_FA } from "@/lib/order-status"
 
 const statusIcons: Record<OrderStatus, typeof Package> = {
   pending: Package,
@@ -27,6 +26,7 @@ const statusIcons: Record<OrderStatus, typeof Package> = {
   shipped: Truck,
   delivered: CheckCircle2,
   canceled: XCircle,
+  returned: CornerUpLeft,
   refunded: RotateCcw,
 }
 
@@ -36,6 +36,7 @@ const statusColors: Record<OrderStatus, string> = {
   shipped: "text-purple-600 bg-purple-50",
   delivered: "text-green-600 bg-green-50",
   canceled: "text-red-600 bg-red-50",
+  returned: "text-orange-600 bg-orange-50",
   refunded: "text-gray-600 bg-gray-50",
 }
 
@@ -59,13 +60,13 @@ export default function OrdersPage() {
 
   return (
     <PageContainer className="py-8 md:py-12" dir="rtl">
-      <SectionHeader title="سفارش‌های من" subtitle="پیگیری وضعیت سفارش‌های ثبت شده" />
+      <SectionHeader title="سفارش‌های من" subtitle="مشاهده وضعیت و جزئیات سفارش‌ها" />
 
       {orders?.length === 0 ? (
         <EmptyState
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
           title="هنوز سفارشی ثبت نکرده‌اید"
-          description="برای دیدن محصولات به بخش فروشگاه بروید"
+          description="برای مشاهده سفارش‌ها، ابتدا خرید خود را ثبت کنید."
         />
       ) : (
         <div className="space-y-4">
@@ -101,7 +102,7 @@ export default function OrdersPage() {
                           statusColors[order.status]
                         )}
                       >
-                        {statusLabels[order.status]}
+                        {ORDER_STATUS_LABELS_FA[order.status]}
                       </span>
                     </div>
                   </div>

@@ -20,7 +20,7 @@ export default function AffiliateDashboard() {
     queryKey: ["affiliate-dashboard"],
     queryFn: async () => {
       const res = await fetch("/api/affiliate/dashboard")
-      if (!res.ok) throw new Error("بارگیری داده‌ها امکان‌پذیر نیست")
+      if (!res.ok) throw new Error("خطا در دریافت اطلاعات داشبورد.")
       return res.json()
     },
   })
@@ -44,21 +44,21 @@ export default function AffiliateDashboard() {
 
   if (!user || !user.affiliateCode) return null
 
-  const affiliateLink = ${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/store?ref=
+  const affiliateLink = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/store?ref=${user.affiliateCode}`
 
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       toast({
-        title: "کد کپی شد",
-        description: "مقدار مورد نظر در کلیپ‌بورد قرار گرفت.",
+        title: "کپی شد",
+        description: "مقدار در کلیپ برد ذخیره شد.",
       })
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       toast({
         title: "خطا",
-        description: "کپی کردن امکان‌پذیر نبود.",
+        description: "امکان کپی وجود ندارد.",
         variant: "destructive",
       })
     }
@@ -66,16 +66,13 @@ export default function AffiliateDashboard() {
 
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
-      <SectionHeader
-        title="همکار فروش"
-        subtitle="داشبورد کمیسیون‌ها و لینک ارجاع شما"
-      />
+      <SectionHeader title="داشبورد همکاری" subtitle="خلاصه درآمد و عملکرد شما" />
 
       <StyledCard variant="glass" className="border-primary/20">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-sm text-muted-foreground mb-2">کد معرف</p>
+              <p className="text-sm text-muted-foreground mb-2">کد همکاری</p>
               <div className="flex items-center gap-3">
                 <p className="text-2xl font-bold font-mono tracking-wider">
                   {user.affiliateCode}
@@ -95,7 +92,7 @@ export default function AffiliateDashboard() {
               </div>
             </div>
             <div className="flex-1 max-w-md">
-              <p className="text-sm text-muted-foreground mb-2">لینک اختصاصی</p>
+              <p className="text-sm text-muted-foreground mb-2">لینک معرفی</p>
               <div className="flex items-center gap-2 p-3 bg-background border border-border rounded-xl">
                 <code className="text-xs flex-1 truncate">{affiliateLink}</code>
                 <Button variant="ghost" size="sm" onClick={() => handleCopy(affiliateLink)}>
@@ -111,25 +108,29 @@ export default function AffiliateDashboard() {
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              موجودی قابل برداشت
+              کمیسیون قابل برداشت
             </CardTitle>
             <Wallet className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatPrice(availableCommissions)}</div>
-            <p className="text-xs text-muted-foreground mt-1">موجودی قابل درخواست</p>
+            <div className="text-3xl font-bold">
+              {formatPrice(availableCommissions)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">موجودی قابل تسویه</p>
           </CardContent>
         </StyledCard>
 
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              کمیسیون‌های در انتظار
+              کمیسیون در انتظار
             </CardTitle>
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatPrice(pendingCommissions)}</div>
+            <div className="text-3xl font-bold">
+              {formatPrice(pendingCommissions)}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">در انتظار تایید</p>
           </CardContent>
         </StyledCard>
@@ -137,20 +138,22 @@ export default function AffiliateDashboard() {
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              کمیسیون‌های پرداخت‌شده
+              کمیسیون تسویه شده
             </CardTitle>
             <Wallet className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatPrice(paidCommissions)}</div>
-            <p className="text-xs text-muted-foreground mt-1">برداشت‌های تکمیل‌شده</p>
+            <div className="text-3xl font-bold">
+              {formatPrice(paidCommissions)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">پرداخت شده</p>
           </CardContent>
         </StyledCard>
 
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              زیرمجموعه‌ها
+              زیرمجموعه ها
             </CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -158,7 +161,7 @@ export default function AffiliateDashboard() {
             <div className="text-3xl font-bold persian-number">
               {user.subAffiliates?.length || 0}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">همکاران ارجاع‌شده</p>
+            <p className="text-xs text-muted-foreground mt-1">همکاران معرفی شده</p>
           </CardContent>
         </StyledCard>
       </div>
@@ -169,8 +172,12 @@ export default function AffiliateDashboard() {
             <CardTitle>کمیسیون سطح ۱</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">{formatPrice(level1Commissions)}</div>
-            <p className="text-sm text-muted-foreground">درصد پرداختی از سفارش‌های سطح اول</p>
+            <div className="text-3xl font-bold mb-2">
+              {formatPrice(level1Commissions)}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              از فروش های مستقیم شما
+            </p>
           </CardContent>
         </StyledCard>
 
@@ -179,8 +186,12 @@ export default function AffiliateDashboard() {
             <CardTitle>کمیسیون سطح ۲</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">{formatPrice(level2Commissions)}</div>
-            <p className="text-sm text-muted-foreground">درصد پرداختی از سفارش‌های سطح دوم</p>
+            <div className="text-3xl font-bold mb-2">
+              {formatPrice(level2Commissions)}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              از فروش زیرمجموعه ها
+            </p>
           </CardContent>
         </StyledCard>
       </div>

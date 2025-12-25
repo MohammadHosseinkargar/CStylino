@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
 
 const categorySchema = z.object({
   name: z.string().min(1, "نام دسته‌بندی الزامی است"),
@@ -17,12 +16,9 @@ const categorySchema = z.object({
 // GET - List all categories (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "دسترسی غیرمجاز" },
-        { status: 403 }
-      )
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const categories = await prisma.category.findMany({
@@ -52,12 +48,9 @@ export async function GET(request: NextRequest) {
 // POST - Create category (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "دسترسی غیرمجاز" },
-        { status: 403 }
-      )
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
@@ -98,5 +91,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
 

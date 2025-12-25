@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { productSchema, variantSchema } from "@/lib/validations"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
 
 const adminVariantSchema = variantSchema.extend({
   priceOverride: z.number().int().positive().nullable().optional(),
@@ -11,9 +10,9 @@ const adminVariantSchema = variantSchema.extend({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
@@ -41,24 +40,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Slug already exists." }, { status: 400 })
     }
 
-    const product = await prisma.product.create({
-      data: {
-        ...validatedProduct,
-        variants: {
-          create: validatedVariants.map((variant) => ({
-            size: variant.size,
-            color: variant.color,
-            colorHex: variant.colorHex,
-            stock: variant.stock,
-            sku: variant.sku,
-            priceOverride: variant.priceOverride ?? null,
-          })),
+    const product = await prisma.$transaction(async (tx) => {
+      const createdProduct = await tx.product.create({
+        data: {
+          ...validatedProduct,
+          variants: {
+            create: validatedVariants.map((variant) => ({
+              size: variant.size,
+              color: variant.color,
+              colorHex: variant.colorHex,
+              stockOnHand: variant.stockOnHand,
+              sku: variant.sku,
+              priceOverride: variant.priceOverride ?? null,
+            })),
+          },
         },
-      },
-      include: {
-        category: true,
-        variants: true,
-      },
+        include: {
+          category: true,
+          variants: true,
+        },
+      })
+
+      const initialMovements = createdProduct.variants
+        .filter((variant) => variant.stockOnHand > 0)
+        .map((variant) => ({
+          productId: createdProduct.id,
+          variantId: variant.id,
+          delta: variant.stockOnHand,
+          reason: "initial_stock" as const,
+          createdByUserId: guard.user.id,
+        }))
+
+      if (initialMovements.length > 0) {
+        await tx.stockMovement.createMany({ data: initialMovements })
+      }
+
+      return createdProduct
     })
 
     return NextResponse.json({ product }, { status: 201 })

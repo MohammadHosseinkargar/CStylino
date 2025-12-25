@@ -36,7 +36,6 @@ export async function GET(
       take: 4,
       include: {
         variants: {
-          where: { stock: { gt: 0 } },
           take: 1,
         },
       },

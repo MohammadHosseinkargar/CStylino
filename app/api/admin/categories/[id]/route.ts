@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
 
 const categoryUpdateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -20,12 +19,9 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "دسترسی غیرمجاز" },
-        { status: 403 }
-      )
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
@@ -86,12 +82,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "دسترسی غیرمجاز" },
-        { status: 403 }
-      )
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     // Check if category has products
@@ -140,5 +133,4 @@ export async function DELETE(
     )
   }
 }
-
 

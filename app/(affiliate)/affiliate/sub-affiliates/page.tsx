@@ -18,11 +18,11 @@ const getStatusLabel = (status?: string) => {
     case "active":
       return "فعال"
     case "pending":
-      return "در انتظار تأیید"
+      return "در انتظار تایید"
     case "rejected":
       return "رد شده"
     default:
-      return "در انتظار تأیید"
+      return "در انتظار تایید"
   }
 }
 
@@ -31,7 +31,7 @@ export default function AffiliateSubAffiliatesPage() {
     queryKey: ["affiliate-dashboard"],
     queryFn: async () => {
       const res = await fetch("/api/affiliate/dashboard")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) throw new Error("خطا در دریافت اطلاعات")
       return res.json()
     },
   })
@@ -40,16 +40,13 @@ export default function AffiliateSubAffiliatesPage() {
 
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
-      <SectionHeader
-        title="زیرمجموعه‌ها"
-        subtitle="پیش‌نمایش زیرمجموعه‌های فعال و در انتظار تأیید"
-      />
+      <SectionHeader title="زیرمجموعه ها" subtitle="همکاران معرفی شده توسط شما" />
 
       <StyledCard variant="elevated">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            زیرمجموعه‌ها ({subAffiliates.length})
+            زیرمجموعه ها ({subAffiliates.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -61,8 +58,8 @@ export default function AffiliateSubAffiliatesPage() {
                 <DataTable
                   columns={[
                     { key: "name", header: "نام" },
-                    { key: "code", header: "کد معرف" },
-                    { key: "date", header: "تاریخ ثبت" },
+                    { key: "code", header: "کد همکاری" },
+                    { key: "date", header: "تاریخ عضویت" },
                     { key: "status", header: "وضعیت" },
                   ]}
                   data={subAffiliates}
@@ -91,7 +88,7 @@ export default function AffiliateSubAffiliatesPage() {
                   <ListCard
                     key={subAffiliate.id}
                     title={subAffiliate.name || subAffiliate.email}
-                    subtitle={کد معرف: }
+                    subtitle={`کد همکاری: ${subAffiliate.affiliateCode}`}
                     meta={formatDate(subAffiliate.createdAt)}
                   >
                     <div className="inline-flex text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
@@ -104,8 +101,8 @@ export default function AffiliateSubAffiliatesPage() {
           ) : (
             <EmptyState
               icon={<Users className="h-6 w-6 text-muted-foreground" />}
-              title="زیرمجموعه‌ای برای نمایش وجود ندارد"
-              description="در حال حاضر زیرمجموعه‌ای ثبت نشده است."
+              title="زیرمجموعه ای ندارید"
+              description="هنوز همکار جدیدی معرفی نکرده اید."
             />
           )}
         </CardContent>
@@ -113,4 +110,3 @@ export default function AffiliateSubAffiliatesPage() {
     </PageContainer>
   )
 }
-

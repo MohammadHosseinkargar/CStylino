@@ -22,6 +22,7 @@ enum OrderStatus {
   shipped
   delivered
   canceled
+  returned
   refunded
 }
 
@@ -39,26 +40,49 @@ enum PayoutStatus {
   rejected
 }
 
+enum StockMovementReason {
+  manual_adjust
+  order_reserved
+  order_committed
+  order_released
+  refund_return
+  initial_stock
+}
+
+enum AffiliateStatus {
+  pending
+  active
+  rejected
+}
+
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
+  id                String           @id @default(cuid())
+  email             String           @unique
   password          String
   name              String?
   phone             String?
-  role              UserRole @default(customer)
-  affiliateCode     String?  @unique
+  role              UserRole         @default(customer)
+  isBlocked         Boolean          @default(false)
+  affiliateCode     String?          @unique
   parentAffiliateId String?
-  parentAffiliate   User?    @relation("AffiliateHierarchy", fields: [parentAffiliateId], references: [id])
-  subAffiliates     User[]   @relation("AffiliateHierarchy")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  parentAffiliate   User?            @relation("AffiliateHierarchy", fields: [parentAffiliateId], references: [id])
+  subAffiliates     User[]           @relation("AffiliateHierarchy")
+  affiliateStatus   AffiliateStatus?
+  bankShaba         String?          @db.Text
+  bankCard          String?          @db.Text
+  bankAccount       String?          @db.Text
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   accounts                  Account[]
   sessions                  Session[]
-  orders                    Order[]         @relation("UserOrders")
-  referredOrdersAsAffiliate Order[]         @relation("AffiliateReferredOrders")
+  orders                    Order[]              @relation("UserOrders")
+  referredOrdersAsAffiliate Order[]              @relation("AffiliateReferredOrders")
   commissions               Commission[]
   payoutRequests            PayoutRequest[]
+  orderStatusChanges        OrderStatusHistory[] @relation("OrderStatusChangedBy")
+  auditLogs                 AuditLog[]           @relation("AuditActor")
+  stockMovementsCreated     StockMovement[]      @relation("StockMovementCreatedBy")
 
   @@index([affiliateCode])
   @@index([parentAffiliateId])
@@ -133,8 +157,9 @@ model Product {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  variants   ProductVariant[]
-  orderItems OrderItem[]
+  variants       ProductVariant[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]  @relation("StockMovementProduct")
 
   @@index([slug])
   @@index([categoryId])
@@ -149,18 +174,21 @@ model ProductVariant {
   size          String // XS, S, M, L, XL, etc.
   color         String // Color name
   colorHex      String // Hex color code
-  stock         Int      @default(0)
+  stockOnHand   Int      @default(0)
+  stockReserved Int      @default(0)
   sku           String   @unique
   priceOverride Int? // Optional price override in Toman
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  orderItems OrderItem[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
 
   @@unique([productId, size, color])
   @@index([productId])
   @@index([sku])
-  @@index([stock])
+  @@index([stockOnHand])
+  @@index([stockReserved])
 }
 
 model Order {
@@ -172,6 +200,9 @@ model Order {
   updatedBy          String?
   totalAmount        Int // Total in Toman
   shippingCost       Int         @default(0)
+  shippingCarrier    String?
+  trackingCode       String?
+  shippedAt          DateTime?
   refAffiliateId     String? // Affiliate who referred this order
   refAffiliate       User?       @relation("AffiliateReferredOrders", fields: [refAffiliateId], references: [id])
   customerName       String
@@ -186,13 +217,31 @@ model Order {
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
-  items       OrderItem[]
-  commissions Commission[]
+  items         OrderItem[]
+  commissions   Commission[]
+  statusHistory OrderStatusHistory[]
 
   @@index([userId])
   @@index([status])
   @@index([refAffiliateId])
   @@index([createdAt])
+  @@index([trackingCode])
+}
+
+model OrderStatusHistory {
+  id              String      @id @default(cuid())
+  orderId         String
+  order           Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus      OrderStatus
+  toStatus        OrderStatus
+  changedByUserId String?
+  changedByUser   User?       @relation("OrderStatusChangedBy", fields: [changedByUserId], references: [id])
+  note            String?     @db.Text
+  createdAt       DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@index([changedByUserId])
 }
 
 model OrderItem {
@@ -231,15 +280,16 @@ model Commission {
 }
 
 model PayoutRequest {
-  id          String       @id @default(cuid())
-  affiliateId String
-  affiliate   User         @relation(fields: [affiliateId], references: [id])
-  amount      Int // Amount in Toman
-  status      PayoutStatus @default(pending)
-  bankAccount String?      @db.Text
-  notes       String?      @db.Text
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id                  String       @id @default(cuid())
+  affiliateId         String
+  affiliate           User         @relation(fields: [affiliateId], references: [id])
+  amount              Int // Amount in Toman
+  status              PayoutStatus @default(pending)
+  bankAccount         String?      @db.Text
+  notes               String?      @db.Text
+  linkedCommissionIds String[]     @default([])
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([affiliateId])
   @@index([status])
@@ -252,4 +302,42 @@ model Settings {
   description String?  @db.Text
   updatedAt   DateTime @updatedAt
   updatedBy   String?
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actorUser   User?    @relation("AuditActor", fields: [actorUserId], references: [id])
+  action      String
+  entityType  String
+  entityId    String?
+  before      Json?
+  after       Json?
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([actorUserId])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+model StockMovement {
+  id              String              @id @default(cuid())
+  productId       String?
+  variantId       String?
+  delta           Int
+  reason          StockMovementReason
+  note            String?
+  createdAt       DateTime            @default(now())
+  createdByUserId String?
+
+  product       Product?        @relation("StockMovementProduct", fields: [productId], references: [id], onDelete: SetNull)
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  createdByUser User?           @relation("StockMovementCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([variantId])
+  @@index([createdByUserId])
+  @@index([reason])
+  @@index([createdAt])
 }

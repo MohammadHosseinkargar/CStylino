@@ -1,14 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signUpSchema } from "@/lib/validations"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, User, Mail, Lock, Phone } from "lucide-react"
 import Link from "next/link"
@@ -16,6 +22,7 @@ import { signIn } from "next-auth/react"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -30,10 +37,11 @@ export default function SignUpPage() {
   const onSubmit = async (data: any) => {
     setIsLoading(true)
     try {
+      const ref = searchParams.get("ref") || undefined
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, ref }),
       })
 
       if (!response.ok) {
@@ -180,4 +188,3 @@ export default function SignUpPage() {
     </div>
   )
 }
-

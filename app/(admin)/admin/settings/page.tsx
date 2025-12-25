@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -26,22 +26,22 @@ const validateSettings = (payload: {
   commissionLevel2Percent: number
 }) => {
   if (Number.isNaN(payload.flatShippingCost)) {
-    return "هزینه ارسال باید عددی معتبر باشد."
+    return "هزینه ارسال عدد معتبر نیست."
   }
   if (payload.flatShippingCost < 0) {
-    return "هزینه ارسال نمی‌تواند منفی باشد."
+    return "هزینه ارسال نمی تواند منفی باشد."
   }
   if (Number.isNaN(payload.commissionLevel1Percent)) {
-    return "درصد کمیسیون سطح اول باید عددی معتبر باشد."
+    return "درصد کمیسیون سطح ۱ عدد معتبر نیست."
   }
   if (payload.commissionLevel1Percent < 0 || payload.commissionLevel1Percent > 100) {
-    return "درصد کمیسیون سطح اول باید بین ۰ تا ۱۰۰ باشد."
+    return "درصد کمیسیون سطح ۱ باید بین ۰ تا ۱۰۰ باشد."
   }
   if (Number.isNaN(payload.commissionLevel2Percent)) {
-    return "درصد کمیسیون سطح دوم باید عددی معتبر باشد."
+    return "درصد کمیسیون سطح ۲ عدد معتبر نیست."
   }
   if (payload.commissionLevel2Percent < 0 || payload.commissionLevel2Percent > 100) {
-    return "درصد کمیسیون سطح دوم باید بین ۰ تا ۱۰۰ باشد."
+    return "درصد کمیسیون سطح ۲ باید بین ۰ تا ۱۰۰ باشد."
   }
   return null
 }
@@ -57,7 +57,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/settings")
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "بارگذاری تنظیمات ممکن نیست.")
+        throw new Error(error.error || "خطا در دریافت تنظیمات")
       }
       return res.json()
     },
@@ -87,10 +87,10 @@ export default function AdminSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
-        if (!res.ok) {
-          const error = await res.json()
-          throw new Error(error.error || "ذخیره تنظیمات ممکن نیست.")
-        }
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || "خطا در بروزرسانی تنظیمات")
+      }
       return res.json()
     },
     onSuccess: (updated) => {
@@ -101,8 +101,8 @@ export default function AdminSettingsPage() {
         commissionLevel2Percent: String(updated.commissionLevel2Percent),
       })
       toast({
-        title: "تغییرات ذخیره شد",
-        description: "تنظیمات کمیسیون و ارسال با موفقیت به‌روزرسانی شد.",
+        title: "تنظیمات بروزرسانی شد",
+        description: "تنظیمات با موفقیت ذخیره شد.",
       })
     },
     onError: (error: any) => {
@@ -138,7 +138,7 @@ export default function AdminSettingsPage() {
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
         title="تنظیمات"
-        subtitle="پیکربندی کمیسیون همکاری در فروش و ارسال"
+        subtitle="مدیریت کمیسیون و هزینه ارسال"
       />
 
       {isLoading ? (
@@ -147,11 +147,11 @@ export default function AdminSettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <StyledCard variant="elevated">
             <CardHeader>
-              <CardTitle>کمیسیون همکاران</CardTitle>
+              <CardTitle>کمیسیون همکاران فروش</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="level1Commission">درصد کمیسیون سطح اول (%)</Label>
+                <Label htmlFor="level1Commission">درصد کمیسیون سطح ۱ (%)</Label>
                 <Input
                   id="level1Commission"
                   type="number"
@@ -168,7 +168,7 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div className="space-y-3">
-                <Label htmlFor="level2Commission">درصد کمیسیون سطح دوم (%)</Label>
+                <Label htmlFor="level2Commission">درصد کمیسیون سطح ۲ (%)</Label>
                 <Input
                   id="level2Commission"
                   type="number"
@@ -189,14 +189,14 @@ export default function AdminSettingsPage() {
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
               >
-                {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+                {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
               </Button>
             </CardContent>
           </StyledCard>
 
           <StyledCard variant="elevated">
             <CardHeader>
-              <CardTitle>حمل و نقل</CardTitle>
+              <CardTitle>هزینه ارسال</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
@@ -220,7 +220,7 @@ export default function AdminSettingsPage() {
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
               >
-                {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+                {saveMutation.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
               </Button>
             </CardContent>
           </StyledCard>

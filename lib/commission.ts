@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { CommissionStatus, OrderStatus } from "@prisma/client"
+import { CommissionStatus, OrderStatus, Prisma } from "@prisma/client"
 
 export interface CommissionSettings {
   level1Percentage: number // Default: 10
@@ -85,27 +85,24 @@ export async function createCommissionsForOrder(orderId: string) {
 
 export async function updateCommissionsOnOrderStatusChange(
   orderId: string,
-  newStatus: OrderStatus
+  newStatus: OrderStatus,
+  db: Prisma.TransactionClient | Prisma.PrismaClient = prisma
 ) {
-  const commissions = await prisma.commission.findMany({
-    where: { orderId },
-  })
-
   if (newStatus === OrderStatus.delivered) {
     // Mark commissions as available
-    await prisma.commission.updateMany({
+    await db.commission.updateMany({
       where: { orderId, status: CommissionStatus.pending },
       data: { status: CommissionStatus.available },
     })
   } else if (
     newStatus === OrderStatus.canceled ||
-    newStatus === OrderStatus.refunded
+    newStatus === OrderStatus.refunded ||
+    newStatus === OrderStatus.returned
   ) {
     // Mark commissions as void
-    await prisma.commission.updateMany({
+    await db.commission.updateMany({
       where: { orderId },
       data: { status: CommissionStatus.void },
     })
   }
 }
-

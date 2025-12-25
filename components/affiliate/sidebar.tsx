@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
@@ -19,9 +19,9 @@ import {
 
 const menuItems = [
   { href: "/affiliate", label: "داشبورد", icon: LayoutDashboard },
-  { href: "/affiliate/commissions", label: "کمیسیون‌ها", icon: TrendingUp },
-  { href: "/affiliate/payouts", label: "درخواست پرداخت", icon: Wallet },
-  { href: "/affiliate/sub-affiliates", label: "زیرمجموعه‌ها", icon: Users },
+  { href: "/affiliate/commissions", label: "کمیسیون ها", icon: TrendingUp },
+  { href: "/affiliate/payouts", label: "تسویه ها", icon: Wallet },
+  { href: "/affiliate/sub-affiliates", label: "زیرمجموعه ها", icon: Users },
   { href: "/affiliate/settings", label: "تنظیمات", icon: Settings },
 ]
 
@@ -111,7 +111,7 @@ export function AffiliateSidebar() {
           type="button"
           onClick={() => setIsOpen(true)}
           className="inline-flex items-center justify-center rounded-lg border border-border/60 bg-background/80 p-2 shadow-sm"
-          aria-label="Open menu"
+          aria-label="باز کردن منو"
           aria-expanded={isOpen}
           aria-controls="affiliate-drawer"
         >
@@ -152,7 +152,7 @@ export function AffiliateSidebar() {
           id="affiliate-drawer"
           role="dialog"
           aria-modal="true"
-          aria-label="Affiliate navigation"
+          aria-label="ناوبری همکاری"
           className={cn(
             "absolute right-0 top-0 h-full w-72 max-w-[85%] bg-muted/95 backdrop-blur border-l border-border/50 p-5 flex flex-col transition-transform duration-200",
             isOpen ? "translate-x-0" : "translate-x-full"
@@ -164,7 +164,7 @@ export function AffiliateSidebar() {
               type="button"
               onClick={() => setIsOpen(false)}
               className="inline-flex items-center justify-center rounded-lg border border-border/60 bg-background/80 p-2 shadow-sm"
-              aria-label="Close menu"
+              aria-label="بستن منو"
             >
               <X className="w-5 h-5" />
             </button>

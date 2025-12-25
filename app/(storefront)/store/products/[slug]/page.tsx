@@ -123,10 +123,12 @@ export default function ProductPage() {
   )
 
   const price = selectedVariant?.priceOverride ?? product?.basePrice ?? 0
-  const stock = selectedVariant?.stock ?? 0
+  const stock = selectedVariant
+    ? Math.max(0, selectedVariant.stockOnHand - selectedVariant.stockReserved)
+    : 0
   const isOutOfStock = selectedVariant ? stock <= 0 : false
   const needsSelection = !selectedSize || !selectedColor
-  const anyInStock = variants.some((v: any) => v.stock > 0)
+  const anyInStock = variants.some((v: any) => v.stockOnHand - v.stockReserved > 0)
   const stockBadge = selectedVariant ? (stock > 0 ? "موجود" : "ناموجود") : anyInStock ? "موجود" : "ناموجود"
   const ctaDisabled = isAdding || (selectedVariant ? isOutOfStock : false)
   const ctaLabel = needsSelection
@@ -186,7 +188,7 @@ export default function ProductPage() {
       price,
       quantity,
       image: product.images[0] || "",
-      stock,
+      availableStock: stock,
     })
 
     toast({

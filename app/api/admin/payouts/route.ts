@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { CommissionStatus, PayoutStatus, Prisma } from "@prisma/client"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
+import { createAuditLog, getRequestIp } from "@/lib/audit"
 
 const payoutActionSchema = z.object({
   id: z.string().min(1),
@@ -12,9 +12,9 @@ const payoutActionSchema = z.object({
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const payouts = await prisma.payoutRequest.findMany({
@@ -38,9 +38,9 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
@@ -96,6 +96,16 @@ export async function PATCH(request: NextRequest) {
         data: { status: PayoutStatus.approved },
       })
 
+      await createAuditLog({
+        actorUserId: guard.user.id,
+        action: "payout.approve",
+        entityType: "payout",
+        entityId: payout.id,
+        before: { status: payout.status },
+        after: { status: updated.status },
+        ip: getRequestIp(request),
+      })
+
       return NextResponse.json({ payout: updated })
     }
 
@@ -110,6 +120,16 @@ export async function PATCH(request: NextRequest) {
       const updated = await prisma.payoutRequest.update({
         where: { id: payout.id },
         data: { status: PayoutStatus.rejected },
+      })
+
+      await createAuditLog({
+        actorUserId: guard.user.id,
+        action: "payout.reject",
+        entityType: "payout",
+        entityId: payout.id,
+        before: { status: payout.status },
+        after: { status: updated.status },
+        ip: getRequestIp(request),
       })
 
       return NextResponse.json({ payout: updated })
@@ -157,7 +177,10 @@ export async function PATCH(request: NextRequest) {
 
         const updated = await tx.payoutRequest.update({
           where: { id: payout.id },
-          data: { status: PayoutStatus.paid },
+          data: {
+            status: PayoutStatus.paid,
+            linkedCommissionIds: commissionIds,
+          },
         })
 
         return { payout: updated }
@@ -168,6 +191,16 @@ export async function PATCH(request: NextRequest) {
     if ("error" in result) {
       return NextResponse.json({ error: result.error }, { status: result.status })
     }
+
+    await createAuditLog({
+      actorUserId: guard.user.id,
+      action: "payout.mark_paid",
+      entityType: "payout",
+      entityId: payout.id,
+      before: { status: payout.status },
+      after: { status: result.payout.status },
+      ip: getRequestIp(request),
+    })
 
     return NextResponse.json({ payout: result.payout })
   } catch (error: any) {

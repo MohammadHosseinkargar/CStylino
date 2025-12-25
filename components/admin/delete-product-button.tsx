@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -16,7 +16,7 @@ export function DeleteProductButton({ productId }: DeleteProductButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
-    if (!confirm("Delete this product? This cannot be undone.")) {
+    if (!confirm("آیا از حذف این محصول مطمئن هستید؟")) {
       return
     }
 
@@ -28,18 +28,18 @@ export function DeleteProductButton({ productId }: DeleteProductButtonProps) {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "Failed to delete product.")
+        throw new Error(error.error || "خطا در حذف محصول")
       }
 
       toast({
-        title: "Deleted",
-        description: "Product removed.",
+        title: "حذف شد",
+        description: "محصول حذف شد.",
       })
       router.refresh()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete product.",
+        title: "خطا",
+        description: error.message || "خطا در حذف محصول",
         variant: "destructive",
       })
     } finally {
@@ -56,7 +56,7 @@ export function DeleteProductButton({ productId }: DeleteProductButtonProps) {
       className="text-destructive hover:text-destructive"
     >
       <Trash2 className="w-4 h-4 ml-2" />
-      Delete
+      حذف
     </Button>
   )
 }

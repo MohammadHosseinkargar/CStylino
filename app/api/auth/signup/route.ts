@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const data = signUpSchema.parse(body)
+    const ref = typeof body.ref === "string" ? body.ref.trim() : undefined
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -16,9 +17,30 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "این ایمیل قبلاً ثبت شده است" },
+        { error: "??? ????? ???? ??? ??? ???." },
         { status: 400 }
       )
+    }
+
+    let parentAffiliateId: string | null = null
+    let role: "customer" | "affiliate" = "customer"
+    let affiliateStatus: "pending" | null = null
+
+    if (ref) {
+      const affiliate = await prisma.user.findUnique({
+        where: { affiliateCode: ref },
+      })
+
+      if (!affiliate || affiliate.role !== "affiliate") {
+        return NextResponse.json(
+          { error: "?? ????? ????? ????." },
+          { status: 400 }
+        )
+      }
+
+      parentAffiliateId = affiliate.id
+      role = "affiliate"
+      affiliateStatus = "pending"
     }
 
     // Hash password
@@ -45,8 +67,10 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         name: data.name,
         phone: data.phone,
-        role: "customer",
+        role,
         affiliateCode,
+        parentAffiliateId,
+        affiliateStatus,
       },
       select: {
         id: true,
@@ -57,7 +81,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: "ثبت‌نام با موفقیت انجام شد", user },
+      { message: "??? ??? ?? ?????? ????? ??.", user },
       { status: 201 }
     )
   } catch (error: any) {
@@ -70,9 +94,8 @@ export async function POST(request: NextRequest) {
 
     console.error("Signup error:", error)
     return NextResponse.json(
-      { error: "خطا در ثبت‌نام" },
+      { error: "??? ??? ?????? ???." },
       { status: 500 }
     )
   }
 }
-

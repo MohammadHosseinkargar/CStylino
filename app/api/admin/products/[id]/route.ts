@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { productSchema, variantSchema } from "@/lib/validations"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
 
 const adminVariantSchema = variantSchema.extend({
   priceOverride: z.number().int().positive().nullable().optional(),
@@ -14,9 +13,9 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
@@ -80,6 +79,14 @@ export async function PATCH(
     }
 
     await prisma.$transaction(async (tx) => {
+      const movementEntries: Array<{
+        productId: string
+        variantId: string
+        delta: number
+        reason: "initial_stock"
+        createdByUserId: string
+      }> = []
+
       await tx.product.update({
         where: { id: params.id },
         data: {
@@ -104,24 +111,38 @@ export async function PATCH(
               size: variant.size,
               color: variant.color,
               colorHex: variant.colorHex,
-              stock: variant.stock,
               sku: variant.sku,
               priceOverride: variant.priceOverride ?? null,
             },
           })
         } else {
-          await tx.productVariant.create({
+          const createdVariant = await tx.productVariant.create({
             data: {
               productId: params.id,
               size: variant.size,
               color: variant.color,
               colorHex: variant.colorHex,
-              stock: variant.stock,
+              stockOnHand: variant.stockOnHand,
               sku: variant.sku,
               priceOverride: variant.priceOverride ?? null,
             },
+            select: { id: true, productId: true, stockOnHand: true },
           })
+
+          if (createdVariant.stockOnHand > 0) {
+            movementEntries.push({
+              productId: createdVariant.productId,
+              variantId: createdVariant.id,
+              delta: createdVariant.stockOnHand,
+              reason: "initial_stock",
+              createdByUserId: guard.user.id,
+            })
+          }
         }
+      }
+
+      if (movementEntries.length > 0) {
+        await tx.stockMovement.createMany({ data: movementEntries })
       }
     })
 
@@ -149,9 +170,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const product = await prisma.product.findUnique({

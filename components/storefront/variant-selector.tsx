@@ -8,7 +8,8 @@ interface Variant {
   size: string
   color: string
   colorHex: string
-  stock: number
+  stockOnHand: number
+  stockReserved: number
   sku: string
 }
 
@@ -34,19 +35,19 @@ export function VariantSelector({
   const getVariantStock = (size?: string, color?: string) => {
     if (size && color) {
       const variant = variants.find((v) => v.size === size && v.color === color)
-      return variant?.stock || 0
+      return variant ? Math.max(0, variant.stockOnHand - variant.stockReserved) : 0
     }
 
     if (size) {
       return variants
         .filter((v) => v.size === size)
-        .reduce((sum, v) => sum + (v.stock || 0), 0)
+        .reduce((sum, v) => sum + Math.max(0, v.stockOnHand - v.stockReserved), 0)
     }
 
     if (color) {
       return variants
         .filter((v) => v.color === color)
-        .reduce((sum, v) => sum + (v.stock || 0), 0)
+        .reduce((sum, v) => sum + Math.max(0, v.stockOnHand - v.stockReserved), 0)
     }
 
     return 0

@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { updateCommissionsOnOrderStatusChange } from "@/lib/commission"
-import { OrderStatus } from "@prisma/client"
+import { OrderStatus, Prisma } from "@prisma/client"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
+import { createAuditLog, getRequestIp } from "@/lib/audit"
+import {
+  getOrderStatusTransitionError,
+  isValidOrderStatusTransition,
+  shouldRestockForTransition,
+} from "@/lib/order-status"
 
 const statusSchema = z.object({
   status: z.nativeEnum(OrderStatus),
+  note: z.string().trim().max(500).optional(),
 })
 
 export async function PATCH(
@@ -15,20 +21,17 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      )
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
-    const { status } = statusSchema.parse(body)
+    const { status, note } = statusSchema.parse(body)
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      select: { id: true, status: true },
+      include: { items: true },
     })
 
     if (!order) {
@@ -39,18 +42,77 @@ export async function PATCH(
       return NextResponse.json({ order })
     }
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: params.id },
-      data: {
-        status,
-        statusUpdatedAt: new Date(),
-        updatedBy: session.user.id,
-      },
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id: params.id },
+        data: {
+          status,
+          statusUpdatedAt: new Date(),
+          updatedBy: guard.user.id,
+        },
+      })
+
+      const shouldRelease =
+        status === OrderStatus.canceled || status === OrderStatus.refunded
+
+      if (shouldRelease) {
+        if (order.status === OrderStatus.pending) {
+          for (const item of order.items) {
+            await tx.$queryRaw(
+              Prisma.sql`
+                UPDATE "ProductVariant"
+                SET "stockReserved" = "stockReserved" - ${item.quantity}
+                WHERE "id" = ${item.variantId}
+                AND "stockReserved" >= ${item.quantity}
+              `
+            )
+          }
+
+          await tx.stockMovement.createMany({
+            data: order.items.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              delta: item.quantity,
+              reason: "order_released" as const,
+              note: `Order ${order.id}`,
+              createdByUserId: guard.user.id,
+            })),
+          })
+        } else if (
+          order.status === OrderStatus.processing ||
+          order.status === OrderStatus.shipped ||
+          order.status === OrderStatus.delivered
+        ) {
+          for (const item of order.items) {
+            await tx.$queryRaw(
+              Prisma.sql`
+                UPDATE "ProductVariant"
+                SET "stockOnHand" = "stockOnHand" + ${item.quantity}
+                WHERE "id" = ${item.variantId}
+              `
+            )
+          }
+
+          await tx.stockMovement.createMany({
+            data: order.items.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              delta: item.quantity,
+              reason: "refund_return" as const,
+              note: `Order ${order.id}`,
+              createdByUserId: guard.user.id,
+            })),
+          })
+        }
+      }
+
+      return updated
     })
 
     await updateCommissionsOnOrderStatusChange(updatedOrder.id, status)
 
     return NextResponse.json({ order: updatedOrder })
+
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json(
@@ -61,7 +123,7 @@ export async function PATCH(
 
     console.error("Error updating order status:", error)
     return NextResponse.json(
-      { error: "Failed to update order status" },
+      { error: "به‌روزرسانی وضعیت سفارش ناموفق بود." },
       { status: 500 }
     )
   }

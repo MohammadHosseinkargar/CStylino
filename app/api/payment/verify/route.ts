@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { zarinpalVerify } from "@/lib/zarinpal"
 import { createCommissionsForOrder } from "@/lib/commission"
-import { OrderStatus } from "@prisma/client"
+import { OrderStatus, Prisma } from "@prisma/client"
 
 /**
  * GET /api/payment/verify
@@ -52,10 +52,42 @@ export async function GET(request: NextRequest) {
 
     // Check if payment was canceled by user
     if (status !== "OK") {
-      // Update order status to canceled
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+      await prisma.$transaction(async (tx) => {
+        const freshOrder = await tx.order.findUnique({
+          where: { id: order.id },
+          include: { items: true },
+        })
+
+        if (!freshOrder || freshOrder.status !== OrderStatus.pending) {
+          return
+        }
+
+        for (const item of freshOrder.items) {
+          await tx.$queryRaw(
+            Prisma.sql`
+              UPDATE "ProductVariant"
+              SET "stockReserved" = "stockReserved" - ${item.quantity}
+              WHERE "id" = ${item.variantId}
+              AND "stockReserved" >= ${item.quantity}
+            `
+          )
+        }
+
+        await tx.order.update({
+          where: { id: freshOrder.id },
+          data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+        })
+
+        await tx.stockMovement.createMany({
+          data: freshOrder.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            delta: item.quantity,
+            reason: "order_released" as const,
+            note: `Order ${freshOrder.id}`,
+            createdByUserId: freshOrder.userId,
+          })),
+        })
       })
 
       return NextResponse.redirect(
@@ -85,11 +117,43 @@ export async function GET(request: NextRequest) {
 
     if (!verificationResult.success) {
       console.error("Payment verification failed:", verificationResult.error)
-      
-      // Update order status to canceled
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+
+      await prisma.$transaction(async (tx) => {
+        const freshOrder = await tx.order.findUnique({
+          where: { id: order.id },
+          include: { items: true },
+        })
+
+        if (!freshOrder || freshOrder.status !== OrderStatus.pending) {
+          return
+        }
+
+        for (const item of freshOrder.items) {
+          await tx.$queryRaw(
+            Prisma.sql`
+              UPDATE "ProductVariant"
+              SET "stockReserved" = "stockReserved" - ${item.quantity}
+              WHERE "id" = ${item.variantId}
+              AND "stockReserved" >= ${item.quantity}
+            `
+          )
+        }
+
+        await tx.order.update({
+          where: { id: freshOrder.id },
+          data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+        })
+
+        await tx.stockMovement.createMany({
+          data: freshOrder.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            delta: item.quantity,
+            reason: "order_released" as const,
+            note: `Order ${freshOrder.id}`,
+            createdByUserId: freshOrder.userId,
+          })),
+        })
       })
 
       return NextResponse.redirect(
@@ -126,18 +190,19 @@ export async function GET(request: NextRequest) {
         }
 
         for (const item of freshOrder.items) {
-          const updated = await tx.productVariant.updateMany({
-            where: {
-              id: item.variantId,
-              stock: { gte: item.quantity },
-            },
-            data: {
-              stock: { decrement: item.quantity },
-            },
-          })
+          const updated = await tx.$queryRaw<{ id: string }[]>(
+            Prisma.sql`
+              UPDATE "ProductVariant"
+              SET "stockOnHand" = "stockOnHand" - ${item.quantity},
+                  "stockReserved" = "stockReserved" - ${item.quantity}
+              WHERE "id" = ${item.variantId}
+              AND "stockReserved" >= ${item.quantity}
+              RETURNING "id"
+            `
+          )
 
-          if (updated.count === 0) {
-            throw new Error("OUT_OF_STOCK")
+          if (updated.length === 0) {
+            throw new Error("RESERVATION_MISSING")
           }
         }
 
@@ -148,6 +213,24 @@ export async function GET(request: NextRequest) {
             statusUpdatedAt: new Date(),
             zarinpalRefId: verificationResult.refId?.toString() || null,
           },
+        })
+        await tx.orderStatusHistory.create({
+          data: {
+            orderId: freshOrder.id,
+            fromStatus: OrderStatus.pending,
+            toStatus: OrderStatus.processing,
+          },
+        })
+
+        await tx.stockMovement.createMany({
+          data: freshOrder.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            delta: -item.quantity,
+            reason: "order_committed" as const,
+            note: `Order ${freshOrder.id}`,
+            createdByUserId: freshOrder.userId,
+          })),
         })
 
         return {
@@ -160,10 +243,62 @@ export async function GET(request: NextRequest) {
         }
       })
     } catch (error: any) {
-      if (error?.message === "OUT_OF_STOCK") {
-        await prisma.order.updateMany({
-          where: { id: order.id, status: OrderStatus.pending },
-          data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+      if (error?.message === "RESERVATION_MISSING") {
+        await prisma.$transaction(async (tx) => {
+          const freshOrder = await tx.order.findUnique({
+            where: { id: order.id },
+            include: { items: true },
+          })
+
+          if (!freshOrder || freshOrder.status !== OrderStatus.pending) {
+            return
+          }
+
+          for (const item of freshOrder.items) {
+            await tx.$queryRaw(
+              Prisma.sql`
+                UPDATE "ProductVariant"
+                SET "stockReserved" = "stockReserved" - ${item.quantity}
+                WHERE "id" = ${item.variantId}
+                AND "stockReserved" >= ${item.quantity}
+              `
+            )
+          }
+
+          await tx.order.update({
+            where: { id: freshOrder.id },
+            data: { status: OrderStatus.canceled, statusUpdatedAt: new Date() },
+          })
+
+          await tx.orderStatusHistory.create({
+            data: {
+              orderId: freshOrder.id,
+              fromStatus: OrderStatus.pending,
+              toStatus: OrderStatus.canceled,
+            },
+          })
+
+          await tx.stockMovement.createMany({
+            data: freshOrder.items.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              delta: item.quantity,
+              reason: "order_released" as const,
+              note: `Order ${freshOrder.id}`,
+              createdByUserId: freshOrder.userId,
+            })),
+          })
+        })
+
+          if (result.count > 0) {
+            await tx.orderStatusHistory.create({
+              data: {
+                orderId: order.id,
+                fromStatus: OrderStatus.pending,
+                toStatus: OrderStatus.canceled,
+              },
+            })
+          }
         })
 
         return NextResponse.redirect(

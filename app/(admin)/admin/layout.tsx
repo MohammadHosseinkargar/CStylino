@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { AdminSidebar } from "@/components/admin/sidebar"
+import { prisma } from "@/lib/prisma"
 
 export default async function AdminLayout({
   children,
@@ -10,7 +11,16 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession(authOptions)
 
-  if (!session || session.user.role !== "admin") {
+  if (!session?.user) {
+    redirect("/auth/signin")
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true, isBlocked: true },
+  })
+
+  if (!user || user.isBlocked || user.role !== "admin") {
     redirect("/auth/signin")
   }
 
@@ -21,4 +31,3 @@ export default async function AdminLayout({
     </div>
   )
 }
-

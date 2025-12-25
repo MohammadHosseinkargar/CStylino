@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -16,6 +16,8 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { ListCard } from "@/components/ui/list-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
+
+const formatNumber = (value: number) => new Intl.NumberFormat("fa-IR").format(value)
 
 export default function AdminCategoriesPage() {
   const { toast } = useToast()
@@ -47,7 +49,7 @@ export default function AdminCategoriesPage() {
     queryKey: ["admin-categories"],
     queryFn: async () => {
       const res = await fetch("/api/admin/categories")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) throw new Error("خطا در دریافت اطلاعات")
       return res.json()
     },
   })
@@ -70,7 +72,7 @@ export default function AdminCategoriesPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "خطا در ایجاد دسته‌بندی")
+        throw new Error(error.error || "خطا در ایجاد دسته بندی")
       }
       return res.json()
     },
@@ -89,7 +91,7 @@ export default function AdminCategoriesPage() {
       })
       toast({
         title: "موفق",
-        description: "دسته‌بندی با موفقیت ایجاد شد.",
+        description: "دسته بندی با موفقیت ایجاد شد.",
       })
     },
     onError: (error: any) => {
@@ -110,7 +112,7 @@ export default function AdminCategoriesPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "خطا در ویرایش دسته‌بندی")
+        throw new Error(error.error || "خطا در بروزرسانی دسته بندی")
       }
       return res.json()
     },
@@ -121,7 +123,7 @@ export default function AdminCategoriesPage() {
       setEditData(null)
       toast({
         title: "موفق",
-        description: "دسته‌بندی با موفقیت ویرایش شد.",
+        description: "دسته بندی با موفقیت بروزرسانی شد.",
       })
     },
     onError: (error: any) => {
@@ -140,7 +142,7 @@ export default function AdminCategoriesPage() {
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "خطا در حذف دسته‌بندی")
+        throw new Error(error.error || "خطا در حذف دسته بندی")
       }
       return res.json()
     },
@@ -149,7 +151,7 @@ export default function AdminCategoriesPage() {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
       toast({
         title: "موفق",
-        description: "دسته‌بندی حذف شد.",
+        description: "دسته بندی حذف شد.",
       })
     },
     onError: (error: any) => {
@@ -165,7 +167,7 @@ export default function AdminCategoriesPage() {
     if (!formData.name || !formData.slug) {
       toast({
         title: "خطا",
-        description: "نام و اسلاگ دسته‌بندی الزامی است.",
+        description: "نام و اسلاگ دسته بندی را وارد کنید.",
         variant: "destructive",
       })
       return
@@ -190,7 +192,7 @@ export default function AdminCategoriesPage() {
     if (!editData?.name || !editData?.slug) {
       toast({
         title: "خطا",
-        description: "نام و اسلاگ دسته‌بندی الزامی است.",
+        description: "نام و اسلاگ دسته بندی را وارد کنید.",
         variant: "destructive",
       })
       return
@@ -199,7 +201,7 @@ export default function AdminCategoriesPage() {
   }
 
   const handleDelete = (id: string) => {
-    if (confirm("آیا از حذف این دسته‌بندی اطمینان دارید؟")) {
+    if (confirm("آیا از حذف این دسته بندی مطمئن هستید؟")) {
       deleteMutation.mutate(id)
     }
   }
@@ -207,15 +209,15 @@ export default function AdminCategoriesPage() {
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
       <SectionHeader
-        title="دسته‌بندی‌ها"
-        subtitle="مدیریت دسته‌بندی‌های محصولات"
+        title="دسته بندی ها"
+        subtitle="مدیریت دسته بندی ها و محصولات"
         actions={
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <div className="w-full sm:w-72">
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="جستجو در دسته‌بندی‌ها..."
+                placeholder="جستجو در دسته بندی ها..."
               />
             </div>
             <Button
@@ -223,7 +225,7 @@ export default function AdminCategoriesPage() {
               onClick={() => setIsCreating(!isCreating)}
             >
               <Plus className="w-5 h-5 ml-2" />
-              {isCreating ? "لغو" : "افزودن دسته"}
+              {isCreating ? "بستن" : "افزودن دسته بندی"}
             </Button>
           </div>
         }
@@ -232,12 +234,12 @@ export default function AdminCategoriesPage() {
       {isCreating && (
         <StyledCard variant="subtle">
           <CardHeader>
-            <CardTitle>افزودن دسته جدید</CardTitle>
+            <CardTitle>ایجاد دسته بندی جدید</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">نام دسته *</Label>
+                <Label htmlFor="name">نام دسته بندی *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -300,7 +302,7 @@ export default function AdminCategoriesPage() {
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>لیست دسته‌بندی‌ها</CardTitle>
+          <CardTitle>لیست دسته بندی ها</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -312,8 +314,8 @@ export default function AdminCategoriesPage() {
                   columns={[
                     { key: "name", header: "نام" },
                     { key: "slug", header: "اسلاگ" },
-                    { key: "count", header: "تعداد" },
-                    { key: "actions", header: "" },
+                    { key: "count", header: "تعداد محصولات" },
+                    { key: "actions", header: "عملیات" },
                   ]}
                   data={filteredCategories}
                   renderRow={(category: any) => (
@@ -337,7 +339,7 @@ export default function AdminCategoriesPage() {
                             />
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {category._count?.products || 0}
+                            {formatNumber(category._count?.products || 0)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -370,7 +372,7 @@ export default function AdminCategoriesPage() {
                             {category.slug}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {category._count?.products || 0}
+                            {formatNumber(category._count?.products || 0)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -402,7 +404,7 @@ export default function AdminCategoriesPage() {
                     key={category.id}
                     title={category.name}
                     subtitle={`اسلاگ: ${category.slug}`}
-                    meta={`${category._count?.products || 0} محصول`}
+                    meta={`${formatNumber(category._count?.products || 0)} محصول`}
                     actions={
                       editingId === category.id ? (
                         <div className="flex items-center gap-2">
@@ -471,7 +473,10 @@ export default function AdminCategoriesPage() {
               </div>
             </>
           ) : (
-            <EmptyState title="دسته‌بندی یافت نشد" description="هنوز دسته‌بندی‌ای اضافه نشده است." />
+            <EmptyState
+              title="دسته بندی ثبت نشده"
+              description="هنوز دسته بندی ایجاد نشده است."
+            />
           )}
         </CardContent>
       </StyledCard>

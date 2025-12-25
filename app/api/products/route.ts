@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { productSchema, variantSchema } from "@/lib/validations"
 import { z } from "zod"
+import { requireAdmin } from "@/lib/rbac"
 
 const querySchema = z.object({
   category: z.string().optional(),
@@ -55,7 +54,6 @@ export async function GET(request: NextRequest) {
     if (params.size || params.color) {
       where.variants = {
         some: {
-          stock: { gt: 0 },
           ...(params.size && { size: params.size }),
           ...(params.color && { color: params.color }),
         },
@@ -67,11 +65,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           category: true,
-          variants: {
-            where: {
-              stock: { gt: 0 },
-            },
-          },
+          variants: true,
         },
         orderBy: {
           createdAt: "desc",
@@ -102,12 +96,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "دسترسی غیرمجاز" },
-        { status: 403 }
-      )
+    const guard = await requireAdmin()
+    if (!guard.ok) {
+      return guard.response
     }
 
     const body = await request.json()
@@ -147,7 +138,7 @@ export async function POST(request: NextRequest) {
             size: v.size,
             color: v.color,
             colorHex: v.colorHex,
-            stock: v.stock,
+            stockOnHand: v.stockOnHand,
             sku: v.sku,
             priceOverride: v.priceOverride,
           })),

@@ -15,19 +15,20 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { ListCard } from "@/components/ui/list-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
+import Link from "next/link"
 
 const getPayoutStatusLabel = (status?: string) => {
   switch (status) {
     case "pending":
       return "در انتظار"
     case "approved":
-      return "در حال تایید"
+      return "تایید شده"
     case "paid":
-      return "پرداخت‌شده"
+      return "پرداخت شده"
     case "rejected":
       return "رد شده"
     default:
-      return "در حال بررسی"
+      return "نامشخص"
   }
 }
 
@@ -39,7 +40,7 @@ export default function AffiliatePayoutsPage() {
     queryKey: ["affiliate-payouts"],
     queryFn: async () => {
       const res = await fetch("/api/affiliate/payouts")
-      if (!res.ok) throw new Error("بارگیری داده‌های برداشت ممکن نیست")
+      if (!res.ok) throw new Error("خطا در دریافت اطلاعات تسویه ها.")
       return res.json()
     },
   })
@@ -55,19 +56,19 @@ export default function AffiliatePayoutsPage() {
 
       if (!res.ok) {
         const error = await res.json().catch(() => ({}))
-        throw new Error(error?.error || "درخواست برداشت امکان‌پذیر نیست")
+        throw new Error(error?.error || "خطا در ثبت درخواست تسویه.")
       }
 
       toast({
-        title: "درخواست برداشت ثبت شد",
-        description: "تقاضای برداشت شما با موفقیت ارسال شد.",
+        title: "درخواست تسویه ثبت شد",
+        description: "درخواست شما ثبت شد و در حال بررسی است.",
       })
       await refetch()
     } catch (error) {
       toast({
         title: "خطا",
         description:
-          error instanceof Error ? error.message : "امکان ثبت درخواست وجود ندارد",
+          error instanceof Error ? error.message : "خطا در ثبت درخواست تسویه.",
         variant: "destructive",
       })
     } finally {
@@ -78,13 +79,13 @@ export default function AffiliatePayoutsPage() {
   const availableToRequest = payoutData?.availableToRequest || 0
   const minimumPayoutAmount = payoutData?.minimumPayoutAmount || 0
   const payouts = payoutData?.payouts || []
+  const bankInfoComplete = payoutData?.bankInfoComplete ?? false
+  const canRequest =
+    bankInfoComplete && availableToRequest >= minimumPayoutAmount && !isSubmitting
 
   return (
     <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
-      <SectionHeader
-        title="درخواست‌های برداشت"
-        subtitle="مدیریت موجودی و تاریخچه برداشت‌ها"
-      />
+      <SectionHeader title="تسویه ها" subtitle="درخواست برداشت و وضعیت تسویه ها" />
 
       <StyledCard variant="glass" className="border-primary/20">
         <CardHeader>
@@ -95,24 +96,36 @@ export default function AffiliatePayoutsPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center py-6">
-            <div className="text-5xl font-bold mb-2">{formatPrice(availableToRequest)}</div>
-            <p className="text-muted-foreground">موجودی فعلی شما</p>
+            <div className="text-5xl font-bold mb-2">
+              {formatPrice(availableToRequest)}
+            </div>
+            <p className="text-muted-foreground">موجودی قابل درخواست</p>
             <p className="text-xs text-muted-foreground mt-2">
-              حداقل برداشت: {formatPrice(minimumPayoutAmount)}
+              حداقل مبلغ تسویه: {formatPrice(minimumPayoutAmount)}
             </p>
           </div>
 
           <Button
             className="btn-editorial w-full"
             onClick={handlePayoutRequest}
-            disabled={availableToRequest < minimumPayoutAmount || isSubmitting}
+            disabled={!canRequest}
           >
-            {isSubmitting ? "در حال ارسال درخواست..." : "درخواست برداشت"}
+            {isSubmitting ? "در حال ارسال درخواست..." : "درخواست تسویه"}
           </Button>
 
-          {availableToRequest < minimumPayoutAmount && (
+          {!bankInfoComplete && (
+            <p className="text-sm text-center text-destructive">
+              برای ثبت درخواست تسویه، ابتدا اطلاعات بانکی را در{" "}
+              <Link href="/affiliate/settings" className="underline">
+                تنظیمات
+              </Link>{" "}
+              تکمیل کنید.
+            </p>
+          )}
+
+          {bankInfoComplete && availableToRequest < minimumPayoutAmount && (
             <p className="text-sm text-center text-muted-foreground">
-              برای ثبت درخواست برداشت حداقل به {formatPrice(minimumPayoutAmount)} نیاز است.
+              حداقل مبلغ برای تسویه {formatPrice(minimumPayoutAmount)} است.
             </p>
           )}
         </CardContent>
@@ -120,7 +133,7 @@ export default function AffiliatePayoutsPage() {
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>سوابق برداشت</CardTitle>
+          <CardTitle>سوابق تسویه</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -164,8 +177,8 @@ export default function AffiliatePayoutsPage() {
           ) : (
             <EmptyState
               icon={<Wallet className="h-6 w-6 text-muted-foreground" />}
-              title="هنوز درخواستی ثبت نشده"
-              description="پس از ثبت اولین برداشت، سابقه در اینجا نمایش داده می‌شود."
+              title="درخواستی ثبت نشده"
+              description="هنوز درخواست تسویه ای ثبت نشده است."
             />
           )}
         </CardContent>

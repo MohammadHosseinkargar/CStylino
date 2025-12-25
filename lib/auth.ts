@@ -27,6 +27,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("ایمیل یا رمز عبور اشتباه است")
         }
 
+        if (user.isBlocked) {
+          throw new Error("حساب کاربری شما مسدود شده است.")
+        }
+
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
@@ -41,6 +45,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          isBlocked: user.isBlocked,
         }
       },
     }),
@@ -58,6 +63,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = (user as any).role
         token.id = user.id
+        token.isBlocked = (user as any).isBlocked
       }
       return token
     },
@@ -65,6 +71,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as UserRole
+        session.user.isBlocked = Boolean(token.isBlocked)
       }
       return session
     },

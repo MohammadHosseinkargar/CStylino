@@ -21,7 +21,8 @@ interface ProductCardProps {
     size: string
     color: string
     colorHex: string
-    stock: number
+    stockOnHand: number
+    stockReserved: number
   }>
   featured?: boolean
 }
@@ -36,7 +37,7 @@ export function ProductCard({
   featured = false,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const hasStock = variants.some((v) => v.stock > 0)
+  const hasStock = variants.some((v) => v.stockOnHand - v.stockReserved > 0)
   const mainImage = images[0] || "/placeholder-product.jpg"
   const uniqueColors = Array.from(
     new Set(variants.map((v) => ({ color: v.color, hex: v.colorHex })))

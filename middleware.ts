@@ -7,25 +7,64 @@ export default withAuth(
     const isAdmin = token?.role === "admin"
     const isAffiliate = token?.role === "affiliate" || token?.role === "admin"
     const path = req.nextUrl.pathname
+    const isBlocked = Boolean(token?.isBlocked)
 
     // Affiliate API routes
     if (path.startsWith("/api/affiliate")) {
       if (!token) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        return NextResponse.json(
+          { error: "احراز هویت انجام نشده است." },
+          { status: 401 }
+        )
+      }
+      if (isBlocked) {
+        return NextResponse.json(
+          { error: "حساب کاربری شما مسدود است." },
+          { status: 403 }
+        )
       }
       if (!isAffiliate) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        return NextResponse.json(
+          { error: "دسترسی مجاز نیست." },
+          { status: 403 }
+        )
+      }
+    }
+
+    // Admin API routes
+    if (path.startsWith("/api/admin")) {
+      if (!token) {
+        return NextResponse.json(
+          { error: "احراز هویت انجام نشده است." },
+          { status: 401 }
+        )
+      }
+      if (isBlocked) {
+        return NextResponse.json(
+          { error: "حساب کاربری شما مسدود است." },
+          { status: 403 }
+        )
+      }
+      if (!isAdmin) {
+        return NextResponse.json(
+          { error: "دسترسی مجاز نیست." },
+          { status: 403 }
+        )
       }
     }
 
     // Admin routes
-    if (path.startsWith("/admin") && !isAdmin) {
-      return NextResponse.redirect(new URL("/auth/signin", req.url))
+    if (path.startsWith("/admin")) {
+      if (isBlocked || !isAdmin) {
+        return NextResponse.redirect(new URL("/auth/signin", req.url))
+      }
     }
 
     // Affiliate routes
-    if (path.startsWith("/affiliate") && !isAffiliate) {
-      return NextResponse.redirect(new URL("/auth/signin", req.url))
+    if (path.startsWith("/affiliate")) {
+      if (isBlocked || !isAffiliate) {
+        return NextResponse.redirect(new URL("/auth/signin", req.url))
+      }
     }
 
     return NextResponse.next()
@@ -34,6 +73,7 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const path = req.nextUrl.pathname
+        const isBlocked = Boolean(token?.isBlocked)
 
         // Public routes
         if (
@@ -49,7 +89,7 @@ export default withAuth(
 
         // Protected routes require auth
         if (path.startsWith("/admin") || path.startsWith("/affiliate")) {
-          return !!token
+          return !!token && !isBlocked
         }
 
         return true
@@ -67,4 +107,3 @@ export const config = {
     "/api/affiliate/:path*",
   ],
 }
-

@@ -1,10 +1,11 @@
 ﻿import { prisma } from "@/lib/prisma"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
-import { TrendingUp, Package, Users, ShoppingCart } from "lucide-react"
+import { TrendingUp, Package, Users, ShoppingCart, AlertTriangle } from "lucide-react"
 import { StyledCard } from "@/components/ui/styled-card"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
+import { LOW_STOCK_THRESHOLD } from "@/lib/constants"
 
 const getOrderStatusLabel = (status: string) => {
   switch (status) {
@@ -13,15 +14,17 @@ const getOrderStatusLabel = (status: string) => {
     case "processing":
       return "در حال پردازش"
     case "shipped":
-      return "ارسال شده"
+      return "ارسال شد"
     case "delivered":
-      return "تحویل داده شده"
+      return "تحویل شد"
     case "canceled":
-      return "کنسل شده"
+      return "لغو شد"
     case "refunded":
-      return "بازپرداخت‌شده"
+      return "بازپرداخت شد"
+    case "returned":
+      return "مرجوع شد"
     default:
-      return "در حال بررسی"
+      return "نامشخص"
   }
 }
 
@@ -32,6 +35,7 @@ export default async function AdminDashboard() {
     totalProducts,
     totalUsers,
     recentOrders,
+    lowStockGroups,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.aggregate({
@@ -49,30 +53,40 @@ export default async function AdminDashboard() {
         },
       },
     }),
+    prisma.productVariant.groupBy({
+      by: ["productId"],
+      _sum: { stockOnHand: true, stockReserved: true },
+    }),
   ])
+
+  const lowStockCount = lowStockGroups.filter(
+    (group) =>
+      (group._sum.stockOnHand ?? 0) - (group._sum.stockReserved ?? 0) <=
+      LOW_STOCK_THRESHOLD
+  ).length
 
   return (
     <PageContainer className="space-y-8 py-6" dir="rtl">
-      <SectionHeader title="داشبورد" subtitle="بازبینی سریع عملکرد فروشگاه" />
+      <SectionHeader title="داشبورد" subtitle="نمای کلی فروشگاه" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              سفارش‌های ثبت‌شده
+              کل سفارش ها
             </CardTitle>
             <ShoppingCart className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold persian-number">{totalOrders}</div>
-            <p className="text-xs text-muted-foreground mt-1">کل سفارش‌ها</p>
+            <p className="text-xs text-muted-foreground mt-1">مجموع سفارش های ثبت شده</p>
           </CardContent>
         </StyledCard>
 
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              درآمد خالص
+              درآمد کل
             </CardTitle>
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -80,40 +94,55 @@ export default async function AdminDashboard() {
             <div className="text-3xl font-bold">
               {formatPrice(totalRevenue._sum.totalAmount || 0)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">درآمد خالص از سفارش‌ها</p>
+            <p className="text-xs text-muted-foreground mt-1">بدون سفارش های لغو شده</p>
           </CardContent>
         </StyledCard>
 
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              محصولات فعال
+              تعداد محصولات
             </CardTitle>
             <Package className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold persian-number">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground mt-1">محصول موجود</p>
+            <p className="text-xs text-muted-foreground mt-1">مجموع محصولات ثبت شده</p>
           </CardContent>
         </StyledCard>
 
         <StyledCard variant="elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              کاربران فعال
+              کاربران
             </CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold persian-number">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground mt-1">کاربران ثبت‌شده</p>
+            <p className="text-xs text-muted-foreground mt-1">مجموع کاربران ثبت شده</p>
+          </CardContent>
+        </StyledCard>
+
+        <StyledCard variant="elevated">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              کمبود موجودی
+            </CardTitle>
+            <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold persian-number">{lowStockCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              محصولات زیر حد {LOW_STOCK_THRESHOLD}
+            </p>
           </CardContent>
         </StyledCard>
       </div>
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>سفارش‌های اخیر</CardTitle>
+          <CardTitle>آخرین سفارش ها</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -141,7 +170,7 @@ export default async function AdminDashboard() {
               ))
             ) : (
               <div className="text-center py-12 text-muted-foreground">
-                هنوز سفارش جدیدی ثبت نشده است
+                هنوز سفارشی ثبت نشده است.
               </div>
             )}
           </div>

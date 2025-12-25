@@ -23,7 +23,8 @@ interface Product {
     size: string
     color: string
     colorHex: string
-    stock: number
+    stockOnHand: number
+    stockReserved: number
   }>
 }
 

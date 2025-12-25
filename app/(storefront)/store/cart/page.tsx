@@ -150,7 +150,7 @@ export default function CartPage() {
                               size="icon"
                               className="h-8 w-8 rounded-lg hover:bg-accent/50"
                               onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                              disabled={item.quantity >= item.stock}
+                              disabled={item.quantity >= item.availableStock}
                               aria-label="افزایش تعداد"
                             >
                               <Plus className="w-4 h-4" />
@@ -240,7 +240,7 @@ export default function CartPage() {
                             size="icon"
                             className="h-8 w-8 rounded-lg hover:bg-accent/50"
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                            disabled={item.quantity >= item.stock}
+                            disabled={item.quantity >= item.availableStock}
                             aria-label="افزایش تعداد"
                           >
                             <Plus className="w-4 h-4" />
