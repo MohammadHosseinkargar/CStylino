@@ -10,6 +10,7 @@ import {
   isValidOrderStatusTransition,
   shouldRestockForTransition,
 } from "@/lib/order-status"
+export const dynamic = "force-dynamic"
 
 const statusSchema = z.object({
   status: z.nativeEnum(OrderStatus),

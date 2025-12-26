@@ -1,5 +1,6 @@
 ﻿import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
@@ -47,12 +48,12 @@ export default async function AdminUsersPage({
   const rawPage = typeof searchParams?.page === "string" ? searchParams.page : "1"
   const page = Math.max(Number.parseInt(rawPage, 10) || 1, 1)
 
-  const where = q
+  const where: Prisma.UserWhereInput = q
     ? {
         OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { email: { contains: q, mode: "insensitive" } },
-          { phone: { contains: q, mode: "insensitive" } },
+          { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          { email: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          { phone: { contains: q, mode: Prisma.QueryMode.insensitive } },
         ],
       }
     : {}

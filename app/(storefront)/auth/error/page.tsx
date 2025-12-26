@@ -1,5 +1,7 @@
 "use client"
 
+import { Suspense } from "react"
+
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { AlertCircle } from "lucide-react"
@@ -72,7 +74,7 @@ function getMessage(code: string | null) {
   return errorMessages[code] || errorMessages.Default
 }
 
-export default function AuthErrorPage() {
+function AuthErrorPageContent() {
   const searchParams = useSearchParams()
   const errorCode = searchParams.get("error")
   const message = getMessage(errorCode)
@@ -107,3 +109,10 @@ export default function AuthErrorPage() {
   )
 }
 
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthErrorPageContent />
+    </Suspense>
+  )
+}

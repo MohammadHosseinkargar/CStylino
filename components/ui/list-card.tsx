@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-interface ListCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ListCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode
   subtitle?: React.ReactNode
   meta?: React.ReactNode

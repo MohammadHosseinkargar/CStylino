@@ -26,6 +26,42 @@ import {
 import { ProductCard } from "@/components/storefront/product-card"
 import { cn } from "@/lib/utils"
 
+type ProductVariant = {
+  id: string
+  size: string
+  color: string
+  colorHex: string
+  stockOnHand: number
+  stockReserved: number
+  sku: string
+  priceOverride?: number | null
+}
+
+type ProductDetails = {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  images: string[]
+  basePrice: number
+  variants: ProductVariant[]
+}
+
+type ProductSummary = {
+  id: string
+  name: string
+  slug: string
+  basePrice: number
+  images: string[]
+  variants: ProductVariant[]
+  featured?: boolean
+}
+
+type ProductResponse = {
+  product: ProductDetails | null
+  relatedProducts: ProductSummary[]
+}
+
 export default function ProductPage() {
   const params = useParams()
   const slug = params?.slug as string
@@ -52,12 +88,12 @@ export default function ProductPage() {
   const { toast } = useToast()
   const addItem = useCartStore((state) => state.addItem)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<ProductResponse>({
     queryKey: ["product", slug],
     queryFn: async () => {
       const res = await fetch(`/api/products/${slug}`)
       if (!res.ok) throw new Error("Failed to fetch product")
-      return res.json()
+      return (await res.json()) as ProductResponse
     },
     enabled: Boolean(slug),
   })
@@ -109,17 +145,17 @@ export default function ProductPage() {
     return () => media.removeListener(update)
   }, [])
 
-  const availableSizes = Array.from(new Set(variants.map((v: any) => v.size)))
-  const availableColors = Array.from(
+  const availableSizes = Array.from(new Set(variants.map((v) => v.size)))
+  const availableColors: Array<{ color: string; hex: string }> = Array.from(
     new Map(
       variants
-        .filter((v: any) => !selectedSize || v.size === selectedSize)
-        .map((v: any) => [v.color, { color: v.color, hex: v.colorHex }])
+        .filter((v) => !selectedSize || v.size === selectedSize)
+        .map((v) => [v.color, { color: v.color, hex: v.colorHex }])
     ).values()
   )
 
   const selectedVariant = variants.find(
-    (v: any) => v.size === selectedSize && v.color === selectedColor
+    (v) => v.size === selectedSize && v.color === selectedColor
   )
 
   const price = selectedVariant?.priceOverride ?? product?.basePrice ?? 0
@@ -128,7 +164,7 @@ export default function ProductPage() {
     : 0
   const isOutOfStock = selectedVariant ? stock <= 0 : false
   const needsSelection = !selectedSize || !selectedColor
-  const anyInStock = variants.some((v: any) => v.stockOnHand - v.stockReserved > 0)
+  const anyInStock = variants.some((v) => v.stockOnHand - v.stockReserved > 0)
   const stockBadge = selectedVariant ? (stock > 0 ? "موجود" : "ناموجود") : anyInStock ? "موجود" : "ناموجود"
   const ctaDisabled = isAdding || (selectedVariant ? isOutOfStock : false)
   const ctaLabel = needsSelection
@@ -172,6 +208,10 @@ export default function ProductPage() {
         description: "موجودی انتخاب‌شده کافی نیست.",
         variant: "destructive",
       })
+      return
+    }
+
+    if (!product) {
       return
     }
 
@@ -422,7 +462,7 @@ export default function ProductPage() {
               ))}
             </div>
             <div className="flex items-center justify-center gap-2">
-              {product.images.map((_, idx: number) => (
+              {product.images.map((image: string, idx: number) => (
                 <button
                   key={idx}
                   type="button"
@@ -693,7 +733,7 @@ export default function ProductPage() {
         <div className="mt-32 pt-16 border-t border-border/40">
           <h2 className="text-hero font-bold mb-12">محصولات مرتبط</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
-            {relatedProducts.map((related: any) => (
+            {relatedProducts.map((related) => (
               <ProductCard
                 key={related.id}
                 id={related.id}

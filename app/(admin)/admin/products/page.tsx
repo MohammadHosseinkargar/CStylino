@@ -1,5 +1,6 @@
 ﻿import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -51,12 +52,12 @@ export default async function AdminProductsPage({
   const rawPage = typeof searchParams?.page === "string" ? searchParams.page : "1"
   const page = Math.max(Number.parseInt(rawPage, 10) || 1, 1)
 
-  const where = q
+  const where: Prisma.ProductWhereInput = q
     ? {
         OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { slug: { contains: q, mode: "insensitive" } },
-          { category: { name: { contains: q, mode: "insensitive" } } },
+          { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          { slug: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          { category: { name: { contains: q, mode: Prisma.QueryMode.insensitive } } },
         ],
       }
     : {}

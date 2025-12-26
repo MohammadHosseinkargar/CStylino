@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react"
  * The actual verification happens in /api/payment/verify
  * Users will be redirected here first, then to success/failed pages
  */
-export default function PaymentCallbackPage() {
+function PaymentCallbackPageContent() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -37,4 +37,10 @@ export default function PaymentCallbackPage() {
   )
 }
 
-
+export default function PaymentCallbackPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentCallbackPageContent />
+    </Suspense>
+  )
+}
