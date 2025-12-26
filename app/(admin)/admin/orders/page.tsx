@@ -247,7 +247,7 @@ export default async function AdminOrdersPage({
             <EmptyState
               icon={<ShoppingBag className="h-6 w-6 text-muted-foreground" />}
               title="سفارشی ثبت نشده"
-              description="هنوز سفارشی ثبت نشده است."
+              description="هنوز سفارشی ثبت نشده است"
             />
           )}
         </CardContent>
