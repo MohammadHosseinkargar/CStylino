@@ -78,7 +78,7 @@ export default function ProductPage() {
     queryFn: async () => {
       const res = await fetch(`/api/products/${slug}`)
       if (!res.ok) throw new Error("Failed to fetch product")
-      return (await res.json()) as ProductResponse
+      return res.json()
     },
   })
 
@@ -97,7 +97,6 @@ export default function ProductPage() {
 
   // Variant & Stock Logic
   const selectedVariant = variants.find(
-    (v) => v.size === selectedSize && v.color === selectedColor
     (v) => v.size === selectedSize && v.color === selectedColor
   )
 
@@ -133,10 +132,6 @@ export default function ProductPage() {
         description: "متاسفانه این محصول در حال حاضر موجود نمی‌باشد",
         variant: "destructive",
       })
-      return
-    }
-
-    if (!product) {
       return
     }
 
