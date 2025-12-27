@@ -40,6 +40,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "formidable": "^3.5.4",
+    "framer-motion": "^12.23.26",
     "gsap": "^3.12.5",
     "lenis": "^1.0.45",
     "lucide-react": "^0.309.0",
