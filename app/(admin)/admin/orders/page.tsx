@@ -1,5 +1,6 @@
 ﻿import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { PageContainer } from "@/components/ui/page-container"
@@ -71,13 +72,13 @@ export default async function AdminOrdersPage({
   const rawPage = typeof searchParams?.page === "string" ? searchParams.page : "1"
   const page = Math.max(Number.parseInt(rawPage, 10) || 1, 1)
 
-  const where = q
+  const where: Prisma.OrderWhereInput = q
     ? {
         OR: [
-          { customerName: { contains: q, mode: "insensitive" } },
-          { shippingPhone: { contains: q, mode: "insensitive" } },
-          { user: { email: { contains: q, mode: "insensitive" } } },
-          { user: { name: { contains: q, mode: "insensitive" } } },
+          { customerName: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          { shippingPhone: { contains: q, mode: Prisma.QueryMode.insensitive } },
+          { user: { email: { contains: q, mode: Prisma.QueryMode.insensitive } } },
+          { user: { name: { contains: q, mode: Prisma.QueryMode.insensitive } } },
         ],
       }
     : {}

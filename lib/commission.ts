@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { CommissionStatus, OrderStatus, Prisma } from "@prisma/client"
+import { CommissionStatus, OrderStatus, Prisma, PrismaClient } from "@prisma/client"
 
 export interface CommissionSettings {
   level1Percentage: number // Default: 10
@@ -65,7 +65,7 @@ export async function createCommissionsForOrder(orderId: string) {
   })
 
   // Level 2 Commission (parent affiliate)
-  if (order.refAffiliate.parentAffiliateId) {
+  if (order.refAffiliate?.parentAffiliateId) {
     const level2Amount = Math.floor(
       (order.totalAmount * settings.level2Percentage) / 100
     )
@@ -86,7 +86,7 @@ export async function createCommissionsForOrder(orderId: string) {
 export async function updateCommissionsOnOrderStatusChange(
   orderId: string,
   newStatus: OrderStatus,
-  db: Prisma.TransactionClient | Prisma.PrismaClient = prisma
+  db: Prisma.TransactionClient | PrismaClient = prisma
 ) {
   if (newStatus === OrderStatus.delivered) {
     // Mark commissions as available

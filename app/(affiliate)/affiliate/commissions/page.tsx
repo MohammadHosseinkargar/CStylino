@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
@@ -33,7 +33,7 @@ const getCommissionStatusLabel = (status?: string) => {
   }
 }
 
-export default function AffiliateCommissionsPage() {
+function AffiliateCommissionsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -216,5 +216,13 @@ export default function AffiliateCommissionsPage() {
         </CardContent>
       </StyledCard>
     </PageContainer>
+  )
+}
+
+export default function AffiliateCommissionsPage() {
+  return (
+    <Suspense fallback={null}>
+      <AffiliateCommissionsPageContent />
+    </Suspense>
   )
 }

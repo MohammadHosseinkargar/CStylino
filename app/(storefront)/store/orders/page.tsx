@@ -11,6 +11,7 @@ import {
   XCircle,
   RotateCcw,
   CornerUpLeft,
+  type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PageContainer } from "@/components/ui/page-container"
@@ -20,7 +21,23 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 import { ORDER_STATUS_LABELS_FA } from "@/lib/order-status"
 
-const statusIcons: Record<OrderStatus, typeof Package> = {
+type OrderItem = {
+  id: string
+  quantity: number
+  price: number
+  product: { name: string }
+  variant: { size: string; color: string }
+}
+
+type OrderListItem = {
+  id: string
+  createdAt: string
+  totalAmount: number
+  status: OrderStatus
+  items: OrderItem[]
+}
+
+const statusIcons: Record<OrderStatus, LucideIcon> = {
   pending: Package,
   processing: Package,
   shipped: Truck,
@@ -41,12 +58,12 @@ const statusColors: Record<OrderStatus, string> = {
 }
 
 export default function OrdersPage() {
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading } = useQuery<OrderListItem[]>({
     queryKey: ["orders"],
     queryFn: async () => {
       const res = await fetch("/api/orders")
       if (!res.ok) throw new Error("Failed to fetch orders")
-      return res.json()
+      return (await res.json()) as OrderListItem[]
     },
   })
 
@@ -70,7 +87,7 @@ export default function OrdersPage() {
         />
       ) : (
         <div className="space-y-4">
-          {orders?.map((order: any) => {
+          {orders?.map((order) => {
             const StatusIcon = statusIcons[order.status]
             return (
               <StyledCard key={order.id} variant="elevated">

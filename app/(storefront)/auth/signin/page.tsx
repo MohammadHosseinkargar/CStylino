@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 
-export default function SignInPage() {
+function SignInPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/store"
@@ -141,3 +141,10 @@ export default function SignInPage() {
   )
 }
 
+export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInPageContent />
+    </Suspense>
+  )
+}

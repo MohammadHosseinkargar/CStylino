@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -7,12 +7,13 @@ import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 
 const statusLabels: Record<OrderStatus, string> = {
-  pending: "در انتظار",
-  processing: "در حال پردازش",
-  shipped: "ارسال شد",
-  delivered: "تحویل شد",
-  canceled: "لغو شد",
-  refunded: "بازپرداخت شد",
+  pending: "Pending",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  returned: "Returned",
+  canceled: "Canceled",
+  refunded: "Refunded",
 }
 
 const statusOptions: OrderStatus[] = [
@@ -20,6 +21,7 @@ const statusOptions: OrderStatus[] = [
   "processing",
   "shipped",
   "delivered",
+  "returned",
   "canceled",
   "refunded",
 ]
@@ -46,16 +48,16 @@ export function OrderStatusSelect({
       })
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || "خطا در به روزرسانی وضعیت")
+        throw new Error(error.error || "Failed to update order status.")
       }
       toast({
-        title: "وضعیت به روزرسانی شد",
-        description: "وضعیت سفارش با موفقیت ثبت شد.",
+        title: "Status updated",
+        description: "The order status has been updated.",
       })
       router.refresh()
     } catch (error: any) {
       toast({
-        title: "خطا",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       })
@@ -78,7 +80,7 @@ export function OrderStatusSelect({
         ))}
       </select>
       <Button onClick={handleSave} disabled={isSaving || status === initialStatus}>
-        {isSaving ? "در حال ذخیره..." : "ثبت وضعیت"}
+        {isSaving ? "Saving..." : "Save status"}
       </Button>
     </div>
   )

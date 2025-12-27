@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation"
+import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,9 +8,8 @@ import { OrderShippingForm } from "@/components/admin/order-shipping-form"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
-import { ORDER_STATUS_LABELS_FA } from "@/lib/order-status"
 
-const formatNumber = (value: number) => new Intl.NumberFormat("fa-IR").format(value)
+const formatNumber = (value: number) => new Intl.NumberFormat("en-US").format(value)
 
 export default async function AdminOrderDetailPage({
   params,
@@ -45,16 +44,16 @@ export default async function AdminOrderDetailPage({
   }
 
   return (
-    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="rtl">
+    <PageContainer className="space-y-6 md:space-y-8 py-6" dir="ltr">
       <SectionHeader
-        title={`سفارش #${order.id.slice(0, 8)}`}
-        subtitle={`${formatDate(order.createdAt)} • ${ORDER_STATUS_LABELS_FA[order.status]}`}
+        title={`Order #${order.id.slice(0, 8)}`}
+        subtitle={`${formatDate(order.createdAt)} - ${order.status}`}
         actions={
           <Link
             href="/admin/orders"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
-            بازگشت به سفارش ها
+            Back to orders
           </Link>
         }
       />
@@ -62,7 +61,7 @@ export default async function AdminOrderDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <StyledCard variant="elevated" className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>وضعیت سفارش</CardTitle>
+            <CardTitle>Order Status</CardTitle>
           </CardHeader>
           <CardContent>
             <OrderStatusSelect orderId={order.id} initialStatus={order.status} />
@@ -71,19 +70,19 @@ export default async function AdminOrderDetailPage({
 
         <StyledCard variant="elevated">
           <CardHeader>
-            <CardTitle>ارسال</CardTitle>
+            <CardTitle>Shipping</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="space-y-1">
-              <div className="text-muted-foreground">شرکت حمل</div>
+              <div className="text-muted-foreground">Carrier</div>
               <div>{order.shippingCarrier || "-"}</div>
             </div>
             <div className="space-y-1">
-              <div className="text-muted-foreground">کد رهگیری</div>
+              <div className="text-muted-foreground">Tracking Code</div>
               <div>{order.trackingCode || "-"}</div>
             </div>
             <div className="space-y-1">
-              <div className="text-muted-foreground">تاریخ ارسال</div>
+              <div className="text-muted-foreground">Shipped At</div>
               <div>{order.shippedAt ? formatDate(order.shippedAt) : "-"}</div>
             </div>
             <div className="pt-2">
@@ -100,7 +99,7 @@ export default async function AdminOrderDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <StyledCard variant="elevated" className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>اقلام سفارش</CardTitle>
+            <CardTitle>Order Items</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {order.items.map((item) => (
@@ -111,7 +110,8 @@ export default async function AdminOrderDetailPage({
                 <div className="space-y-1">
                   <div className="font-semibold">{item.product.name}</div>
                   <div className="text-muted-foreground">
-                    {item.variant.size} / {item.variant.color} • تعداد {formatNumber(item.quantity)}
+                    {item.variant.size} / {item.variant.color} - Qty{" "}
+                    {formatNumber(item.quantity)}
                   </div>
                 </div>
                 <div className="font-semibold">
@@ -124,7 +124,7 @@ export default async function AdminOrderDetailPage({
 
         <StyledCard variant="elevated">
           <CardHeader>
-            <CardTitle>مشتری</CardTitle>
+            <CardTitle>Customer</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="font-semibold">
@@ -138,11 +138,11 @@ export default async function AdminOrderDetailPage({
             <div className="text-muted-foreground">{order.shippingAddress}</div>
             {order.shippingPostalCode && (
               <div className="text-muted-foreground">
-                کد پستی: {order.shippingPostalCode}
+                Postal Code: {order.shippingPostalCode}
               </div>
             )}
             {order.notes && (
-              <div className="text-muted-foreground">یادداشت: {order.notes}</div>
+              <div className="text-muted-foreground">Notes: {order.notes}</div>
             )}
           </CardContent>
         </StyledCard>
@@ -150,7 +150,7 @@ export default async function AdminOrderDetailPage({
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>تاریخچه وضعیت</CardTitle>
+          <CardTitle>Status History</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {order.statusHistory.length > 0 ? (
@@ -160,42 +160,42 @@ export default async function AdminOrderDetailPage({
                 className="flex flex-col gap-1 border-b border-border/50 pb-3 last:border-none last:pb-0"
               >
                 <div className="font-semibold">
-                  از {ORDER_STATUS_LABELS_FA[entry.fromStatus]} به {ORDER_STATUS_LABELS_FA[entry.toStatus]}
+                  From {entry.fromStatus} to {entry.toStatus}
                 </div>
                 <div className="text-muted-foreground">
                   {formatDate(entry.createdAt)}
                   {entry.changedByUser?.email
-                    ? ` • ${entry.changedByUser.name || entry.changedByUser.email}`
+                    ? ` - ${entry.changedByUser.name || entry.changedByUser.email}`
                     : ""}
                 </div>
                 {entry.note && (
-                  <div className="text-muted-foreground">یادداشت: {entry.note}</div>
+                  <div className="text-muted-foreground">Note: {entry.note}</div>
                 )}
               </div>
             ))
           ) : (
-            <div className="text-muted-foreground">تاریخچه ای ثبت نشده است.</div>
+            <div className="text-muted-foreground">No status history yet.</div>
           )}
         </CardContent>
       </StyledCard>
 
       <StyledCard variant="elevated">
         <CardHeader>
-          <CardTitle>جمع کل</CardTitle>
+          <CardTitle>Totals</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">جمع جزء</span>
+            <span className="text-muted-foreground">Subtotal</span>
             <span className="font-semibold">
               {formatPrice(order.totalAmount - order.shippingCost)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">هزینه ارسال</span>
+            <span className="text-muted-foreground">Shipping</span>
             <span className="font-semibold">{formatPrice(order.shippingCost)}</span>
           </div>
           <div className="flex items-center justify-between font-semibold">
-            <span>مبلغ نهایی</span>
+            <span>Total</span>
             <span>{formatPrice(order.totalAmount)}</span>
           </div>
         </CardContent>

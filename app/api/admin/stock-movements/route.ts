@@ -6,7 +6,10 @@ import { z } from "zod"
 
 const createSchema = z.object({
   variantId: z.string().min(1),
-  delta: z.number().int().nonzero(),
+  delta: z
+    .number()
+    .int()
+    .refine((value) => value !== 0, { message: "Delta must be non-zero." }),
   reason: z.nativeEnum(StockMovementReason),
   note: z.string().max(500).nullable().optional(),
 })
@@ -145,3 +148,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "??? ?? ??? ????? ??????." }, { status: 500 })
   }
 }
+export const dynamic = "force-dynamic"

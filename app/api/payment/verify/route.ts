@@ -290,17 +290,6 @@ export async function GET(request: NextRequest) {
           })
         })
 
-          if (result.count > 0) {
-            await tx.orderStatusHistory.create({
-              data: {
-                orderId: order.id,
-                fromStatus: OrderStatus.pending,
-                toStatus: OrderStatus.canceled,
-              },
-            })
-          }
-        })
-
         return NextResponse.redirect(
           `${process.env.APP_URL || process.env.NEXTAUTH_URL}/store/payment/failed?orderId=${order.id}&error=out_of_stock`
         )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,7 +20,7 @@ import { Loader2, User, Mail, Lock, Phone } from "lucide-react"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
 
-export default function SignUpPage() {
+function SignUpPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -186,5 +186,13 @@ export default function SignUpPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignUpPageContent />
+    </Suspense>
   )
 }

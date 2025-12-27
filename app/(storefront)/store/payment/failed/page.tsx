@@ -1,12 +1,14 @@
 "use client"
 
+import { Suspense } from "react"
+
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { XCircle, ArrowLeft, RefreshCw } from "lucide-react"
 
-export default function PaymentFailedPage() {
+function PaymentFailedPageContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get("orderId")
 
@@ -52,3 +54,10 @@ export default function PaymentFailedPage() {
   )
 }
 
+export default function PaymentFailedPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentFailedPageContent />
+    </Suspense>
+  )
+}

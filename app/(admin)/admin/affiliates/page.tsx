@@ -1,5 +1,6 @@
 ﻿import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { Prisma, UserRole } from "@prisma/client"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { PageContainer } from "@/components/ui/page-container"
@@ -61,14 +62,14 @@ export default async function AdminAffiliatesPage({
   const rawPage = typeof searchParams?.page === "string" ? searchParams.page : "1"
   const page = Math.max(Number.parseInt(rawPage, 10) || 1, 1)
 
-  const where = {
-    role: "affiliate",
+  const where: Prisma.UserWhereInput = {
+    role: UserRole.affiliate,
     ...(q
       ? {
           OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { email: { contains: q, mode: "insensitive" } },
-            { affiliateCode: { contains: q, mode: "insensitive" } },
+            { name: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { affiliateCode: { contains: q, mode: Prisma.QueryMode.insensitive } },
           ],
         }
       : {}),

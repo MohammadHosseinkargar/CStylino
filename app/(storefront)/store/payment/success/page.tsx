@@ -1,14 +1,14 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { useCartStore } from "@/store/cart-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CheckCircle2, Package, ArrowLeft, Sparkles } from "lucide-react"
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessPageContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get("orderId")
   const clearCart = useCartStore((state) => state.clearCart)
@@ -60,3 +60,10 @@ export default function PaymentSuccessPage() {
   )
 }
 
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentSuccessPageContent />
+    </Suspense>
+  )
+}
