@@ -3,6 +3,7 @@ import { Vazirmatn } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { Providers } from "@/components/providers"
+import { fa } from "@/lib/copy/fa"
 
 const vazirmatn = Vazirmatn({
   subsets: ["latin", "arabic"],
@@ -14,8 +15,8 @@ const vazirmatn = Vazirmatn({
 })
 
 export const metadata: Metadata = {
-  title: "استایلینو - فروشگاه آنلاین پوشاک زنانه",
-  description: "بهترین فروشگاه آنلاین پوشاک زنانه در ایران - استایل روزانه شما",
+  title: `${fa.brand.name} | ${fa.brand.descriptor}`,
+  description: fa.brand.shortDescription,
 }
 
 export default function RootLayout({

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json(
-        { error: "لطفاً ابتدا وارد شوید" },
+        { error: "برای ادامه باید وارد حساب شوید." },
         { status: 401 }
       )
     }
@@ -139,13 +139,13 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
       if (error?.message === "OUT_OF_STOCK") {
         return NextResponse.json(
-          { error: "?????? ???? ????? ???? ????." },
+          { error: "موجودی این محصول کافی نیست." },
           { status: 400 }
         )
       }
       if (error?.message === "VARIANT_NOT_FOUND") {
         return NextResponse.json(
-          { error: "????? ?????????? ???? ???." },
+          { error: "گزینه انتخاب شده یافت نشد." },
           { status: 400 }
         )
       }
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
 
     console.error("Order creation error:", error)
     return NextResponse.json(
-      { error: "خطا در ایجاد سفارش" },
+      { error: "خطا در ثبت سفارش." },
       { status: 500 }
     )
   }
@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json(
-        { error: "لطفاً ابتدا وارد شوید" },
+        { error: "برای ادامه باید وارد حساب شوید." },
         { status: 401 }
       )
     }
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching orders:", error)
     return NextResponse.json(
-      { error: "خطا در دریافت سفارش‌ها" },
+      { error: "خطا در دریافت سفارش ها." },
       { status: 500 }
     )
   }

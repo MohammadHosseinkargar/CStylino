@@ -12,6 +12,8 @@ import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
+import { formatPrice } from "@/lib/utils"
+import { fa } from "@/lib/copy/fa"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal } = useCartStore()
@@ -52,13 +54,13 @@ export default function CartPage() {
       <PageContainer className="py-20 min-h-screen flex items-center justify-center" dir="rtl">
         <EmptyState
           icon={<ShoppingBag className="w-10 h-10 text-muted-foreground" />}
-          title="سبد خرید شما خالی است"
-          description="برای شروع خرید، به بخش محصولات سر بزنید و کالاهای مورد علاقه خود را به سبد اضافه کنید."
+          title={fa.cart.emptyTitle}
+          description={fa.cart.emptyDescription}
           action={
             <Link href="/store/products">
               <Button size="lg" className="btn-editorial">
-                <ArrowLeft className="w-5 h-5 ml-2" />
-                مشاهده محصولات
+                <ArrowLeft className="w-5 h-5 ms-2" />
+                {fa.cart.emptyCta}
               </Button>
             </Link>
           }
@@ -68,10 +70,10 @@ export default function CartPage() {
   }
 
   return (
-    <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
+    <PageContainer className="py-8 md:py-12 lg:py-16 pb-[calc(var(--mobile-bottom-nav-height)+2.5rem)]" dir="rtl">
       <SectionHeader
-        title="سبد خرید"
-        subtitle={`${items.length} محصول در سبد خرید`}
+        title={fa.cart.title}
+        subtitle={fa.cart.subtitle.replace("{count}", items.length.toLocaleString("fa-IR"))}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
@@ -81,10 +83,12 @@ export default function CartPage() {
               <table className="w-full">
                 <thead className="border-b border-border/40 text-xs text-muted-foreground">
                   <tr>
-                    <th className="text-right font-semibold px-6 py-4">محصول</th>
-                    <th className="text-center font-semibold px-4 py-4">تعداد</th>
-                    <th className="text-right font-semibold px-4 py-4">قیمت</th>
-                    <th className="text-left font-semibold px-6 py-4"> </th>
+                    <th className="text-start font-semibold px-6 py-4">{fa.cart.productHeader}</th>
+                    <th className="text-center font-semibold px-4 py-4">
+                      {fa.cart.quantityHeader}
+                    </th>
+                    <th className="text-start font-semibold px-4 py-4">{fa.cart.priceHeader}</th>
+                    <th className="text-end font-semibold px-6 py-4"> </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
@@ -117,7 +121,7 @@ export default function CartPage() {
                                 <span className="font-medium">سایز:</span>
                                 <span>{item.variantSize}</span>
                               </span>
-                              <span>×</span>
+                              <span> - </span>
                               <span className="flex items-center gap-2">
                                 <span className="font-medium">رنگ:</span>
                                 <span
@@ -138,7 +142,7 @@ export default function CartPage() {
                               size="icon"
                               className="h-8 w-8 rounded-lg hover:bg-accent/50"
                               onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                              aria-label="کاهش تعداد"
+                              aria-label={fa.cart.quantityDecrease}
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
@@ -151,7 +155,7 @@ export default function CartPage() {
                               className="h-8 w-8 rounded-lg hover:bg-accent/50"
                               onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                               disabled={item.quantity >= item.availableStock}
-                              aria-label="افزایش تعداد"
+                              aria-label={fa.cart.quantityIncrease}
                             >
                               <Plus className="w-4 h-4" />
                             </Button>
@@ -159,7 +163,7 @@ export default function CartPage() {
                         </div>
                       </td>
                       <td className="px-4 py-5">
-                        <Price price={item.price * item.quantity} size="sm" className="text-right" />
+                        <Price price={item.price * item.quantity} size="sm" className="text-start" />
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex justify-end">
@@ -168,7 +172,7 @@ export default function CartPage() {
                             size="icon"
                             className="h-10 w-10 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
                             onClick={() => removeItem(item.variantId)}
-                            aria-label="حذف از سبد خرید"
+                            aria-label={fa.cart.removeItem}
                           >
                             <Trash2 className="w-5 h-5" />
                           </Button>
@@ -211,7 +215,7 @@ export default function CartPage() {
                           <span className="font-medium">سایز:</span>
                           <span>{item.variantSize}</span>
                         </span>
-                        <span>×</span>
+                        <span> - </span>
                         <span className="flex items-center gap-2">
                           <span className="font-medium">رنگ:</span>
                           <span
@@ -228,7 +232,7 @@ export default function CartPage() {
                             size="icon"
                             className="h-8 w-8 rounded-lg hover:bg-accent/50"
                             onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                            aria-label="کاهش تعداد"
+                            aria-label={fa.cart.quantityDecrease}
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
@@ -241,12 +245,12 @@ export default function CartPage() {
                             className="h-8 w-8 rounded-lg hover:bg-accent/50"
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                             disabled={item.quantity >= item.availableStock}
-                            aria-label="افزایش تعداد"
+                            aria-label={fa.cart.quantityIncrease}
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
                         </div>
-                        <Price price={item.price * item.quantity} size="sm" className="text-left" />
+                        <Price price={item.price * item.quantity} size="sm" className="text-end" />
                       </div>
                       <div className="mt-4 flex justify-end">
                         <Button
@@ -254,7 +258,7 @@ export default function CartPage() {
                           size="icon"
                           className="h-10 w-10 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
                           onClick={() => removeItem(item.variantId)}
-                          aria-label="حذف از سبد خرید"
+                          aria-label={fa.cart.removeItem}
                         >
                           <Trash2 className="w-5 h-5" />
                         </Button>
@@ -270,26 +274,24 @@ export default function CartPage() {
         <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
           <StyledCard variant="subtle" className="border-border/40">
             <CardHeader className="pb-4 md:pb-6">
-              <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
+              <CardTitle className="text-base md:text-title">{fa.cart.summaryTitle}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">جمع محصولات:</span>
-                  <span className="font-semibold persian-number">
-                    {itemsTotal.toLocaleString("fa-IR")} تومان
-                  </span>
+                  <span className="text-muted-foreground">{fa.cart.itemsTotal}</span>
+                  <span className="font-semibold persian-number">{formatPrice(itemsTotal)}</span>
                 </div>
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">هزینه ارسال:</span>
-                  <span className={`font-semibold persian-number ${shippingCost === null ? "animate-pulse" : ""}`}>
-                    {shippingCost === null
-                      ? "..."
-                      : `${shippingCost.toLocaleString("fa-IR")} تومان`}
+                  <span className="text-muted-foreground">{fa.cart.shipping}</span>
+                  <span
+                    className={`font-semibold persian-number ${shippingCost === null ? "animate-pulse" : ""}`}
+                  >
+                    {shippingCost === null ? "..." : formatPrice(shippingCost)}
                   </span>
                 </div>
                 <div className="border-t border-border/50 pt-4 flex justify-between items-center">
-                  <span className="text-subtitle font-bold">مبلغ کل:</span>
+                  <span className="text-subtitle font-bold">{fa.cart.total}</span>
                   {total === null ? (
                     <span className="font-semibold persian-number animate-pulse">...</span>
                   ) : (
@@ -299,12 +301,12 @@ export default function CartPage() {
               </div>
               <Link href="/store/checkout" className="block">
                 <Button className="w-full btn-editorial h-14 text-base" size="lg">
-                  ادامه و پرداخت
+                  {fa.cart.checkout}
                 </Button>
               </Link>
               <Link href="/store/products" className="block">
                 <Button variant="outline" className="w-full">
-                  ادامه خرید
+                  {fa.cart.continueShopping}
                 </Button>
               </Link>
             </CardContent>
@@ -312,19 +314,17 @@ export default function CartPage() {
         </div>
       </div>
 
-      <div className="lg:hidden sticky bottom-0 z-30 -mx-4 mt-8 border-t border-border/50 bg-background/95 backdrop-blur px-4 py-4">
+      <div className="lg:hidden sticky bottom-[calc(var(--mobile-bottom-nav-height)+env(safe-area-inset-bottom))] z-30 -mx-4 mt-8 border-t border-border/50 bg-background/95 backdrop-blur px-4 py-4">
         <div className="flex items-center justify-between text-sm mb-3">
-          <span className="text-muted-foreground">مبلغ کل:</span>
+          <span className="text-muted-foreground">{fa.cart.total}</span>
           {total === null ? (
             <span className="font-semibold persian-number animate-pulse">...</span>
           ) : (
-            <span className="font-semibold persian-number">
-              {total.toLocaleString("fa-IR")} تومان
-            </span>
+            <span className="font-semibold persian-number">{formatPrice(total)}</span>
           )}
         </div>
         <Link href="/store/checkout" className="block">
-          <Button className="w-full btn-editorial h-12 text-base">ادامه و پرداخت</Button>
+          <Button className="w-full btn-editorial h-12 text-base">{fa.cart.checkout}</Button>
         </Link>
       </div>
     </PageContainer>

@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, Mail, Lock } from "lucide-react"
 import Link from "next/link"
+import { fa } from "@/lib/copy/fa"
 
 function SignInPageContent() {
   const router = useRouter()
@@ -40,8 +41,8 @@ function SignInPageContent() {
 
       if (result?.error) {
         toast({
-          title: "خطا",
-          description: result.error,
+          title: fa.auth.signIn.invalidCredentialsTitle,
+          description: fa.auth.signIn.invalidCredentialsDescription,
           variant: "destructive",
         })
         setIsLoading(false)
@@ -52,8 +53,8 @@ function SignInPageContent() {
       router.refresh()
     } catch (error) {
       toast({
-        title: "خطا",
-        description: "خطا در ورود",
+        title: fa.auth.signIn.genericErrorTitle,
+        description: fa.auth.signIn.genericErrorDescription,
         variant: "destructive",
       })
       setIsLoading(false)
@@ -67,16 +68,14 @@ function SignInPageContent() {
           <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-hero font-bold">خوش آمدید</CardTitle>
-          <CardDescription className="text-body">
-            وارد حساب کاربری خود شوید
-          </CardDescription>
+          <CardTitle className="text-hero font-bold">{fa.auth.signIn.title}</CardTitle>
+          <CardDescription className="text-body">{fa.auth.signIn.subtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-3">
               <Label htmlFor="email" className="text-sm font-semibold">
-                ایمیل
+                {fa.auth.signIn.emailLabel}
               </Label>
               <div className="relative">
                 <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
@@ -84,7 +83,7 @@ function SignInPageContent() {
                   id="email"
                   type="email"
                   {...register("email")}
-                  placeholder="example@email.com"
+                  placeholder={fa.auth.signIn.emailPlaceholder}
                   className="pr-12 h-12"
                 />
               </div>
@@ -97,7 +96,7 @@ function SignInPageContent() {
 
             <div className="space-y-3">
               <Label htmlFor="password" className="text-sm font-semibold">
-                رمز عبور
+                {fa.auth.signIn.passwordLabel}
               </Label>
               <div className="relative">
                 <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
@@ -105,7 +104,7 @@ function SignInPageContent() {
                   id="password"
                   type="password"
                   {...register("password")}
-                  placeholder="••••••••"
+                  placeholder={fa.auth.signIn.passwordPlaceholder}
                   className="pr-12 h-12"
                 />
               </div>
@@ -121,18 +120,18 @@ function SignInPageContent() {
               className="w-full btn-editorial h-14 text-base"
               disabled={isLoading}
             >
-              {isLoading && <Loader2 className="w-5 h-5 ml-2 animate-spin" />}
-              ورود
+              {isLoading && <Loader2 className="w-5 h-5 ms-2 animate-spin" />}
+              {fa.auth.signIn.cta}
             </Button>
           </form>
 
           <div className="mt-8 text-center text-body">
-            <span className="text-muted-foreground">حساب کاربری ندارید؟ </span>
+            <span className="text-muted-foreground">{fa.auth.signIn.noAccount} </span>
             <Link
               href="/auth/signup"
               className="text-primary font-semibold hover:underline transition-colors duration-300"
             >
-              ثبت‌نام کنید
+              {fa.auth.signIn.createAccount}
             </Link>
           </div>
         </CardContent>

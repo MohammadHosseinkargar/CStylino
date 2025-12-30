@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Check } from "lucide-react"
+import { fa } from "@/lib/copy/fa"
 
 interface Variant {
   id: string
@@ -9,8 +10,8 @@ interface Variant {
   color: string
   colorHex: string
   stockOnHand: number
-  stockReserved: number
-  sku: string
+  stockReserved?: number
+  sku?: string
 }
 
 interface VariantSelectorProps {
@@ -35,19 +36,21 @@ export function VariantSelector({
   const getVariantStock = (size?: string, color?: string) => {
     if (size && color) {
       const variant = variants.find((v) => v.size === size && v.color === color)
-      return variant ? Math.max(0, variant.stockOnHand - variant.stockReserved) : 0
+      return variant
+        ? Math.max(0, variant.stockOnHand - (variant.stockReserved ?? 0))
+        : 0
     }
 
     if (size) {
       return variants
         .filter((v) => v.size === size)
-        .reduce((sum, v) => sum + Math.max(0, v.stockOnHand - v.stockReserved), 0)
+        .reduce((sum, v) => sum + Math.max(0, v.stockOnHand - (v.stockReserved ?? 0)), 0)
     }
 
     if (color) {
       return variants
         .filter((v) => v.color === color)
-        .reduce((sum, v) => sum + Math.max(0, v.stockOnHand - v.stockReserved), 0)
+        .reduce((sum, v) => sum + Math.max(0, v.stockOnHand - (v.stockReserved ?? 0)), 0)
     }
 
     return 0
@@ -58,14 +61,16 @@ export function VariantSelector({
       {availableSizes.length > 0 && (
         <div>
           <label className="block text-caption font-semibold mb-3 text-foreground">
-            سایز
+            {fa.pdp.sizeLabel}
             {selectedSize && (
-                <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
-                  ({getVariantStock(selectedSize, selectedColor || undefined) > 0
-                    ? `${getVariantStock(selectedSize, selectedColor || undefined)} عدد موجود`
-                  : "ناموجود"})
-                </span>
-              )}
+              <span className="text-muted-foreground font-normal ms-2 text-caption persian-number">
+                (
+                {getVariantStock(selectedSize, selectedColor || undefined) > 0
+                  ? `${getVariantStock(selectedSize, selectedColor || undefined)} ${fa.pdp.stockCount}`
+                  : fa.pdp.stockUnavailable}
+                )
+              </span>
+            )}
           </label>
           <div className="flex flex-wrap gap-2 md:gap-2.5">
             {availableSizes.map((size) => {
@@ -104,14 +109,16 @@ export function VariantSelector({
       {availableColors.length > 0 && (
         <div>
           <label className="block text-caption font-semibold mb-3 text-foreground">
-            رنگ
+            {fa.pdp.colorLabel}
             {selectedColor && (
-                <span className="text-muted-foreground font-normal mr-2 text-caption persian-number">
-                  ({getVariantStock(selectedSize || undefined, selectedColor) > 0
-                    ? `${getVariantStock(selectedSize || undefined, selectedColor)} عدد موجود`
-                  : "ناموجود"})
-                </span>
-              )}
+              <span className="text-muted-foreground font-normal ms-2 text-caption persian-number">
+                (
+                {getVariantStock(selectedSize || undefined, selectedColor) > 0
+                  ? `${getVariantStock(selectedSize || undefined, selectedColor)} ${fa.pdp.stockCount}`
+                  : fa.pdp.stockUnavailable}
+                )
+              </span>
+            )}
           </label>
           <div className="flex flex-wrap gap-2 md:gap-3">
             {availableColors.map((colorItem, idx) => {
@@ -135,7 +142,7 @@ export function VariantSelector({
                   )}
                   style={{ backgroundColor: colorItem.hex }}
                   title={colorItem.color}
-                  aria-label={`رنگ ${colorItem.color}`}
+                  aria-label={`${fa.pdp.colorLabel} ${colorItem.color}`}
                   aria-pressed={isSelected}
                   aria-disabled={isDisabled}
                 >

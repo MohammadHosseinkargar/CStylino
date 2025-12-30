@@ -1,5 +1,6 @@
 import { formatPrice } from "@/lib/utils"
 import { cn } from "@/lib/utils"
+import { fa } from "@/lib/copy/fa"
 
 interface PriceProps {
   price: number
@@ -37,7 +38,7 @@ export function Price({ price, originalPrice, className, size = "md" }: PricePro
               {formatPrice(originalPrice!)}
             </span>
             <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full">
-              {discountPercent}٪ تخفیف
+              {discountPercent}% {fa.price.discountLabel}
             </span>
           </>
         )}

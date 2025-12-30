@@ -1,126 +1,182 @@
-"use client"
+﻿"use client"
 
 import { useQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
-import Image from "next/image"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Price } from "@/components/storefront/price"
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { useCartStore } from "@/store/cart-store"
 import { useToast } from "@/hooks/use-toast"
-import {
-  ShoppingCart,
-  Plus,
-  Minus,
-  Heart,
-  Share2,
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  Loader2,
-  Ruler,
-  Truck,
-  Shield,
-  Clock,
-  CheckCircle,
-  Headphones,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import * as Dialog from "@radix-ui/react-dialog"
+import { useWishlistStore } from "@/store/wishlist-store"
+import { PageContainer } from "@/components/ui/page-container"
+import { SectionHeader } from "@/components/ui/section-header"
+import { StyledCard } from "@/components/ui/styled-card"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ProductGallery } from "@/components/storefront/pdp/product-gallery"
+import { ProductInfo } from "@/components/storefront/pdp/product-info"
+import { StickyMobileCTA } from "@/components/storefront/pdp/sticky-mobile-cta"
+import { ProductCard } from "@/components/storefront/product-card"
+import { PackageSearch, Sparkles, Star, Truck } from "lucide-react"
 
-// ==================== INTERFACE DEFINITIONS ====================
 interface ProductVariant {
-  id: string;
-  size: string;
-  color: string;
-  colorHex: string;
-  priceOverride?: number;
-  stockOnHand: number;
-  stockReserved?: number;
+  id: string
+  size: string
+  color: string
+  colorHex: string
+  priceOverride?: number
+  stockOnHand: number
+  stockReserved?: number
 }
 
 interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  basePrice: number;
-  images: string[];
-  variants: ProductVariant[];
+  id: string
+  name: string
+  slug: string
+  description: string
+  basePrice: number
+  images: string[]
+  variants: ProductVariant[]
 }
 
 interface ProductData {
-  product: Product;
-  relatedProducts: any[];
+  product: Product
+  relatedProducts: Product[]
 }
 
-// ==================== MAIN COMPONENT ====================
+const getStock = (variant: ProductVariant) =>
+  Math.max(0, variant.stockOnHand - (variant.stockReserved || 0))
+
+const normalizeVariants = (items: ProductVariant[]) =>
+  items.map((variant) => ({
+    ...variant,
+    stockReserved: variant.stockReserved ?? 0,
+  }))
 
 export default function ProductPage() {
   const params = useParams()
   const slug = params?.slug as string
-  
-  // State Management
+
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [quantity, setQuantity] = useState(1)
   const [currentImage, setCurrentImage] = useState(0)
   const [isAdding, setIsAdding] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  
-  const { toast } = useToast()
-  const addItem = useCartStore((state) => state.addItem)
 
-  // ==================== DATA FETCHING ====================
   const { data: productData, isLoading } = useQuery<ProductData>({
     queryKey: ["product", slug],
     queryFn: async () => {
       const res = await fetch(`/api/products/${slug}`)
-      if (!res.ok) throw new Error("Failed to fetch product")
+      if (!res.ok) throw new Error("خطا در دریافت محصول")
       return res.json()
     },
   })
 
   const product = productData?.product
-  const variants = product?.variants || []
   const relatedProducts = productData?.relatedProducts || []
+  const { toast } = useToast()
+  const addItem = useCartStore((state) => state.addItem)
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem)
+  const isWishlisted = useWishlistStore((state) =>
+    product ? state.hasItem(product.id) : false
+  )
 
-  // Default Selection Logic
+  const normalizedVariants = useMemo(
+    () => normalizeVariants(product?.variants ?? []),
+    [product?.variants]
+  )
+
+  const availableSizes = useMemo(
+    () => Array.from(new Set(normalizedVariants.map((variant) => variant.size))),
+    [normalizedVariants]
+  )
+
+  const colorsForSize = useMemo(() => {
+    const candidates = selectedSize
+      ? normalizedVariants.filter((variant) => variant.size === selectedSize)
+      : normalizedVariants
+    return Array.from(
+      new Map(
+        candidates.map((variant) => [
+          `${variant.color}-${variant.colorHex}`,
+          { color: variant.color, hex: variant.colorHex },
+        ])
+      ).values()
+    )
+  }, [normalizedVariants, selectedSize])
+
+  const sizesForColor = useMemo(() => {
+    if (!selectedColor) return availableSizes
+    return Array.from(
+      new Set(
+        normalizedVariants
+          .filter((variant) => variant.color === selectedColor)
+          .map((variant) => variant.size)
+      )
+    )
+  }, [availableSizes, normalizedVariants, selectedColor])
+
   useEffect(() => {
-    if (variants.length > 0 && !selectedSize && !selectedColor) {
-      const firstVariant = variants[0]
-      setSelectedSize(firstVariant.size)
-      setSelectedColor(firstVariant.color)
-    }
-  }, [variants])
+    if (!normalizedVariants.length) return
 
-  // Variant & Stock Logic
-  const selectedVariant = variants.find(
-    (v) => v.size === selectedSize && v.color === selectedColor
+    if (!selectedSize || !selectedColor) {
+      const firstAvailable =
+        normalizedVariants.find((variant) => getStock(variant) > 0) ||
+        normalizedVariants[0]
+      setSelectedSize(firstAvailable.size)
+      setSelectedColor(firstAvailable.color)
+      return
+    }
+
+    if (!availableSizes.includes(selectedSize)) {
+      setSelectedSize(availableSizes[0] || "")
+    }
+
+    if (selectedSize) {
+      const colorMatch = colorsForSize.find((colorItem) => colorItem.color === selectedColor)
+      if (!colorMatch) {
+        setSelectedColor(colorsForSize[0]?.color || "")
+      }
+    }
+  }, [availableSizes, colorsForSize, normalizedVariants, selectedColor, selectedSize])
+
+  const handleSizeSelect = (size: string) => {
+    setSelectedSize(size)
+    const colors = normalizedVariants
+      .filter((variant) => variant.size === size)
+      .map((variant) => ({ color: variant.color, hex: variant.colorHex }))
+    const nextColor = colors.find((colorItem) => colorItem.color === selectedColor)?.color
+    setSelectedColor(nextColor || colors[0]?.color || "")
+  }
+
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color)
+    const sizes = normalizedVariants
+      .filter((variant) => variant.color === color)
+      .map((variant) => variant.size)
+    const nextSize = sizes.includes(selectedSize) ? selectedSize : sizes[0]
+    setSelectedSize(nextSize || "")
+  }
+
+  const selectedVariant = normalizedVariants.find(
+    (variant) => variant.size === selectedSize && variant.color === selectedColor
   )
 
   const price = selectedVariant?.priceOverride ?? product?.basePrice ?? 0
-  const stock = selectedVariant
-    ? Math.max(0, selectedVariant.stockOnHand - (selectedVariant.stockReserved || 0))
-    : 0
-  const isOutOfStock = selectedVariant ? stock <= 0 : false
+  const stock = selectedVariant ? getStock(selectedVariant) : 0
+  const isOutOfStock = !selectedVariant || stock <= 0
 
-  const availableSizes: string[] = Array.from(new Set(variants.map(v => v.size)))
-  const availableColors = Array.from(
-    new Map(
-      variants
-        .filter(v => !selectedSize || v.size === selectedSize)
-        .map(v => [v.color, { color: v.color, hex: v.colorHex }])
-    ).values()
-  )
+  useEffect(() => {
+    if (stock > 0 && quantity > stock) {
+      setQuantity(stock)
+    }
+  }, [quantity, stock])
 
-  // Add to Cart Logic
   const handleAddToCart = () => {
-    if (!selectedVariant) {
+    if (!product || !selectedVariant) {
       toast({
-        title: "انتخاب لازم است",
-        description: "لطفاً سایز و رنگ محصول را انتخاب کنید",
+        title: "انتخاب نامعتبر",
+        description: "لطفا سایز و رنگ را انتخاب کنید.",
         variant: "destructive",
       })
       return
@@ -128,8 +184,8 @@ export default function ProductPage() {
 
     if (isOutOfStock) {
       toast({
-        title: "محصول ناموجود است",
-        description: "متاسفانه این محصول در حال حاضر موجود نمی‌باشد",
+        title: "ناموجود",
+        description: "این انتخاب در حال حاضر موجود نیست.",
         variant: "destructive",
       })
       return
@@ -138,363 +194,210 @@ export default function ProductPage() {
     setIsAdding(true)
 
     addItem({
-      productId: product!.id,
+      productId: product.id,
       variantId: selectedVariant.id,
-      slug: product!.slug,
-      productName: product!.name,
-      variantSize: selectedSize,
-      variantColor: selectedColor,
+      slug: product.slug,
+      productName: product.name,
+      variantSize: selectedVariant.size,
+      variantColor: selectedVariant.color,
       variantColorHex: selectedVariant.colorHex,
       price,
       quantity,
-      image: product!.images[0] || "",
+      image: product.images[0] || "",
       availableStock: stock,
     })
 
     toast({
-      title: "🎉 افزوده شد به سبد خرید",
-      description: "محصول با موفقیت به سبد خرید شما اضافه شد",
-      className: "border-[#d7b242] bg-gradient-to-r from-[#fdf9e8] to-white",
+      title: "به سبد خرید اضافه شد",
+      description: "محصول با موفقیت به سبد خرید اضافه شد.",
     })
 
     setShowSuccess(true)
     setTimeout(() => {
       setIsAdding(false)
       setShowSuccess(false)
-    }, 1500)
+    }, 1400)
   }
 
-  // Loading State
+  const handleWishlistToggle = () => {
+    if (!product) return
+    toggleWishlist({ productId: product.id, slug: product.slug, name: product.name, image: product.images[0] })
+  }
+
+  const handleShare = async () => {
+    if (!product) return
+    const shareData = {
+      title: product.name,
+      text: product.description || product.name,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else if (shareData.url) {
+        await navigator.clipboard.writeText(shareData.url)
+        toast({ title: "لینک کپی شد" })
+      }
+    } catch (error) {
+      toast({ title: "امکان اشتراک گذاری نیست", variant: "destructive" })
+    }
+  }
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-[#d7b242]" />
-      </div>
+      <PageContainer className="py-10 md:py-14" dir="rtl">
+        <div className="grid gap-10 lg:grid-cols-2">
+          <Skeleton className="aspect-[3/4] w-full" />
+          <div className="space-y-6">
+            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        </div>
+      </PageContainer>
     )
   }
 
-  // Not Found State
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
-        <h2 className="text-xl font-bold">محصول یافت نشد</h2>
-        <Button onClick={() => window.history.back()}>بازگشت</Button>
-      </div>
+      <PageContainer className="py-16" dir="rtl">
+        <EmptyState
+          icon={<PackageSearch className="h-7 w-7 text-muted-foreground" />}
+          title="محصول پیدا نشد"
+          description="کالای مورد نظر شما در حال حاضر در دسترس نیست."
+          action={
+            <Link href="/store/products">
+              <span className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground">
+                بازگشت به محصولات
+              </span>
+            </Link>
+          }
+        />
+      </PageContainer>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pb-20 font-sans" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-        
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
-          
-          {/* RIGHT COLUMN: Images (با همان منطق گالری قبلی شما) */}
-          <div className="space-y-6 order-1">
-             <div className="relative group">
-                <div className="relative aspect-[3/4] md:aspect-square rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-white">
-                  {product.images[currentImage] && (
-                    <Image
-                      src={product.images[currentImage]}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      priority
-                    />
-                  )}
-                  
-                  {/* دکمه‌های ناوبری گالری */}
-                  {product.images.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentImage(prev => prev > 0 ? prev - 1 : product.images.length - 1)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => setCurrentImage(prev => prev < product.images.length - 1 ? prev + 1 : 0)}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                    </>
-                  )}
-                  
-                  {/* Badge */}
-                  <div className="absolute top-5 left-5">
-                    <div className="px-4 py-1.5 rounded-full bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-500/30">
-                      ویژه
-                    </div>
-                  </div>
-                </div>
-             </div>
+    <PageContainer className="py-8 md:py-12 lg:py-16 pb-28" dir="rtl">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        <ProductGallery
+          images={product.images}
+          name={product.name}
+          currentIndex={currentImage}
+          onChange={setCurrentImage}
+        />
+        <ProductInfo
+          variants={normalizedVariants}
+          name={product.name}
+          price={price}
+          stock={stock}
+          isOutOfStock={isOutOfStock}
+          selectedSize={selectedSize}
+          selectedColor={selectedColor}
+          availableSizes={availableSizes}
+          availableColors={colorsForSize}
+          quantity={quantity}
+          onQuantityChange={setQuantity}
+          onSizeSelect={handleSizeSelect}
+          onColorSelect={handleColorSelect}
+          onAddToCart={handleAddToCart}
+          isAdding={isAdding}
+          showSuccess={showSuccess}
+          isWishlisted={isWishlisted}
+          onToggleWishlist={handleWishlistToggle}
+          onShare={handleShare}
+        />
+      </div>
 
-             {/* Thumbnails */}
-             {product.images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  {product.images.map((img: string, idx: number) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentImage(idx)}
-                      className={cn(
-                        "relative flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all",
-                        currentImage === idx ? "border-[#d7b242] shadow-md opacity-100" : "border-transparent opacity-60 hover:opacity-100"
-                      )}
-                    >
-                      <Image src={img} alt="" fill className="object-cover" />
-                    </button>
-                  ))}
-                </div>
-             )}
-          </div>
-
-          {/* LEFT COLUMN: Product Details (طرح جدید درخواستی) */}
-          <div className="flex flex-col space-y-6 order-2 bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-gray-100">
-            
-            {/* Header: Stock & Size Guide */}
-            <div className="flex items-center justify-between">
-              <div className={cn(
-                "px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2",
-                stock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
-              )}>
-                <span className={cn("w-2 h-2 rounded-full", stock > 0 ? "bg-emerald-500" : "bg-rose-500")}></span>
-                {stock > 0 ? `موجود در انبار (${stock} عدد)` : "ناموجود"}
-              </div>
-
-              {/* Size Guide Dialog */}
-              <Dialog.Root>
-                <Dialog.Trigger asChild>
-                  <button className="text-gray-400 hover:text-[#d7b242] text-xs font-bold flex items-center gap-1 transition-colors">
-                    <Ruler size={14} />
-                    راهنمای سایز
-                  </button>
-                </Dialog.Trigger>
-                <Dialog.Portal>
-                  <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-                  <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl p-6 w-full max-w-md z-50 shadow-2xl">
-                     <Dialog.Title className="text-lg font-bold mb-4 text-center">راهنمای سایز</Dialog.Title>
-                     <div className="overflow-hidden rounded-xl border border-gray-100">
-                        <table className="w-full text-sm text-center">
-                          <thead className="bg-[#FFF9E5]">
-                            <tr><th className="p-3">سایز</th><th className="p-3">سینه</th><th className="p-3">کمر</th></tr>
-                          </thead>
-                          <tbody>
-                            <tr><td className="p-3 font-bold">S</td><td className="p-3">82-86</td><td className="p-3">62-66</td></tr>
-                            <tr><td className="p-3 font-bold">M</td><td className="p-3">86-90</td><td className="p-3">66-70</td></tr>
-                            <tr><td className="p-3 font-bold">L</td><td className="p-3">90-94</td><td className="p-3">70-74</td></tr>
-                          </tbody>
-                        </table>
-                     </div>
-                     <Dialog.Close asChild>
-                       <Button className="w-full mt-4 bg-[#d7b242] hover:bg-[#c09a2b] text-black font-bold rounded-xl">بستن</Button>
-                     </Dialog.Close>
-                  </Dialog.Content>
-                </Dialog.Portal>
-              </Dialog.Root>
-            </div>
-
-            {/* Title & Price */}
-            <div>
-              <div className="text-xs text-gray-400 mb-2 font-medium">
-                 {productData?.product?.variants?.length ? "کالکشن جدید" : "تک محصول"}
-              </div>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 leading-tight">
-                {product.name}
-              </h1>
-              <div className="text-3xl font-black text-[#6F7BFF] dark:text-[#d7b242]">
-                <Price price={price} />
-              </div>
-            </div>
-
-            {/* Selectors Section */}
-            <div className="space-y-6 pt-4 border-t border-gray-50">
-               
-               {/* Controls Row */}
-               <div className="flex flex-wrap items-center justify-between gap-y-4 gap-x-2">
-                  
-                  {/* Colors */}
-                  <div className="space-y-2">
-                    <span className="text-xs text-gray-500 font-bold block">انتخاب رنگ: {selectedColor}</span>
-                    <div className="flex items-center gap-2">
-                      {availableColors.map(({ color, hex }) => (
-                        <button
-                          key={color}
-                          onClick={() => setSelectedColor(color)}
-                          className={cn(
-                            "w-9 h-9 rounded-full flex items-center justify-center relative transition-all duration-300",
-                            selectedColor === color ? "ring-2 ring-offset-2 ring-[#d7b242] scale-110" : "hover:scale-105 border border-gray-200"
-                          )}
-                          style={{ backgroundColor: hex }}
-                          title={color}
-                        >
-                          {selectedColor === color && <Check className="w-4 h-4 text-white drop-shadow-md" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Sizes */}
-                  <div className="space-y-2">
-                    <span className="text-xs text-gray-500 font-bold block">انتخاب سایز</span>
-                    <div className="flex items-center gap-2">
-                      {availableSizes.map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedSize(size)}
-                          className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all border-2",
-                            selectedSize === size
-                              ? "bg-black border-black text-white shadow-lg scale-105"
-                              : "bg-white border-gray-100 text-gray-600 hover:border-gray-300"
-                          )}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Quantity */}
-                  <div className="space-y-2">
-                    <span className="text-xs text-gray-500 font-bold block">تعداد</span>
-                    <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50 h-10">
-                      <button
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        disabled={quantity <= 1}
-                        className="w-8 h-full flex items-center justify-center text-gray-500 hover:bg-white rounded-r-xl transition-colors disabled:opacity-30"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="w-8 text-center text-sm font-bold">{quantity}</span>
-                      <button
-                        onClick={() => setQuantity(quantity + 1)}
-                        disabled={quantity >= stock}
-                        className="w-8 h-full flex items-center justify-center text-gray-500 hover:bg-white rounded-l-xl transition-colors disabled:opacity-30"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* Info Box (Yellow) */}
-            <div className="bg-[#FFF9E5] p-5 rounded-2xl border border-[#FFEFB3]">
-               <div className="flex items-center mb-3 gap-2">
-                  <Truck className="text-[#B48E2D]" size={20} />
-                  <h3 className="font-bold text-gray-900 text-sm">سفارش آسان، تحویل سریع</h3>
-               </div>
-               <p className="text-xs text-gray-600 mb-4 leading-relaxed opacity-80">
-                  ما تضمین می‌کنیم محصول شما در سریع‌ترین زمان ممکن و با بسته‌بندی ایمن به دستتان برسد.
-               </p>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl border border-[#FFEFB3]/50 flex items-center gap-3">
-                     <div className="bg-[#FFF9E5] p-1.5 rounded-lg"><Clock className="text-[#B48E2D]" size={16} /></div>
-                     <div>
-                        <div className="font-bold text-xs text-gray-900">ارسال فوری</div>
-                        <div className="text-[10px] text-gray-500">زیر ۲۴ ساعت در تهران</div>
-                     </div>
-                  </div>
-                  <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl border border-[#FFEFB3]/50 flex items-center gap-3">
-                     <div className="bg-[#FFF9E5] p-1.5 rounded-lg"><Headphones className="text-[#B48E2D]" size={16} /></div>
-                     <div>
-                        <div className="font-bold text-xs text-gray-900">پشتیبانی</div>
-                        <div className="text-[10px] text-gray-500">پاسخگویی آنلاین</div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-3 pt-2">
-               <Button
-                  className={cn(
-                    "w-full h-14 rounded-xl font-black text-base shadow-xl shadow-[#d7b242]/20 transition-all duration-300",
-                    showSuccess 
-                      ? "bg-emerald-500 hover:bg-emerald-600 text-white" 
-                      : "bg-[#d7b242] hover:bg-[#c09a2b] text-black hover:scale-[1.01]"
-                  )}
-                  onClick={handleAddToCart}
-                  disabled={isAdding || isOutOfStock || !selectedVariant}
-               >
-                  {isAdding ? <Loader2 className="ml-2 animate-spin" /> : showSuccess ? <CheckCircle className="ml-2" /> : <ShoppingCart className="ml-2" />}
-                  {showSuccess ? "اضافه شد" : isOutOfStock ? "ناموجود" : "افزودن به سبد خرید"}
-               </Button>
-               
-               <div className="grid grid-cols-2 gap-3">
-                  <button 
-                     className="h-12 border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all"
-                  >
-                     <Share2 size={16} /> اشتراک
-                  </button>
-                  <button 
-                     onClick={() => setIsFavorite(!isFavorite)}
-                     className={cn(
-                       "h-12 border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-sm font-bold transition-all",
-                       isFavorite ? "text-rose-500 border-rose-200 bg-rose-50" : "text-gray-600 hover:bg-gray-50 hover:border-gray-300"
-                     )}
-                  >
-                     <Heart size={16} className={cn(isFavorite && "fill-rose-500")} /> علاقه‌مندی
-                  </button>
-               </div>
-            </div>
-
-          </div>
+      <div className="mt-16 md:mt-24 space-y-10">
+        <div className="max-w-3xl space-y-3">
+          <h2 className="text-title font-bold">جزئیات محصول</h2>
+          <p className="text-body text-muted-foreground leading-relaxed">
+            {product.description || "جزئیات این محصول به زودی تکمیل می شود."}
+          </p>
         </div>
 
-        {/* بخش توضیحات (پایین) */}
-        <div className="mt-16 md:mt-24">
-           <div className="max-w-4xl mx-auto">
-              <div className="border-b border-gray-200 mb-6">
-                 <h2 className="text-xl font-black text-gray-900 pb-4 border-b-2 border-[#d7b242] inline-block">توضیحات محصول</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StyledCard variant="subtle" className="border-border/50">
+            <div className="p-6 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Sparkles className="h-4 w-4 text-primary" />
+                جنس و نگهداری
               </div>
-              <p className="text-gray-600 leading-8 text-justify">
-                {product.description || "توضیحات تکمیلی برای این محصول ثبت نشده است."}
+              <p className="text-body text-muted-foreground">
+                پارچه باکیفیت و لطیف. شستشو با آب سرد و خشک کردن در سطح صاف.
               </p>
-           </div>
+            </div>
+          </StyledCard>
+          <StyledCard variant="subtle" className="border-border/50">
+            <div className="p-6 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Star className="h-4 w-4 text-primary" />
+                فیت و ایستایی
+              </div>
+              <p className="text-body text-muted-foreground">
+                فیت متعادل و خوش ایست. سایز انتخابی خود را مطابق راهنما بردارید.
+              </p>
+            </div>
+          </StyledCard>
+          <StyledCard variant="subtle" className="border-border/50">
+            <div className="p-6 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Truck className="h-4 w-4 text-primary" />
+                ارسال و مرجوعی
+              </div>
+              <p className="text-body text-muted-foreground">
+                ارسال بین ۲ تا ۴ روز کاری. مرجوعی تا ۷ روز با حفظ شرایط کالا.
+              </p>
+              <Link href="/store/shipping" className="text-sm font-semibold text-primary">
+                مشاهده قوانین
+              </Link>
+            </div>
+          </StyledCard>
         </div>
 
-        {/* محصولات مشابه */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-20">
-            <div className="flex items-center justify-between mb-8">
-               <h2 className="text-2xl font-black text-gray-900">محصولات مشابه</h2>
-               <Button variant="ghost" className="text-[#d7b242] hover:text-[#c09a2b]">مشاهده همه <ChevronLeft className="w-4 h-4 mr-1"/></Button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {relatedProducts.slice(0, 4).map((item: any) => (
-                <div key={item.id} className="group cursor-pointer">
-                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100 mb-4 border border-gray-100">
-                    <Image src={item.images?.[0]} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-[#d7b242] transition-colors">{item.name}</h3>
-                  <div className="text-[#d7b242] font-black text-sm"><Price price={item.basePrice} /></div>
-                </div>
-              ))}
-            </div>
+        <SectionHeader
+          title="محصولات مرتبط"
+          subtitle="استایل خود را با انتخاب های هماهنگ کامل کنید."
+        />
+        {relatedProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {relatedProducts.slice(0, 4).map((item) => (
+              <ProductCard
+                key={item.id}
+                id={item.id}
+                name={item.name}
+                slug={item.slug}
+                basePrice={item.basePrice}
+                images={item.images}
+                variants={normalizeVariants(item.variants)}
+              />
+            ))}
           </div>
+        ) : (
+          <EmptyState
+            icon={<Sparkles className="h-6 w-6 text-muted-foreground" />}
+            title="محصول مرتبطی یافت نشد"
+            description="به زودی محصولات هماهنگ را اینجا قرار می دهیم."
+          />
         )}
 
-        {/* Mobile Sticky Bar (برای موبایل) */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-           <div className="flex items-center justify-between gap-4">
-              <div>
-                 <div className="text-[10px] text-gray-500">قیمت نهایی</div>
-                 <div className="text-lg font-black text-[#d7b242]"><Price price={price * quantity} /></div>
-              </div>
-              <Button 
-                onClick={handleAddToCart}
-                disabled={isAdding || isOutOfStock}
-                className="flex-1 bg-[#d7b242] hover:bg-[#c09a2b] text-black font-bold rounded-xl h-12"
-              >
-                 {isAdding ? "..." : "افزودن به سبد"}
-              </Button>
-           </div>
-        </div>
-
+        <SectionHeader title="نظرات مشتریان" subtitle="بازخورد خریداران اینجا نمایش داده می شود." />
+        <EmptyState
+          icon={<Star className="h-6 w-6 text-muted-foreground" />}
+          title="هنوز نظری ثبت نشده"
+          description="اولین نفر باشید که تجربه خود را به اشتراک می گذارد."
+        />
       </div>
-    </div>
+
+      <StickyMobileCTA
+        price={price * quantity}
+        disabled={isAdding || isOutOfStock}
+        isAdding={isAdding}
+        onAddToCart={handleAddToCart}
+      />
+    </PageContainer>
   )
 }

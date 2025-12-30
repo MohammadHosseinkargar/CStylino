@@ -1,14 +1,23 @@
 ﻿import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { fa } from "@/lib/copy/fa"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatPrice(price: number): string {
-  return new Intl.NumberFormat("fa-IR", {
-    style: "decimal",
-  }).format(price) + " تومان"
+export type FormatPriceOptions = {
+  usePersianDigits?: boolean
+}
+
+export function formatPrice(price: number, options: FormatPriceOptions = {}): string {
+  const { usePersianDigits = true } = options
+  const locale = usePersianDigits ? "fa-IR" : "en-US"
+  return (
+    new Intl.NumberFormat(locale, {
+      maximumFractionDigits: 0,
+    }).format(price) + ` ${fa.common.currency}`
+  )
 }
 
 export function generateAffiliateCode(): string {

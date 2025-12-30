@@ -341,3 +341,12 @@ model StockMovement {
   @@index([reason])
   @@index([createdAt])
 }
+
+model HomepageContent {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  heroHeadline    String
+  heroSubheadline String
+  heroEnabled     Boolean  @default(true)
+  updatedAt       DateTime @updatedAt
+}

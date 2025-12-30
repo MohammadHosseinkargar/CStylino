@@ -5,6 +5,8 @@ import Image from "next/image"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { cn } from "@/lib/utils"
+import { PageContainer } from "@/components/ui/page-container"
+import { fa } from "@/lib/copy/fa"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -138,10 +140,12 @@ export function StorytellingSection({ steps }: StorytellingSectionProps) {
   if (stackedLayout) {
     return (
       <section className="section-spacing bg-gradient-to-b from-background via-muted/20 to-background">
-        <div className="editorial-container px-4">
+        <PageContainer>
           <div className="mb-12">
-            <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">روایت مجموعه</p>
-            <h2 className="text-hero font-bold mt-4">از الهام تا پوشش نهایی</h2>
+            <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+              {fa.store.storyKicker}
+            </p>
+            <h2 className="text-hero font-bold mt-4">{fa.store.storyHeadline}</h2>
           </div>
           <div className="space-y-12">
             {steps.map((step, index) => (
@@ -164,7 +168,7 @@ export function StorytellingSection({ steps }: StorytellingSectionProps) {
               </div>
             ))}
           </div>
-        </div>
+        </PageContainer>
       </section>
     )
   }
@@ -175,7 +179,7 @@ export function StorytellingSection({ steps }: StorytellingSectionProps) {
       className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-background via-muted/20 to-background"
     >
       <div className="absolute inset-0 grain-texture" />
-      <div className="editorial-container px-4 py-16 relative z-10">
+      <PageContainer className="py-16 relative z-10">
         <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
           <div className="relative min-h-[28rem]">
             {steps.map((step, index) => (
@@ -193,20 +197,22 @@ export function StorytellingSection({ steps }: StorytellingSectionProps) {
                     </p>
                   ) : null}
                   <h3 className="text-hero font-bold mb-6">{step.title}</h3>
-                  <p className="text-body text-muted-foreground leading-relaxed text-lg">{step.body}</p>
+                  <p className="text-body text-muted-foreground leading-relaxed text-lg">
+                    {step.body}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2.5rem] border border-border/50 shadow-xl bg-muted/30">
-            {steps.map((step, index) => (
+            {steps.map((step) => (
               <div key={step.image} className="story-image absolute inset-0">
                 <Image src={step.image} alt={step.title} fill className="object-cover" />
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     </section>
   )
 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/rbac"
 import { Prisma, StockMovementReason } from "@prisma/client"
@@ -15,12 +15,12 @@ const createSchema = z.object({
 })
 
 const reasonLabels: Record<StockMovementReason, string> = {
-  manual_adjust: "????? ????",
-  order_reserved: "???? ?????",
-  order_committed: "??? ????",
-  order_released: "???????? ????",
-  refund_return: "?????? / ??????",
-  initial_stock: "?????? ?????",
+  manual_adjust: "تنظیم دستی",
+  order_reserved: "رزرو سفارش",
+  order_committed: "ثبت سفارش",
+  order_released: "آزادسازی رزرو",
+  refund_return: "مرجوعی / بازپرداخت",
+  initial_stock: "موجودی اولیه",
 }
 
 export async function GET(request: NextRequest) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   const productId = params.get("productId")
 
   if (!productId) {
-    return NextResponse.json({ error: "productId ???? ???." }, { status: 400 })
+    return NextResponse.json({ error: "productId الزامی است." }, { status: 400 })
   }
 
   const reason = params.get("reason") as StockMovementReason | null
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     ]
 
     if (!allowedReasons.includes(data.reason)) {
-      return NextResponse.json({ error: "???? ????? ????? ????." }, { status: 400 })
+      return NextResponse.json({ error: "دلیل انتخاب شده مجاز نیست." }, { status: 400 })
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     if (error?.message === "INVALID_ADJUSTMENT") {
       return NextResponse.json(
-        { error: "????? ???? ???? ??? ?????? ?? ???? ??? ?? ???? ??????." },
+        { error: "تغییر موجودی معتبر نیست یا باعث منفی شدن موجودی می شود." },
         { status: 400 }
       )
     }
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.error("Error creating stock movement:", error)
-    return NextResponse.json({ error: "??? ?? ??? ????? ??????." }, { status: 500 })
+    return NextResponse.json({ error: "خطا در ثبت تغییر موجودی." }, { status: 500 })
   }
 }
 export const dynamic = "force-dynamic"

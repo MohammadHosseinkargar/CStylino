@@ -1,4 +1,5 @@
-﻿import { OrderStatus } from "@prisma/client"
+import { OrderStatus } from "@prisma/client"
+import { fa } from "@/lib/copy/fa"
 
 // Allowed transitions:
 // pending -> processing, canceled
@@ -18,13 +19,13 @@ export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 }
 
 export const ORDER_STATUS_LABELS_FA: Record<OrderStatus, string> = {
-  pending: "در انتظار",
-  processing: "در حال پردازش",
-  shipped: "ارسال شد",
-  delivered: "تحویل شد",
-  canceled: "لغو شد",
-  returned: "مرجوع شد",
-  refunded: "بازپرداخت شد",
+  pending: fa.orderStatus.pending,
+  processing: fa.orderStatus.processing,
+  shipped: fa.orderStatus.shipped,
+  delivered: fa.orderStatus.delivered,
+  canceled: fa.orderStatus.canceled,
+  returned: fa.orderStatus.returned,
+  refunded: fa.orderStatus.refunded,
 }
 
 export function getOrderStatusLabelFa(status: OrderStatus) {
@@ -43,7 +44,10 @@ export function getOrderStatusTransitionError(
   fromStatus: OrderStatus,
   toStatus: OrderStatus
 ) {
-  return `تغییر وضعیت از «${getOrderStatusLabelFa(fromStatus)}» به «${getOrderStatusLabelFa(toStatus)}» مجاز نیست.`
+  return fa.orderStatus.transitionError(
+    getOrderStatusLabelFa(fromStatus),
+    getOrderStatusLabelFa(toStatus)
+  )
 }
 
 export function shouldRestockForTransition(

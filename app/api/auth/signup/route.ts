@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { signUpSchema } from "@/lib/validations"
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "??? ????? ???? ??? ??? ???." },
+        { error: "این ایمیل قبلا ثبت شده است." },
         { status: 400 }
       )
     }
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
       if (!affiliate || affiliate.role !== "affiliate") {
         return NextResponse.json(
-          { error: "?? ????? ????? ????." },
+          { error: "کد معرف معتبر نیست." },
           { status: 400 }
         )
       }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: "??? ??? ?? ?????? ????? ??.", user },
+      { message: "حساب کاربری با موفقیت ایجاد شد.", user },
       { status: 201 }
     )
   } catch (error: any) {
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     console.error("Signup error:", error)
     return NextResponse.json(
-      { error: "??? ??? ?????? ???." },
+      { error: "خطا در ثبت نام." },
       { status: 500 }
     )
   }

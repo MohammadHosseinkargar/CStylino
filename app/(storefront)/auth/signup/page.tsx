@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2, User, Mail, Lock, Phone } from "lucide-react"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import { fa } from "@/lib/copy/fa"
 
 function SignUpPageContent() {
   const router = useRouter()
@@ -45,16 +46,14 @@ function SignUpPageContent() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "خطا در ثبت‌نام")
+        throw new Error(fa.auth.signUp.requestError)
       }
 
       toast({
-        title: "موفق",
-        description: "ثبت‌نام با موفقیت انجام شد. در حال ورود...",
+        title: fa.auth.signUp.successTitle,
+        description: fa.auth.signUp.successDescription,
       })
 
-      // Auto sign in
       await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -65,8 +64,8 @@ function SignUpPageContent() {
       router.refresh()
     } catch (error: any) {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در ثبت‌نام",
+        title: fa.auth.signUp.genericErrorTitle,
+        description: fa.auth.signUp.genericErrorDescription,
         variant: "destructive",
       })
       setIsLoading(false)
@@ -80,23 +79,21 @@ function SignUpPageContent() {
           <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-hero font-bold">ایجاد حساب کاربری</CardTitle>
-          <CardDescription className="text-body">
-            حساب کاربری جدید ایجاد کنید
-          </CardDescription>
+          <CardTitle className="text-hero font-bold">{fa.auth.signUp.title}</CardTitle>
+          <CardDescription className="text-body">{fa.auth.signUp.subtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-sm font-semibold">
-                نام
+                {fa.auth.signUp.nameLabel}
               </Label>
               <div className="relative">
                 <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
                 <Input
                   id="name"
                   {...register("name")}
-                  placeholder="نام شما"
+                  placeholder={fa.auth.signUp.namePlaceholder}
                   className="pr-12 h-12"
                 />
               </div>
@@ -109,7 +106,7 @@ function SignUpPageContent() {
 
             <div className="space-y-3">
               <Label htmlFor="email" className="text-sm font-semibold">
-                ایمیل
+                {fa.auth.signUp.emailLabel}
               </Label>
               <div className="relative">
                 <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
@@ -117,7 +114,7 @@ function SignUpPageContent() {
                   id="email"
                   type="email"
                   {...register("email")}
-                  placeholder="example@email.com"
+                  placeholder={fa.auth.signUp.emailPlaceholder}
                   className="pr-12 h-12"
                 />
               </div>
@@ -130,7 +127,7 @@ function SignUpPageContent() {
 
             <div className="space-y-3">
               <Label htmlFor="password" className="text-sm font-semibold">
-                رمز عبور
+                {fa.auth.signUp.passwordLabel}
               </Label>
               <div className="relative">
                 <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
@@ -138,7 +135,7 @@ function SignUpPageContent() {
                   id="password"
                   type="password"
                   {...register("password")}
-                  placeholder="••••••••"
+                  placeholder={fa.auth.signUp.passwordPlaceholder}
                   className="pr-12 h-12"
                 />
               </div>
@@ -151,14 +148,17 @@ function SignUpPageContent() {
 
             <div className="space-y-3">
               <Label htmlFor="phone" className="text-sm font-semibold">
-                شماره تماس <span className="text-muted-foreground font-normal">(اختیاری)</span>
+                {fa.auth.signUp.phoneLabel}{" "}
+                <span className="text-muted-foreground font-normal">
+                  ({fa.common.optional})
+                </span>
               </Label>
               <div className="relative">
                 <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
                 <Input
                   id="phone"
                   {...register("phone")}
-                  placeholder="09123456789"
+                  placeholder={fa.auth.signUp.phonePlaceholder}
                   className="pr-12 h-12 persian-number"
                 />
               </div>
@@ -169,18 +169,18 @@ function SignUpPageContent() {
               className="w-full btn-editorial h-14 text-base"
               disabled={isLoading}
             >
-              {isLoading && <Loader2 className="w-5 h-5 ml-2 animate-spin" />}
-              ثبت‌نام
+              {isLoading && <Loader2 className="w-5 h-5 ms-2 animate-spin" />}
+              {fa.auth.signUp.cta}
             </Button>
           </form>
 
           <div className="mt-8 text-center text-body">
-            <span className="text-muted-foreground">قبلاً ثبت‌نام کرده‌اید؟ </span>
+            <span className="text-muted-foreground">{fa.auth.signUp.haveAccount} </span>
             <Link
               href="/auth/signin"
               className="text-primary font-semibold hover:underline transition-colors duration-300"
             >
-              وارد شوید
+              {fa.auth.signUp.signIn}
             </Link>
           </div>
         </CardContent>

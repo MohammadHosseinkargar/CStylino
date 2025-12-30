@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { CommissionStatus } from "@prisma/client"
 import { requireAffiliate } from "@/lib/rbac"
@@ -30,7 +30,7 @@ export async function GET() {
 
     if (!user || !user.affiliateCode) {
       return NextResponse.json(
-        { error: "????? ???? ???? ???." },
+        { error: "کاربر همکاری یافت نشد." },
         { status: 404 }
       )
     }
@@ -79,7 +79,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching affiliate dashboard:", error)
     return NextResponse.json(
-      { error: "?????? ??????? ??????? ?????? ???." },
+      { error: "خطا در دریافت اطلاعات داشبورد همکاری." },
       { status: 500 }
     )
   }

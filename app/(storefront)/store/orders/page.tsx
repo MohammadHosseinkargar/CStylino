@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useQuery } from "@tanstack/react-query"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,6 +20,7 @@ import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 import { ORDER_STATUS_LABELS_FA } from "@/lib/order-status"
+import { fa } from "@/lib/copy/fa"
 
 type OrderItem = {
   id: string
@@ -62,7 +63,7 @@ export default function OrdersPage() {
     queryKey: ["orders"],
     queryFn: async () => {
       const res = await fetch("/api/orders")
-      if (!res.ok) throw new Error("Failed to fetch orders")
+      if (!res.ok) throw new Error(fa.orders.statusFetchError)
       return (await res.json()) as OrderListItem[]
     },
   })
@@ -77,13 +78,13 @@ export default function OrdersPage() {
 
   return (
     <PageContainer className="py-8 md:py-12" dir="rtl">
-      <SectionHeader title="سفارش‌های من" subtitle="مشاهده وضعیت و جزئیات سفارش‌ها" />
+      <SectionHeader title={fa.orders.title} subtitle={fa.orders.subtitle} />
 
       {orders?.length === 0 ? (
         <EmptyState
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
-          title="هنوز سفارشی ثبت نکرده‌اید"
-          description="برای مشاهده سفارش‌ها، ابتدا خرید خود را ثبت کنید."
+          title={fa.orders.emptyTitle}
+          description={fa.orders.emptyDescription}
         />
       ) : (
         <div className="space-y-4">
@@ -103,13 +104,15 @@ export default function OrdersPage() {
                         <StatusIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg">سفارش #{order.id.slice(0, 8)}</CardTitle>
+                        <CardTitle className="text-lg">
+                          {fa.orders.orderLabel} #{order.id.slice(0, 8)}
+                        </CardTitle>
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {formatDate(order.createdAt)}
                         </p>
                       </div>
                     </div>
-                    <div className="text-left">
+                    <div className="text-end">
                       <div className="font-bold text-lg mb-1">
                         {formatPrice(order.totalAmount)}
                       </div>
@@ -126,10 +129,11 @@ export default function OrdersPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 pt-4 border-t border-border">
-                    {order.items.map((item: any) => (
+                    {order.items.map((item: OrderItem) => (
                       <div key={item.id} className="flex justify-between items-center text-sm">
                         <span className="text-muted-foreground">
-                          {item.product.name} - {item.variant.size} / {item.variant.color} × {item.quantity}
+                          {item.product.name} - {item.variant.size} / {item.variant.color} ×{" "}
+                          {item.quantity}
                         </span>
                         <span className="font-semibold persian-number">
                           {formatPrice(item.price * item.quantity)}

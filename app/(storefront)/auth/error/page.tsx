@@ -7,64 +7,10 @@ import { useSearchParams } from "next/navigation"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { fa } from "@/lib/copy/fa"
 
-const errorMessages: Record<
-  string,
-  { title: string; description: string }
-> = {
-  Configuration: {
-    title: "خطای پیکربندی",
-    description: "مشکلی در تنظیمات ورود وجود دارد. لطفا بعدا دوباره تلاش کنید.",
-  },
-  AccessDenied: {
-    title: "دسترسی رد شد",
-    description: "اجازه ورود برای این حساب صادر نشده است.",
-  },
-  Verification: {
-    title: "لینک نامعتبر",
-    description: "لینک تایید نامعتبر است یا منقضی شده است.",
-  },
-  CredentialsSignin: {
-    title: "ورود ناموفق",
-    description: "ایمیل یا رمز عبور اشتباه است. لطفا دوباره تلاش کنید.",
-  },
-  OAuthSignin: {
-    title: "خطای ورود با سرویس",
-    description: "اتصال به سرویس ورود با مشکل مواجه شد. لطفا دوباره تلاش کنید.",
-  },
-  OAuthCallback: {
-    title: "خطای بازگشت",
-    description: "بازگشت از سرویس ورود کامل نشد. لطفا دوباره تلاش کنید.",
-  },
-  OAuthCreateAccount: {
-    title: "خطای ساخت حساب",
-    description: "امکان ایجاد حساب با این سرویس وجود ندارد.",
-  },
-  EmailCreateAccount: {
-    title: "خطای ساخت حساب",
-    description: "امکان ایجاد حساب با ایمیل وجود ندارد.",
-  },
-  Callback: {
-    title: "خطای بازگشت",
-    description: "فرآیند ورود کامل نشد. لطفا دوباره تلاش کنید.",
-  },
-  OAuthAccountNotLinked: {
-    title: "حساب مرتبط نیست",
-    description: "این حساب به ایمیل دیگری متصل است. با ایمیل درست وارد شوید.",
-  },
-  EmailSignin: {
-    title: "خطای ارسال ایمیل",
-    description: "ارسال لینک ورود با ایمیل ناموفق بود.",
-  },
-  SessionRequired: {
-    title: "نیاز به ورود",
-    description: "برای دسترسی به این بخش باید وارد حساب خود شوید.",
-  },
-  Default: {
-    title: "خطای نامشخص",
-    description: "مشکلی در فرآیند ورود پیش آمد. لطفا دوباره تلاش کنید.",
-  },
-}
+const errorMessages: Record<string, { title: string; description: string }> =
+  fa.auth.error.messages
 
 function getMessage(code: string | null) {
   if (!code) {
@@ -92,15 +38,15 @@ function AuthErrorPageContent() {
         <CardContent className="space-y-6">
           {errorCode && (
             <div className="text-center text-sm text-muted-foreground">
-              کد خطا: <span className="font-semibold">{errorCode}</span>
+              {fa.auth.error.heading}: <span className="font-semibold">{errorCode}</span>
             </div>
           )}
           <div className="space-y-3">
             <Button asChild className="w-full btn-editorial h-12">
-              <Link href="/auth/signin">بازگشت به صفحه ورود</Link>
+              <Link href="/auth/signin">{fa.auth.error.actions.signIn}</Link>
             </Button>
             <Button asChild variant="outline" className="w-full h-12">
-              <Link href="/store">رفتن به فروشگاه</Link>
+              <Link href="/store">{fa.auth.error.actions.store}</Link>
             </Button>
           </div>
         </CardContent>

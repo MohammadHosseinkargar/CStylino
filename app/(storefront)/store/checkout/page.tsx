@@ -13,19 +13,22 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Price } from "@/components/storefront/price"
 import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
+import { cn, formatPrice } from "@/lib/utils"
 import { Loader2, MapPin, Phone, User } from "lucide-react"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { fa } from "@/lib/copy/fa"
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { items, getTotal } = useCartStore()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [shippingCost, setShippingCost] = useState<number | null>(null)
+  const [isRedirecting, setIsRedirecting] = useState(true)
 
   const {
     register,
@@ -37,13 +40,22 @@ export default function CheckoutPage() {
   })
 
   useEffect(() => {
+    if (status === "loading") return
+
     if (!session) {
+      setIsRedirecting(true)
       router.push("/auth/signin?callbackUrl=/store/checkout")
+      return
     }
+
     if (items.length === 0) {
+      setIsRedirecting(true)
       router.push("/store/cart")
+      return
     }
-  }, [session, items.length, router])
+
+    setIsRedirecting(false)
+  }, [session, status, items.length, router])
 
   useEffect(() => {
     if (session?.user?.name) {
@@ -79,8 +91,19 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  if (!session || items.length === 0) {
-    return null
+  if (isRedirecting) {
+    return (
+      <PageContainer className="py-10 md:py-14" dir="rtl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-14 w-2/3" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+          <Skeleton className="h-72 w-full" />
+        </div>
+      </PageContainer>
+    )
   }
 
   const onSubmit = async (data: any) => {
@@ -96,8 +119,7 @@ export default function CheckoutPage() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "خطا در ثبت سفارش")
+        throw new Error(fa.checkout.errors.createOrder)
       }
 
       const { order } = await response.json()
@@ -109,16 +131,15 @@ export default function CheckoutPage() {
       })
 
       if (!paymentResponse.ok) {
-        const error = await paymentResponse.json()
-        throw new Error(error.error || "خطا در دریافت درگاه پرداخت")
+        throw new Error(fa.checkout.errors.requestPayment)
       }
 
       const { url } = await paymentResponse.json()
       window.location.href = url
     } catch (error: any) {
       toast({
-        title: "خطا",
-        description: error.message || "خطا در ثبت سفارش",
+        title: fa.auth.signIn.genericErrorTitle,
+        description: fa.checkout.errors.generic,
         variant: "destructive",
       })
       setIsLoading(false)
@@ -130,10 +151,7 @@ export default function CheckoutPage() {
 
   return (
     <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
-      <SectionHeader
-        title="ثبت سفارش"
-        subtitle="لطفاً اطلاعات خود را وارد کنید تا سفارش شما در سریع‌ترین زمان ممکن پردازش شود."
-      />
+      <SectionHeader title={fa.checkout.title} subtitle={fa.checkout.subtitle} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
         <div className="lg:col-span-2 space-y-6">
@@ -143,19 +161,19 @@ export default function CheckoutPage() {
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
                   <User className="w-6 h-6 text-primary" />
                 </div>
-                اطلاعات تماس
+                {fa.checkout.customerInfo}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 sm:space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <Label htmlFor="customerName" className="mb-3 block text-sm font-semibold">
-                    نام و نام خانوادگی
+                    {fa.checkout.nameLabel}
                   </Label>
                   <Input
                     id="customerName"
                     {...register("customerName")}
-                    placeholder="نام و نام خانوادگی"
+                    placeholder={fa.checkout.nameLabel}
                     className={cn(
                       "h-12",
                       errors.customerName &&
@@ -169,14 +187,17 @@ export default function CheckoutPage() {
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="shippingPhone" className="mb-3 block text-sm font-semibold flex items-center gap-2">
+                  <Label
+                    htmlFor="shippingPhone"
+                    className="mb-3 block text-sm font-semibold flex items-center gap-2"
+                  >
                     <Phone className="w-4 h-4" />
-                    شماره موبایل
+                    {fa.checkout.phoneLabel}
                   </Label>
                   <Input
                     id="shippingPhone"
                     {...register("shippingPhone")}
-                    placeholder="09123456789"
+                    placeholder={fa.auth.signUp.phonePlaceholder}
                     className={cn(
                       "h-12 persian-number",
                       errors.shippingPhone &&
@@ -199,7 +220,7 @@ export default function CheckoutPage() {
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
-                آدرس ارسال
+                {fa.checkout.shippingInfo}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -207,12 +228,12 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <Label htmlFor="shippingProvince" className="mb-3 block text-sm font-semibold">
-                      استان
+                      {fa.checkout.provinceLabel}
                     </Label>
                     <Input
                       id="shippingProvince"
                       {...register("shippingProvince")}
-                      placeholder="استان"
+                      placeholder={fa.checkout.provinceLabel}
                       className={cn(
                         "h-12",
                         errors.shippingProvince &&
@@ -227,12 +248,12 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <Label htmlFor="shippingCity" className="mb-3 block text-sm font-semibold">
-                      شهر
+                      {fa.checkout.cityLabel}
                     </Label>
                     <Input
                       id="shippingCity"
                       {...register("shippingCity")}
-                      placeholder="شهر"
+                      placeholder={fa.checkout.cityLabel}
                       className={cn(
                         "h-12",
                         errors.shippingCity &&
@@ -249,12 +270,12 @@ export default function CheckoutPage() {
 
                 <div>
                   <Label htmlFor="shippingAddress" className="mb-3 block text-sm font-semibold">
-                    آدرس دقیق
+                    {fa.checkout.addressLabel}
                   </Label>
                   <Input
                     id="shippingAddress"
                     {...register("shippingAddress")}
-                    placeholder="خیابان، کوچه، پلاک، واحد"
+                    placeholder={fa.checkout.addressLabel}
                     className={cn(
                       "h-12",
                       errors.shippingAddress &&
@@ -271,12 +292,12 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <Label htmlFor="shippingPostalCode" className="mb-3 block text-sm font-semibold">
-                      کد پستی
+                      {fa.checkout.postalLabel}
                     </Label>
                     <Input
                       id="shippingPostalCode"
                       {...register("shippingPostalCode")}
-                      placeholder="1234567890"
+                      placeholder="مثال: ۱۲۳۴۵۶۷۸۹۰"
                       className={cn(
                         "h-12 persian-number",
                         errors.shippingPostalCode &&
@@ -290,13 +311,14 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div className="flex items-end text-xs text-muted-foreground">
-                    کد پستی: ۱۰ رقم (بدون خط تیره)
+                    {fa.checkout.postalHint}
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="notes" className="mb-3 block text-sm font-semibold">
-                    توضیحات سفارش (اختیاری)
+                    {fa.checkout.notesLabel}{" "}
+                    <span className="text-muted-foreground font-normal">({fa.common.optional})</span>
                   </Label>
                   <textarea
                     id="notes"
@@ -306,7 +328,7 @@ export default function CheckoutPage() {
                       errors.notes &&
                         "border-destructive focus-visible:ring-destructive/30 focus-visible:border-destructive bg-destructive/5"
                     )}
-                    placeholder="توضیحات خاصی اگر دارید بنویسید..."
+                    placeholder={fa.checkout.notesPlaceholder}
                   />
                 </div>
 
@@ -316,10 +338,10 @@ export default function CheckoutPage() {
                   className="w-full btn-editorial h-14 text-base"
                   disabled={isLoading}
                 >
-                  {isLoading && <Loader2 className="w-5 h-5 ml-2 animate-spin" />}
-                  پرداخت و تکمیل خرید
+                  {isLoading && <Loader2 className="w-5 h-5 ms-2 animate-spin" />}
+                  {fa.checkout.submit}
                 </Button>
-                <p className="text-xs text-muted-foreground">روش پرداخت: درگاه امن</p>
+                <p className="text-xs text-muted-foreground">{fa.checkout.paymentMethod}</p>
               </form>
             </CardContent>
           </StyledCard>
@@ -328,40 +350,36 @@ export default function CheckoutPage() {
         <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
           <StyledCard variant="subtle" className="border-border/40">
             <CardHeader className="pb-4 md:pb-6">
-              <CardTitle className="text-base md:text-title">خلاصه سفارش</CardTitle>
+              <CardTitle className="text-base md:text-title">{fa.checkout.orderSummary}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 sm:space-y-6">
               <div className="space-y-3 pb-6 border-b border-border/50">
                 {items.map((item) => (
                   <div key={item.variantId} className="flex justify-between text-body">
                     <span className="text-muted-foreground line-clamp-1">
-                      {item.productName} - {item.quantity}
+                      {item.productName} - {item.quantity} {fa.checkout.itemCountSuffix}
                     </span>
                     <span className="font-semibold persian-number">
-                      {(item.price * item.quantity).toLocaleString("fa-IR")} تومان
+                      {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
               </div>
               <div className="space-y-3 pt-2">
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">جمع محصولات:</span>
-                  <span className="font-semibold persian-number">
-                    {itemsTotal.toLocaleString("fa-IR")} تومان
-                  </span>
+                  <span className="text-muted-foreground">{fa.cart.itemsTotal}</span>
+                  <span className="font-semibold persian-number">{formatPrice(itemsTotal)}</span>
                 </div>
                 <div className="flex justify-between text-body">
-                  <span className="text-muted-foreground">هزینه ارسال:</span>
+                  <span className="text-muted-foreground">{fa.cart.shipping}</span>
                   <span className="font-semibold persian-number">
-                    {shippingCost === null
-                      ? "..."
-                      : `${shippingCost.toLocaleString("fa-IR")} تومان`}
+                    {shippingCost === null ? "..." : formatPrice(shippingCost)}
                   </span>
                 </div>
               </div>
               <div className="border-t border-border/50 pt-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-subtitle font-bold">مبلغ قابل پرداخت:</span>
+                  <span className="text-subtitle font-bold">{fa.cart.total}</span>
                   {total === null ? (
                     <span className="font-semibold persian-number">...</span>
                   ) : (

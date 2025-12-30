@@ -46,6 +46,7 @@
     --shadow-xl: 0 24px 48px -10px rgb(0 0 0 / 0.16), 0 10px 20px -6px rgb(0 0 0 / 0.1);
 
     --storefront-header-height: 4rem;
+    --mobile-bottom-nav-height: 4.75rem;
   }
 
   .dark {
@@ -139,11 +140,6 @@
     z-index: 1;
   }
   
-  /* Editorial section spacing */
-  .section-spacing {
-    padding-top: clamp(4rem, 8vw, 8rem);
-    padding-bottom: clamp(4rem, 8vw, 8rem);
-  }
 }
 
 @layer utilities {
@@ -172,8 +168,8 @@
   }
 
   .section-spacing {
-    padding-top: clamp(3rem, 6vw, 6rem);
-    padding-bottom: clamp(3rem, 6vw, 6rem);
+    padding-top: clamp(4rem, 8vw, 8rem);
+    padding-bottom: clamp(4rem, 8vw, 8rem);
   }
 
   /* Luxury card - editorial feel */
@@ -212,6 +208,73 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
+  @keyframes hero-reveal {
+    0% {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-accent-shine {
+    0% {
+      transform: scaleX(0.92);
+      opacity: 0;
+    }
+    40% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  .hero-line {
+    display: inline-block;
+    opacity: 0;
+    animation: hero-reveal 1s cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+  }
+
+  .hero-line-delay-1 {
+    animation-delay: 0.05s;
+  }
+
+  .hero-line-delay-2 {
+    animation-delay: 0.2s;
+  }
+
+  .hero-line-delay-3 {
+    animation-delay: 0.35s;
+  }
+
+  .hero-line-delay-4 {
+    animation-delay: 0.5s;
+  }
+
+  .hero-accent {
+    position: relative;
+    padding-inline: 0.2em;
+    z-index: 0;
+  }
+
+  .hero-accent::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0.1em;
+    height: 0.45em;
+    border-radius: 999px;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.35), hsl(var(--accent) / 0.7));
+    z-index: -1;
+    transform-origin: center;
+    animation: hero-accent-shine 1.1s ease forwards;
+    animation-delay: 0.25s;
+  }
   
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
@@ -223,6 +286,18 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+
+    .hero-line {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+    }
+
+    .hero-accent::after {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+    }
   }
   
   /* Persian number formatting */
@@ -231,13 +306,6 @@
     font-feature-settings: "tnum" 1, "rlig" 1;
   }
   
-  /* Editorial container */
-  .editorial-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding-left: clamp(1.5rem, 4vw, 4rem);
-    padding-right: clamp(1.5rem, 4vw, 4rem);
-  }
 }
 
 /* RTL specific improvements */

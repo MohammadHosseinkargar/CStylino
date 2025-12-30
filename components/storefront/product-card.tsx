@@ -4,11 +4,15 @@ import Link from "next/link"
 import Image from "next/image"
 import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Price } from "@/components/storefront/price"
 import { ShoppingCart, Heart } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { StyledCard } from "@/components/ui/styled-card"
+import { useCartStore } from "@/store/cart-store"
+import { useToast } from "@/hooks/use-toast"
+import { useWishlistStore } from "@/store/wishlist-store"
+import { PriceBlock } from "@/components/storefront/price-block"
+import { fa } from "@/lib/copy/fa"
 
 interface ProductCardProps {
   id: string
@@ -23,6 +27,7 @@ interface ProductCardProps {
     colorHex: string
     stockOnHand: number
     stockReserved: number
+    priceOverride?: number
   }>
   featured?: boolean
 }
@@ -37,11 +42,73 @@ export function ProductCard({
   featured = false,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const { toast } = useToast()
+  const addItem = useCartStore((state) => state.addItem)
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem)
+  const isWishlisted = useWishlistStore((state) => state.hasItem(id))
   const hasStock = variants.some((v) => v.stockOnHand - v.stockReserved > 0)
-  const mainImage = images[0] || "/placeholder-product.jpg"
+  const mainImage = images[0] || "/placeholders/product-1.svg"
   const uniqueColors = Array.from(
-    new Set(variants.map((v) => ({ color: v.color, hex: v.colorHex })))
+    new Map(
+      variants.map((v) => [
+        `${v.color}-${v.colorHex}`,
+        { color: v.color, hex: v.colorHex },
+      ])
+    ).values()
   )
+  const primaryVariant =
+    variants.find((v) => v.stockOnHand - v.stockReserved > 0) || variants[0]
+
+  const handleAddToCart = () => {
+    if (!primaryVariant) {
+      toast({
+        title: fa.price.noVariantTitle,
+        description: fa.price.noVariantDescription,
+        variant: "destructive",
+      })
+      return
+    }
+
+    const availableStock = Math.max(
+      0,
+      primaryVariant.stockOnHand - primaryVariant.stockReserved
+    )
+
+    if (availableStock <= 0) {
+      toast({
+        title: fa.price.outOfStockTitle,
+        description: fa.price.outOfStockDescription,
+        variant: "destructive",
+      })
+      return
+    }
+
+    addItem({
+      productId: id,
+      variantId: primaryVariant.id,
+      slug,
+      productName: name,
+      variantSize: primaryVariant.size,
+      variantColor: primaryVariant.color,
+      variantColorHex: primaryVariant.colorHex,
+      price: primaryVariant.priceOverride ?? basePrice,
+      quantity: 1,
+      image: mainImage,
+      availableStock,
+    })
+
+    toast({
+      title: fa.price.addedToCartTitle,
+      description: fa.price.addedToCartDescription,
+    })
+  }
+
+  const handleWishlistToggle = () => {
+    toggleWishlist({ productId: id, slug, name, image: mainImage })
+    toast({
+      title: isWishlisted ? fa.price.removeFromWishlist : fa.price.addToWishlist,
+    })
+  }
 
   return (
     <StyledCard
@@ -66,18 +133,19 @@ export function ProductCard({
         />
         {featured && (
           <div className="absolute top-4 right-4 bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-md">
-            ویژه
+            {fa.price.featuredBadge}
           </div>
         )}
         {!hasStock && (
           <div className="absolute inset-0 bg-background/90 flex items-center justify-center backdrop-blur-sm">
-            <span className="text-sm font-semibold text-muted-foreground">ناموجود</span>
+            <span className="text-sm font-semibold text-muted-foreground">
+              {fa.price.outOfStock}
+            </span>
           </div>
         )}
-        {/* Quick actions overlay */}
         <div
           className={cn(
-            "absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-500 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100",
+            "absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-all duration-500 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100",
             !hasStock && "opacity-0"
           )}
         >
@@ -86,9 +154,10 @@ export function ProductCard({
             className="h-12 w-12 rounded-full bg-background/95 backdrop-blur-md shadow-xl hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
             onClick={(e) => {
               e.preventDefault()
-              // Add to cart logic
+              handleAddToCart()
             }}
-            aria-label="افزودن به سبد خرید"
+            aria-label={fa.price.addToCart}
+            disabled={!hasStock}
           >
             <ShoppingCart className="h-5 w-5" />
           </Button>
@@ -98,11 +167,11 @@ export function ProductCard({
             className="h-12 w-12 rounded-full bg-background/95 backdrop-blur-md shadow-xl hover:bg-destructive/10 hover:text-destructive transition-all duration-300 hover:scale-110"
             onClick={(e) => {
               e.preventDefault()
-              // Add to favorites logic
+              handleWishlistToggle()
             }}
-            aria-label="افزودن به علاقه‌مندی‌ها"
+            aria-label={isWishlisted ? fa.price.removeFromWishlist : fa.price.addToWishlist}
           >
-            <Heart className="h-5 w-5" />
+            <Heart className={cn("h-5 w-5", isWishlisted && "fill-current")} />
           </Button>
         </div>
       </Link>
@@ -115,7 +184,7 @@ export function ProductCard({
         </Link>
 
         <div className="mt-auto pt-3 flex items-end justify-between">
-          <Price price={basePrice} size="md" />
+          <PriceBlock price={basePrice} size="sm" />
           {uniqueColors.length > 0 && (
             <div className="flex items-center gap-1.5">
               {uniqueColors.slice(0, 4).map((colorItem, idx) => (
@@ -127,7 +196,9 @@ export function ProductCard({
                 />
               ))}
               {uniqueColors.length > 4 && (
-                <span className="text-xs text-muted-foreground">+{uniqueColors.length - 4}</span>
+                <span className="text-xs text-muted-foreground">
+                  +{uniqueColors.length - 4}
+                </span>
               )}
             </div>
           )}
