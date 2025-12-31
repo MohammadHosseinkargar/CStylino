@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { OrderStatus } from "@prisma/client"
@@ -58,7 +59,7 @@ const statusColors: Record<OrderStatus, string> = {
   refunded: "text-gray-600 bg-gray-50",
 }
 
-export default function OrdersPage() {
+function OrdersPageContent() {
   const { data: orders, isLoading } = useQuery<OrderListItem[]>({
     queryKey: ["orders"],
     queryFn: async () => {
@@ -148,5 +149,13 @@ export default function OrdersPage() {
         </div>
       )}
     </PageContainer>
+  )
+}
+
+export default function OrdersPage() {
+  return (
+    <QueryProvider>
+      <OrdersPageContent />
+    </QueryProvider>
   )
 }

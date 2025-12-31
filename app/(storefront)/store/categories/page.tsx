@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import Link from "next/link"
 import Image from "next/image"
 import { PageContainer } from "@/components/ui/page-container"
@@ -10,7 +11,7 @@ import { SkeletonCard } from "@/components/ui/skeleton-kit"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FolderOpen } from "lucide-react"
 
-export default function CategoriesPage() {
+function CategoriesPageContent() {
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -51,6 +52,7 @@ export default function CategoriesPage() {
                       alt={category.name}
                       fill
                       className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   </div>
                 )}
@@ -79,5 +81,13 @@ export default function CategoriesPage() {
         </div>
       )}
     </PageContainer>
+  )
+}
+
+export default function CategoriesPage() {
+  return (
+    <QueryProvider>
+      <CategoriesPageContent />
+    </QueryProvider>
   )
 }

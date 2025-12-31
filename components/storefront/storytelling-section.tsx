@@ -18,7 +18,7 @@ type StoryStep = {
 }
 
 type StorytellingSectionProps = {
-  steps: StoryStep[]
+  steps: readonly StoryStep[]
 }
 
 export function StorytellingSection({ steps }: StorytellingSectionProps) {
@@ -163,7 +163,13 @@ export function StorytellingSection({ steps }: StorytellingSectionProps) {
                   <p className="text-body text-muted-foreground leading-relaxed">{step.body}</p>
                 </div>
                 <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border/40 shadow-lg">
-                  <Image src={step.image} alt={step.title} fill className="object-cover" />
+                  <Image
+                    src={step.image}
+                    alt={step.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 45vw"
+                  />
                 </div>
               </div>
             ))}
@@ -207,7 +213,13 @@ export function StorytellingSection({ steps }: StorytellingSectionProps) {
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2.5rem] border border-border/50 shadow-xl bg-muted/30">
             {steps.map((step) => (
               <div key={step.image} className="story-image absolute inset-0">
-                <Image src={step.image} alt={step.title} fill className="object-cover" />
+                <Image
+                  src={step.image}
+                  alt={step.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                />
               </div>
             ))}
           </div>

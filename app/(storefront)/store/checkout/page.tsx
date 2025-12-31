@@ -7,6 +7,7 @@ import { useCartStore } from "@/store/cart-store"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { checkoutSchema } from "@/lib/validations"
+import { SessionProviderWrapper } from "@/components/session-provider"
 import { Button } from "@/components/ui/button"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -21,7 +22,7 @@ import { StyledCard } from "@/components/ui/styled-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { fa } from "@/lib/copy/fa"
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const { items, getTotal } = useCartStore()
@@ -392,5 +393,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </PageContainer>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <SessionProviderWrapper>
+      <CheckoutPageContent />
+    </SessionProviderWrapper>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Wallet } from "lucide-react"
@@ -32,7 +33,7 @@ const getPayoutStatusLabel = (status?: string) => {
   }
 }
 
-export default function AffiliatePayoutsPage() {
+function AffiliatePayoutsPageContent() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -184,5 +185,13 @@ export default function AffiliatePayoutsPage() {
         </CardContent>
       </StyledCard>
     </PageContainer>
+  )
+}
+
+export default function AffiliatePayoutsPage() {
+  return (
+    <QueryProvider>
+      <AffiliatePayoutsPageContent />
+    </QueryProvider>
   )
 }

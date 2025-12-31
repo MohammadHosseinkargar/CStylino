@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { Vazirmatn } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
-import { Providers } from "@/components/providers"
 import { fa } from "@/lib/copy/fa"
 
 const vazirmatn = Vazirmatn({
@@ -27,10 +26,8 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" className={vazirmatn.variable} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground grain-texture">
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+        {children}
+        <Toaster />
       </body>
     </html>
   )

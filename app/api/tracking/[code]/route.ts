@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getCityCache, setCityCache } from "@/lib/city-cache"
+import { LruCache } from "@/lib/lru-cache"
 
 export const dynamic = "force-dynamic"
 
@@ -12,6 +13,22 @@ type TrackingEvent = {
 }
 
 const POSTEX_BASE_URL = "https://api.postex.ir/api/app/v1/tracking/public"
+const TRACKING_TTL_MS = 60_000
+const trackingCache = new LruCache<{
+  ok: boolean
+  trackingCode: string
+  status: "Delivered" | "InTransit" | "Unknown"
+  lastKnownCity: string | null
+  coords: { lat: number; lng: number } | null
+  routeCities: string[]
+  routePoints: Array<{ lat: number; lng: number; label: string }>
+  currentPoint: { lat: number; lng: number; label: string } | null
+  events: TrackingEvent[]
+  timelineNewestFirst: TrackingEvent[]
+}>(100)
+const cacheHeaders = {
+  "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
+}
 
 function normalizeEvent(event: any): TrackingEvent {
   return {
@@ -98,9 +115,13 @@ function extractRouteCities(events: TrackingEvent[]) {
 }
 
 async function geocodeCity(city: string) {
-  const cached = await getCityCache(city)
-  if (cached) {
-    return { lat: cached.lat, lng: cached.lng }
+  try {
+    const cached = await getCityCache(city)
+    if (cached) {
+      return { lat: cached.lat, lng: cached.lng }
+    }
+  } catch (error) {
+    console.warn("City cache read error:", error)
   }
 
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -126,7 +147,11 @@ async function geocodeCity(city: string) {
     return null
   }
 
-  await setCityCache(city, { lat, lng, updatedAt: new Date().toISOString() })
+  try {
+    await setCityCache(city, { lat, lng, updatedAt: new Date().toISOString() })
+  } catch (error) {
+    console.warn("City cache write error:", error)
+  }
   return { lat, lng }
 }
 
@@ -142,6 +167,12 @@ export async function GET(
       { status: 400 }
     )
   }
+
+  const cached = trackingCache.get(trackingCode)
+  if (cached) {
+    return NextResponse.json(cached, { headers: cacheHeaders })
+  }
+
 
   try {
     const url = `${POSTEX_BASE_URL}/${trackingCode}`
@@ -250,7 +281,7 @@ export async function GET(
       latestDescription.includes("تحویل گیرنده") ||
       /تحویل.+گردیده/.test(latestDescription)
 
-    const status =
+    const status: "Delivered" | "InTransit" | "Unknown" =
       events.length === 0 ? "Unknown" : isDelivered ? "Delivered" : "InTransit"
 
     let coords = null
@@ -276,7 +307,7 @@ export async function GET(
     const currentPoint =
       coords && lastKnownCity ? { ...coords, label: lastKnownCity } : null
 
-    return NextResponse.json({
+    const responsePayload = {
       ok: true,
       trackingCode,
       status,
@@ -287,7 +318,11 @@ export async function GET(
       currentPoint,
       events,
       timelineNewestFirst,
-    })
+    }
+
+    trackingCache.set(trackingCode, responsePayload, TRACKING_TTL_MS)
+
+    return NextResponse.json(responsePayload, { headers: cacheHeaders })
   } catch (error) {
     console.error("Tracking error:", error)
     return NextResponse.json(

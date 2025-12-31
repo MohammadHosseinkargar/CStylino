@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { QueryProvider } from "@/components/query-provider"
 import { useCartStore } from "@/store/cart-store"
 import { useToast } from "@/hooks/use-toast"
 import { useWishlistStore } from "@/store/wishlist-store"
@@ -52,7 +53,7 @@ const normalizeVariants = (items: ProductVariant[]) =>
     stockReserved: variant.stockReserved ?? 0,
   }))
 
-export default function ProductPage() {
+function ProductPageContent() {
   const params = useParams()
   const slug = params?.slug as string
 
@@ -399,5 +400,13 @@ export default function ProductPage() {
         onAddToCart={handleAddToCart}
       />
     </PageContainer>
+  )
+}
+
+export default function ProductPage() {
+  return (
+    <QueryProvider>
+      <ProductPageContent />
+    </QueryProvider>
   )
 }

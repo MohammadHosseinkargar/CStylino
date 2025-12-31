@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { OrderStatus } from "@prisma/client"
 import {
@@ -91,7 +92,7 @@ function OrderTrackingAction({
   )
 }
 
-export default function CustomerOrdersPage() {
+function CustomerOrdersPageContent() {
   const { data: orders, isLoading } = useQuery<OrderListItem[]>({
     queryKey: ["customer-orders"],
     queryFn: async () => {
@@ -268,5 +269,13 @@ export default function CustomerOrdersPage() {
         </>
       )}
     </PanelContainer>
+  )
+}
+
+export default function CustomerOrdersPage() {
+  return (
+    <QueryProvider>
+      <CustomerOrdersPageContent />
+    </QueryProvider>
   )
 }

@@ -3,6 +3,7 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { Users } from "lucide-react"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
@@ -26,7 +27,7 @@ const getStatusLabel = (status?: string) => {
   }
 }
 
-export default function AffiliateSubAffiliatesPage() {
+function AffiliateSubAffiliatesPageContent() {
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ["affiliate-dashboard"],
     queryFn: async () => {
@@ -108,5 +109,13 @@ export default function AffiliateSubAffiliatesPage() {
         </CardContent>
       </StyledCard>
     </PageContainer>
+  )
+}
+
+export default function AffiliateSubAffiliatesPage() {
+  return (
+    <QueryProvider>
+      <AffiliateSubAffiliatesPageContent />
+    </QueryProvider>
   )
 }

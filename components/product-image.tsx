@@ -13,10 +13,11 @@ type ProductImageProps = Omit<ImageProps, "src"> & {
 
 export function ProductImage({
   src,
+  alt = "",
   onError,
   ...props
 }: ProductImageProps) {
-  const [currentSrc, setCurrentSrc] = useState(() =>
+  const [currentSrc, setCurrentSrc] = useState<string>(() =>
     normalizeProductImageSrc(src)
   )
 
@@ -31,5 +32,5 @@ export function ProductImage({
     )
   }
 
-  return <Image {...props} src={currentSrc} onError={handleError} />
+  return <Image {...props} src={currentSrc} alt={alt} onError={handleError} />
 }

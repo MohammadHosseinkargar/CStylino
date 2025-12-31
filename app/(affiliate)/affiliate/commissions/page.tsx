@@ -5,6 +5,7 @@ import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { TrendingUp } from "lucide-react"
+import { QueryProvider } from "@/components/query-provider"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
@@ -221,8 +222,10 @@ function AffiliateCommissionsPageContent() {
 
 export default function AffiliateCommissionsPage() {
   return (
-    <Suspense fallback={null}>
-      <AffiliateCommissionsPageContent />
-    </Suspense>
+    <QueryProvider>
+      <Suspense fallback={null}>
+        <AffiliateCommissionsPageContent />
+      </Suspense>
+    </QueryProvider>
   )
 }

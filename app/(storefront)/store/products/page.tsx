@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/storefront/product-card"
@@ -42,7 +43,7 @@ interface Category {
   slug: string
 }
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const [filters, setFilters] = useState({
     category: "",
     minPrice: null as number | null,
@@ -396,5 +397,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </PageContainer>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <QueryProvider>
+      <ProductsPageContent />
+    </QueryProvider>
   )
 }

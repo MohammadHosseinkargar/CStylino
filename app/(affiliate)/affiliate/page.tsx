@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { StyledCard } from "@/components/ui/styled-card"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
-export default function AffiliateDashboard() {
+function AffiliateDashboardContent() {
   const { toast } = useToast()
   const [copied, setCopied] = useState(false)
 
@@ -196,5 +197,13 @@ export default function AffiliateDashboard() {
         </StyledCard>
       </div>
     </PageContainer>
+  )
+}
+
+export default function AffiliateDashboard() {
+  return (
+    <QueryProvider>
+      <AffiliateDashboardContent />
+    </QueryProvider>
   )
 }

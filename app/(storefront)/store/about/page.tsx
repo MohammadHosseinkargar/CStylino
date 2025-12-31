@@ -1,6 +1,3 @@
-"use client"
-
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import { PageContainer } from "@/components/ui/page-container"
 import { SectionHeader } from "@/components/ui/section-header"
@@ -17,16 +14,6 @@ import { fa } from "@/lib/copy/fa"
 const featureIcons = [Tag, HeartHandshake, ShieldCheck, Headphones]
 
 export default function AboutPage() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
-
   return (
     <PageContainer className="py-12 md:py-20" dir="rtl">
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

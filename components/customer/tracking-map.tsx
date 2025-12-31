@@ -3,6 +3,7 @@
 import "leaflet/dist/leaflet.css"
 import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from "react-leaflet"
 import L from "leaflet"
+import type { LatLngBoundsExpression } from "leaflet"
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
 import markerIcon from "leaflet/dist/images/marker-icon.png"
 import markerShadow from "leaflet/dist/images/marker-shadow.png"
@@ -38,8 +39,10 @@ export function TrackingMap({
 }: TrackingMapProps) {
   const hasRoute = routePoints.length >= 2
   const points = hasRoute ? routePoints : [{ lat, lng, label: city }]
-  const bounds =
-    points.length > 1 ? points.map((point) => [point.lat, point.lng]) : undefined
+  const bounds: LatLngBoundsExpression | undefined =
+    points.length > 1
+      ? (points.map((point) => [point.lat, point.lng] as [number, number]) as LatLngBoundsExpression)
+      : undefined
 
   const currentCityLabel = currentPoint?.label || city
 

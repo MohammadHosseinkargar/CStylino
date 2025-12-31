@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
@@ -33,7 +34,7 @@ const getPayoutStatusLabel = (status?: string) => {
   }
 }
 
-export default function AdminPayoutsPage() {
+function AdminPayoutsPageContent() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -215,5 +216,13 @@ export default function AdminPayoutsPage() {
         </CardContent>
       </StyledCard>
     </PageContainer>
+  )
+}
+
+export default function AdminPayoutsPage() {
+  return (
+    <QueryProvider>
+      <AdminPayoutsPageContent />
+    </QueryProvider>
   )
 }

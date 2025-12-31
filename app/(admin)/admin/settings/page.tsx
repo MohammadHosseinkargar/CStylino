@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,7 +47,7 @@ const validateSettings = (payload: {
   return null
 }
 
-export default function AdminSettingsPage() {
+function AdminSettingsPageContent() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState(DEFAULT_FORM)
@@ -227,5 +228,13 @@ export default function AdminSettingsPage() {
         </div>
       )}
     </PageContainer>
+  )
+}
+
+export default function AdminSettingsPage() {
+  return (
+    <QueryProvider>
+      <AdminSettingsPageContent />
+    </QueryProvider>
   )
 }

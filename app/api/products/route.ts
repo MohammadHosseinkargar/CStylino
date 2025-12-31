@@ -4,6 +4,20 @@ import { productSchema, variantSchema } from "@/lib/validations"
 import { z } from "zod"
 import { requireAdmin } from "@/lib/rbac"
 import { normalizeProductImages } from "@/lib/product-image.server"
+import { LruCache } from "@/lib/lru-cache"
+
+const PRODUCTS_TTL_MS = 60_000
+const productsCache = new LruCache<any>(200)
+const cacheHeaders = {
+  "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
+}
+
+const getCacheKey = (searchParams: URLSearchParams) => {
+  const entries = Array.from(searchParams.entries()).sort(([a], [b]) =>
+    a.localeCompare(b)
+  )
+  return new URLSearchParams(entries).toString()
+}
 
 const querySchema = z.object({
   category: z.string().optional(),
@@ -20,6 +34,11 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const params = querySchema.parse(Object.fromEntries(searchParams))
+    const cacheKey = getCacheKey(searchParams)
+    const cached = productsCache.get(cacheKey)
+    if (cached) {
+      return NextResponse.json(cached, { headers: cacheHeaders })
+    }
 
     const page = parseInt(params.page || "1")
     const limit = parseInt(params.limit || "12")
@@ -82,7 +101,7 @@ export async function GET(request: NextRequest) {
       images: normalizeProductImages(product.images),
     }))
 
-    return NextResponse.json({
+    const responsePayload = {
       products: normalizedProducts,
       pagination: {
         page,
@@ -90,7 +109,11 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    }
+
+    productsCache.set(cacheKey, responsePayload, PRODUCTS_TTL_MS)
+
+    return NextResponse.json(responsePayload, { headers: cacheHeaders })
   } catch (error) {
     console.error("Error fetching products:", error)
     return NextResponse.json(

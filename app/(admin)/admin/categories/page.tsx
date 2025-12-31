@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { QueryProvider } from "@/components/query-provider"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +20,7 @@ import { SkeletonTable } from "@/components/ui/skeleton-kit"
 
 const formatNumber = (value: number) => new Intl.NumberFormat("fa-IR").format(value)
 
-export default function AdminCategoriesPage() {
+function AdminCategoriesPageContent() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [isCreating, setIsCreating] = useState(false)
@@ -481,5 +482,13 @@ export default function AdminCategoriesPage() {
         </CardContent>
       </StyledCard>
     </PageContainer>
+  )
+}
+
+export default function AdminCategoriesPage() {
+  return (
+    <QueryProvider>
+      <AdminCategoriesPageContent />
+    </QueryProvider>
   )
 }

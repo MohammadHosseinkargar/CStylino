@@ -3,6 +3,7 @@ import path from "path"
 import {
   PRODUCT_PLACEHOLDER_SRC,
   isRemoteImageSrc,
+  normalizeLocalImageSrc,
   stripQueryAndHash,
 } from "@/lib/product-image"
 
@@ -24,13 +25,19 @@ export const normalizeProductImages = (images?: string[] | null) => {
       return PRODUCT_PLACEHOLDER_SRC
     }
 
-    if (isRemoteImageSrc(src) || src.startsWith("data:")) {
-      return src
+    const normalized = normalizeLocalImageSrc(src.trim())
+
+    if (!normalized) {
+      return PRODUCT_PLACEHOLDER_SRC
     }
 
-    if (isLocalImageSrc(src)) {
-      const publicPath = resolvePublicPath(src)
-      return fs.existsSync(publicPath) ? src : PRODUCT_PLACEHOLDER_SRC
+    if (isRemoteImageSrc(normalized) || normalized.startsWith("data:")) {
+      return normalized
+    }
+
+    if (isLocalImageSrc(normalized)) {
+      const publicPath = resolvePublicPath(normalized)
+      return fs.existsSync(publicPath) ? normalized : PRODUCT_PLACEHOLDER_SRC
     }
 
     return PRODUCT_PLACEHOLDER_SRC
