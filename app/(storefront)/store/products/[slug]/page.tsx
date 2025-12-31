@@ -8,9 +8,8 @@ import { QueryProvider } from "@/components/query-provider"
 import { useCartStore } from "@/store/cart-store"
 import { useToast } from "@/hooks/use-toast"
 import { useWishlistStore } from "@/store/wishlist-store"
-import { PageContainer } from "@/components/ui/page-container"
+import { Container } from "@/components/ui/container"
 import { SectionHeader } from "@/components/ui/section-header"
-import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductGallery } from "@/components/storefront/pdp/product-gallery"
@@ -18,6 +17,8 @@ import { ProductInfo } from "@/components/storefront/pdp/product-info"
 import { StickyMobileCTA } from "@/components/storefront/pdp/sticky-mobile-cta"
 import { ProductCard } from "@/components/storefront/product-card"
 import { PackageSearch, Sparkles, Star, Truck } from "lucide-react"
+import { Surface } from "@/components/ui/surface"
+import { fa } from "@/lib/copy/fa"
 
 interface ProductVariant {
   id: string
@@ -68,7 +69,7 @@ function ProductPageContent() {
     queryKey: ["product", slug],
     queryFn: async () => {
       const res = await fetch(`/api/products/${slug}`)
-      if (!res.ok) throw new Error("خطا در دریافت محصول")
+      if (!res.ok) throw new Error("دریافت اطلاعات محصول ناموفق بود.")
       return res.json()
     },
   })
@@ -176,8 +177,8 @@ function ProductPageContent() {
   const handleAddToCart = () => {
     if (!product || !selectedVariant) {
       toast({
-        title: "انتخاب نامعتبر",
-        description: "لطفا سایز و رنگ را انتخاب کنید.",
+        title: fa.price.noVariantTitle,
+        description: fa.price.noVariantDescription,
         variant: "destructive",
       })
       return
@@ -185,8 +186,8 @@ function ProductPageContent() {
 
     if (isOutOfStock) {
       toast({
-        title: "ناموجود",
-        description: "این انتخاب در حال حاضر موجود نیست.",
+        title: fa.price.outOfStockTitle,
+        description: fa.price.outOfStockDescription,
         variant: "destructive",
       })
       return
@@ -209,8 +210,8 @@ function ProductPageContent() {
     })
 
     toast({
-      title: "به سبد خرید اضافه شد",
-      description: "محصول با موفقیت به سبد خرید اضافه شد.",
+      title: fa.price.addedToCartTitle,
+      description: fa.price.addedToCartDescription,
     })
 
     setShowSuccess(true)
@@ -241,13 +242,13 @@ function ProductPageContent() {
         toast({ title: "لینک کپی شد" })
       }
     } catch (error) {
-      toast({ title: "امکان اشتراک گذاری نیست", variant: "destructive" })
+      toast({ title: "اشتراک‌گذاری انجام نشد", variant: "destructive" })
     }
   }
 
   if (isLoading) {
     return (
-      <PageContainer className="py-10 md:py-14" dir="rtl">
+      <Container className="py-10 md:py-14" dir="rtl">
         <div className="grid gap-10 lg:grid-cols-2">
           <Skeleton className="aspect-[3/4] w-full" />
           <div className="space-y-6">
@@ -257,17 +258,17 @@ function ProductPageContent() {
             <Skeleton className="h-40 w-full" />
           </div>
         </div>
-      </PageContainer>
+      </Container>
     )
   }
 
   if (!product) {
     return (
-      <PageContainer className="py-16" dir="rtl">
+      <Container className="py-16" dir="rtl">
         <EmptyState
           icon={<PackageSearch className="h-7 w-7 text-muted-foreground" />}
-          title="محصول پیدا نشد"
-          description="کالای مورد نظر شما در حال حاضر در دسترس نیست."
+          title="محصولی پیدا نشد"
+          description="این محصول در دسترس نیست یا حذف شده است."
           action={
             <Link href="/store/products">
               <span className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground">
@@ -276,12 +277,12 @@ function ProductPageContent() {
             </Link>
           }
         />
-      </PageContainer>
+      </Container>
     )
   }
 
   return (
-    <PageContainer className="py-8 md:py-12 lg:py-16 pb-28" dir="rtl">
+    <Container className="py-8 md:py-12 lg:py-16 pb-28" dir="rtl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
         <ProductGallery
           images={product.images}
@@ -297,7 +298,7 @@ function ProductPageContent() {
           isOutOfStock={isOutOfStock}
           selectedSize={selectedSize}
           selectedColor={selectedColor}
-          availableSizes={availableSizes}
+          availableSizes={sizesForColor}
           availableColors={colorsForSize}
           quantity={quantity}
           onQuantityChange={setQuantity}
@@ -314,54 +315,48 @@ function ProductPageContent() {
 
       <div className="mt-16 md:mt-24 space-y-10">
         <div className="max-w-3xl space-y-3">
-          <h2 className="text-title font-bold">جزئیات محصول</h2>
+          <h2 className="text-title font-bold">درباره محصول</h2>
           <p className="text-body text-muted-foreground leading-relaxed">
-            {product.description || "جزئیات این محصول به زودی تکمیل می شود."}
+            {product.description || "توضیحی برای این محصول ثبت نشده است."}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StyledCard variant="subtle" className="border-border/50">
-            <div className="p-6 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Sparkles className="h-4 w-4 text-primary" />
-                جنس و نگهداری
-              </div>
-              <p className="text-body text-muted-foreground">
-                پارچه باکیفیت و لطیف. شستشو با آب سرد و خشک کردن در سطح صاف.
-              </p>
+          <Surface className="p-6 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Sparkles className="h-4 w-4 text-primary" />
+              کیفیت ممتاز
             </div>
-          </StyledCard>
-          <StyledCard variant="subtle" className="border-border/50">
-            <div className="p-6 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Star className="h-4 w-4 text-primary" />
-                فیت و ایستایی
-              </div>
-              <p className="text-body text-muted-foreground">
-                فیت متعادل و خوش ایست. سایز انتخابی خود را مطابق راهنما بردارید.
-              </p>
+            <p className="text-body text-muted-foreground">
+              انتخاب شده از بهترین متریال‌ها برای ماندگاری بیشتر.
+            </p>
+          </Surface>
+          <Surface className="p-6 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Star className="h-4 w-4 text-primary" />
+              مناسب استایل روز
             </div>
-          </StyledCard>
-          <StyledCard variant="subtle" className="border-border/50">
-            <div className="p-6 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Truck className="h-4 w-4 text-primary" />
-                ارسال و مرجوعی
-              </div>
-              <p className="text-body text-muted-foreground">
-                ارسال بین ۲ تا ۴ روز کاری. مرجوعی تا ۷ روز با حفظ شرایط کالا.
-              </p>
-              <Link href="/store/shipping" className="text-sm font-semibold text-primary">
-                مشاهده قوانین
-              </Link>
+            <p className="text-body text-muted-foreground">
+              طراحی به‌روز و هماهنگ با ترندهای فصل.
+            </p>
+          </Surface>
+          <Surface className="p-6 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Truck className="h-4 w-4 text-primary" />
+              ارسال سریع و امن
             </div>
-          </StyledCard>
+            <p className="text-body text-muted-foreground">
+              ارسال مطمئن به سراسر ایران با بسته‌بندی شیک.
+            </p>
+            <Link href="/store/shipping" className="text-sm font-semibold text-primary">
+              مشاهده جزئیات ارسال
+            </Link>
+          </Surface>
         </div>
 
         <SectionHeader
-          title="محصولات مرتبط"
-          subtitle="استایل خود را با انتخاب های هماهنگ کامل کنید."
+          title="محصولات مشابه"
+          subtitle="منتخب‌هایی با استایل نزدیک به انتخاب شما."
         />
         {relatedProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -380,16 +375,16 @@ function ProductPageContent() {
         ) : (
           <EmptyState
             icon={<Sparkles className="h-6 w-6 text-muted-foreground" />}
-            title="محصول مرتبطی یافت نشد"
-            description="به زودی محصولات هماهنگ را اینجا قرار می دهیم."
+            title="محصول مشابهی پیدا نشد"
+            description="به زودی موارد مرتبط اضافه خواهد شد."
           />
         )}
 
-        <SectionHeader title="نظرات مشتریان" subtitle="بازخورد خریداران اینجا نمایش داده می شود." />
+        <SectionHeader title="نقد و بررسی" subtitle="به زودی بخش نظرات فعال می‌شود." />
         <EmptyState
           icon={<Star className="h-6 w-6 text-muted-foreground" />}
-          title="هنوز نظری ثبت نشده"
-          description="اولین نفر باشید که تجربه خود را به اشتراک می گذارد."
+          title="نظری ثبت نشده"
+          description="اولین نظر را شما بنویسید."
         />
       </div>
 
@@ -399,7 +394,7 @@ function ProductPageContent() {
         isAdding={isAdding}
         onAddToCart={handleAddToCart}
       />
-    </PageContainer>
+    </Container>
   )
 }
 

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+﻿import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -41,12 +41,13 @@ export default async function CustomerOrderDetailPage({
   return (
     <PanelContainer dir="rtl">
       <SectionHeader
+        kicker="جزئیات سفارش"
         title={
           <h1 className="text-xl font-semibold">
-            {"سفارش #"}{order.id.slice(0, 8)}
+            سفارش <span dir="ltr">#{order.id.slice(0, 8)}</span>
           </h1>
         }
-        subtitle="جزئیات سفارش و اطلاعات ارسال"
+        subtitle="وضعیت سفارش، آدرس ارسال و اقلام خریداری‌شده."
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -65,14 +66,14 @@ export default async function CustomerOrderDetailPage({
               </StatusBadge>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-muted-foreground">مبلغ نهایی</span>
+              <span className="text-muted-foreground">مبلغ پرداختی</span>
               <span className="font-bold persian-number">
                 {formatPrice(order.totalAmount)}
               </span>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-muted-foreground">کد رهگیری</span>
-              <span className="font-semibold persian-number" dir="ltr">
+              <span className="font-semibold" dir="ltr">
                 {order.trackingCode || "ثبت نشده"}
               </span>
             </div>
@@ -87,7 +88,7 @@ export default async function CustomerOrderDetailPage({
             </p>
             <p>{order.shippingAddress}</p>
             <p className="text-muted-foreground">
-              {"کد پستی:"}{" "}{order.shippingPostalCode || "---"}
+              کد پستی: <span dir="ltr">{order.shippingPostalCode || "---"}</span>
             </p>
           </div>
         </PanelCard>
@@ -103,7 +104,7 @@ export default async function CustomerOrderDetailPage({
                 className="flex flex-wrap items-center justify-between gap-2"
               >
                 <span className="text-muted-foreground">
-                  {item.product.name} - {item.variant.size} / {item.variant.color} - {item.quantity}
+                  {item.product.name} - <span dir="ltr">{item.variant.size}</span> / {item.variant.color} - {item.quantity}
                 </span>
                 <span className="font-semibold persian-number">
                   {formatPrice(item.price * item.quantity)}
@@ -113,9 +114,7 @@ export default async function CustomerOrderDetailPage({
           </div>
           <div className="flex flex-wrap gap-3 pt-3">
             <Button asChild variant="outline">
-              <Link href="/account/orders">
-                {"بازگشت به سفارش‌ها"}
-              </Link>
+              <Link href="/account/orders">بازگشت به سفارش‌ها</Link>
             </Button>
             <Button asChild>
               <Link
@@ -125,7 +124,7 @@ export default async function CustomerOrderDetailPage({
                     : "/account/tracking"
                 }
               >
-                {"رهگیری مرسوله"}
+                پیگیری مرسوله
               </Link>
             </Button>
           </div>

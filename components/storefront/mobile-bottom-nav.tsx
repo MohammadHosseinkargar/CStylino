@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -45,7 +45,7 @@ export function MobileBottomNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 h-[var(--mobile-bottom-nav-height)] border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 h-[var(--mobile-bottom-nav-height)] border-t border-border/60 bg-background/95 backdrop-blur-sm md:hidden">
       <div className="flex h-full items-center justify-around px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => {
           const Icon = item.icon
@@ -63,8 +63,11 @@ export function MobileBottomNav() {
               <div className="relative">
                 <Icon className="h-5 w-5" />
                 {item.href === "/store/cart" && itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 h-4 min-w-4 rounded-full bg-primary px-1 text-[10px] font-bold leading-4 text-primary-foreground text-center">
-                    {itemCount > 9 ? "۹+" : itemCount.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])}
+                  <span
+                    className="absolute -top-2 -right-2 h-4 min-w-4 rounded-full bg-primary px-1 text-[10px] font-bold leading-4 text-primary-foreground text-center"
+                    dir="ltr"
+                  >
+                    {itemCount > 9 ? "9+" : itemCount}
                   </span>
                 )}
               </div>

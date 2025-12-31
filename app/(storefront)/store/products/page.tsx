@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useMemo, useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/storefront/product-card"
 import { Filter, X, SlidersHorizontal } from "lucide-react"
 import { cn, formatPrice } from "@/lib/utils"
-import { PageContainer } from "@/components/ui/page-container"
+import { Container } from "@/components/ui/container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { SkeletonCard } from "@/components/ui/skeleton-kit"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Slider } from "@/components/ui/slider"
+import { GlassCard } from "@/components/ui/glass-card"
 import { fa } from "@/lib/copy/fa"
 
 interface ProductVariant {
@@ -153,18 +154,18 @@ function ProductsPageContent() {
 
   if (isLoading) {
     return (
-      <PageContainer className="py-10 md:py-16" dir="rtl">
+      <Container className="py-10 md:py-16" dir="rtl">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
             <SkeletonCard key={index} />
           ))}
         </div>
-      </PageContainer>
+      </Container>
     )
   }
 
   return (
-    <PageContainer className="py-8 md:py-12 lg:py-16" dir="rtl">
+    <Container className="py-8 md:py-12 lg:py-16" dir="rtl">
       <SectionHeader title={fa.products.title} subtitle={fa.products.subtitle} />
 
       {showFilters && (
@@ -175,12 +176,12 @@ function ProductsPageContent() {
         />
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 mt-10">
         <aside
           className={cn(
             "lg:block",
             showFilters
-              ? "fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-background/95 backdrop-blur-xl border-l border-border/50 p-6 overflow-y-auto lg:static lg:inset-auto lg:z-auto lg:w-auto lg:max-w-none lg:border-0 lg:p-0 lg:bg-transparent"
+              ? "fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-background/95 backdrop-blur-sm border-l border-border/50 p-6 overflow-y-auto lg:static lg:inset-auto lg:z-auto lg:w-auto lg:max-w-none lg:border-0 lg:p-0 lg:bg-transparent"
               : "hidden"
           )}
         >
@@ -199,7 +200,7 @@ function ProductsPageContent() {
             </div>
           )}
 
-          <div className="space-y-8">
+          <GlassCard className="space-y-8 p-5 sm:p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-foreground">{fa.products.category}</label>
@@ -331,7 +332,7 @@ function ProductsPageContent() {
                 ))}
               </div>
             </div>
-          </div>
+          </GlassCard>
         </aside>
 
         <div className="lg:col-span-3">
@@ -339,7 +340,6 @@ function ProductsPageContent() {
             <div className="flex items-center gap-3 lg:hidden">
               <Button
                 variant="outline"
-                className="btn-editorial"
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal className="w-4 h-4 ms-2" />
@@ -369,7 +369,7 @@ function ProductsPageContent() {
           </div>
 
           {sortedProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
               {sortedProducts.map((product: Product) => (
                 <ProductCard
                   key={product.id}
@@ -388,7 +388,7 @@ function ProductsPageContent() {
               title={fa.products.emptyTitle}
               description={fa.products.emptyDescription}
               action={
-                <Button variant="outline" className="btn-editorial" onClick={resetFilters}>
+                <Button variant="outline" onClick={resetFilters}>
                   {fa.products.resetFilters}
                 </Button>
               }
@@ -396,7 +396,7 @@ function ProductsPageContent() {
           )}
         </div>
       </div>
-    </PageContainer>
+    </Container>
   )
 }
 

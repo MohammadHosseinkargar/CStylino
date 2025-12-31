@@ -71,7 +71,13 @@ export function ProductInfo({
               stock > 0 ? "bg-primary" : "bg-destructive"
             )}
           />
-          {stock > 0 ? `${fa.pdp.stockAvailable} (${stock})` : fa.pdp.stockUnavailable}
+          {stock > 0 ? (
+            <span>
+              {fa.pdp.stockAvailable} (<span dir="ltr">{stock}</span>)
+            </span>
+          ) : (
+            fa.pdp.stockUnavailable
+          )}
         </div>
         <SizeGuide />
       </div>

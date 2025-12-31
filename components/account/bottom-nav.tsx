@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -21,7 +21,7 @@ const navItems = [
   },
   {
     href: "/account/tracking",
-    label: "رهگیری",
+    label: "پیگیری",
     icon: MapPin,
     match: (path: string) => path.startsWith("/account/tracking"),
   },
@@ -39,7 +39,7 @@ export function BottomNav() {
   return (
     <nav
       dir="rtl"
-      className="fixed bottom-0 left-0 right-0 z-40 h-[var(--mobile-bottom-nav-height)] border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden font-sans"
+      className="fixed bottom-0 left-0 right-0 z-40 h-[var(--mobile-bottom-nav-height)] border-t border-border/60 bg-background/95 backdrop-blur-sm md:hidden font-sans"
     >
       <div className="flex h-full items-center justify-around px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => {

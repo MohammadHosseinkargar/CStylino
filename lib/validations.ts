@@ -20,7 +20,20 @@ export const productSchema = z.object({
   descriptionEn: z.string().optional(),
   basePrice: z.number().int().positive("قیمت باید عدد مثبت باشد."),
   categoryId: z.string().min(1, "دسته بندی الزامی است."),
-  images: z.array(z.string().url()).min(1, "حداقل یک تصویر محصول لازم است."),
+  images: z
+    .array(
+      z.string().refine((value) => {
+        const trimmed = value.trim()
+        if (!trimmed) return false
+        if (/^https?:\/\//i.test(trimmed)) return true
+        if (/^file:\/\//i.test(trimmed)) return false
+        if (/^blob:/i.test(trimmed)) return false
+        if (/^[a-zA-Z]:[\\/]/.test(trimmed)) return false
+        if (trimmed.startsWith("//")) return false
+        return trimmed.startsWith("/")
+      }, "Invalid url")
+    )
+    .min(1, "????? ?? ????? ????? ???? ???."),
   isActive: z.boolean().default(true),
   featured: z.boolean().default(false),
 })

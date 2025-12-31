@@ -4,12 +4,14 @@ import { cn } from "@/lib/utils"
 
 interface SectionHeaderProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  kicker?: React.ReactNode
   title: React.ReactNode
   subtitle?: React.ReactNode
   actions?: React.ReactNode
 }
 
 export function SectionHeader({
+  kicker,
   title,
   subtitle,
   actions,
@@ -25,6 +27,11 @@ export function SectionHeader({
       {...props}
     >
       <div className="space-y-2">
+        {kicker && (
+          <div className="text-xs tracking-[0.3em] text-muted-foreground">
+            {kicker}
+          </div>
+        )}
         <div className="text-title font-bold">{title}</div>
         {subtitle && <div className="text-body text-muted-foreground">{subtitle}</div>}
       </div>

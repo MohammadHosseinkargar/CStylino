@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -76,7 +76,7 @@ function OrderTrackingAction({
         <Input
           inputMode="numeric"
           pattern="\\d*"
-          placeholder="کد رهگیری را وارد کنید"
+          placeholder="کد رهگیری (اختیاری)"
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
           className="text-left"
@@ -85,7 +85,7 @@ function OrderTrackingAction({
       </div>
       <Button asChild className="h-12 px-5">
         <Link href={`/account/tracking${normalized ? `?code=${normalized}` : ""}`}>
-          {"رهگیری"}
+          پیگیری
         </Link>
       </Button>
     </div>
@@ -97,7 +97,7 @@ function CustomerOrdersPageContent() {
     queryKey: ["customer-orders"],
     queryFn: async () => {
       const res = await fetch("/api/orders")
-      if (!res.ok) throw new Error("خطا در دریافت سفارش‌ها")
+      if (!res.ok) throw new Error("دریافت سفارش‌ها ناموفق بود.")
       return (await res.json()) as OrderListItem[]
     },
   })
@@ -113,19 +113,16 @@ function CustomerOrdersPageContent() {
   return (
     <PanelContainer dir="rtl">
       <SectionHeader
-        title={
-          <h1 className="text-xl font-semibold">
-            {"سفارش‌های من"}
-          </h1>
-        }
-        subtitle="جزئیات سفارش‌ها و کدهای رهگیری."
+        kicker="سفارش‌ها"
+        title={<h1 className="text-xl font-semibold">سفارش‌های شما</h1>}
+        subtitle="وضعیت سفارش‌ها و کد رهگیری را در این بخش ببینید."
       />
 
       {orders?.length === 0 ? (
         <EmptyState
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
-          title="سفارشی ثبت نشده است"
-          description="پس از ثبت سفارش، اطلاعات آن در این بخش نمایش داده می‌شود."
+          title="سفارشی ثبت نشده"
+          description="هنوز سفارشی ندارید. از محصولات جدید دیدن کنید."
         />
       ) : (
         <>
@@ -157,7 +154,7 @@ function CustomerOrdersPageContent() {
                             >
                               <StatusIcon className="w-4 h-4" />
                             </span>
-                            <span className="font-semibold">#{order.id.slice(0, 8)}</span>
+                            <span className="font-semibold" dir="ltr">#{order.id.slice(0, 8)}</span>
                           </div>
                         </td>
                         <td className="py-4 text-muted-foreground">
@@ -181,9 +178,7 @@ function CustomerOrdersPageContent() {
                         </td>
                         <td className="py-4">
                           <Button asChild variant="outline" className="h-9 px-3">
-                            <Link href={`/account/orders/${order.id}`}>
-                              {"مشاهده"}
-                            </Link>
+                            <Link href={`/account/orders/${order.id}`}>مشاهده</Link>
                           </Button>
                         </td>
                       </tr>
@@ -211,8 +206,7 @@ function CustomerOrdersPageContent() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold">
-                          {"سفارش #"}
-                          {order.id.slice(0, 8)}
+                          سفارش <span dir="ltr">#{order.id.slice(0, 8)}</span>
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {formatDate(order.createdAt)}
@@ -238,7 +232,7 @@ function CustomerOrdersPageContent() {
                     {order.items.map((item: OrderItem) => (
                       <div key={item.id} className="flex justify-between items-center">
                         <span className="text-muted-foreground">
-                          {item.product.name} - {item.variant.size} / {item.variant.color} - {item.quantity}
+                          {item.product.name} - <span dir="ltr">{item.variant.size}</span> / {item.variant.color} - {item.quantity}
                         </span>
                         <span className="font-semibold persian-number">
                           {formatPrice(item.price * item.quantity)}
@@ -249,15 +243,10 @@ function CustomerOrdersPageContent() {
 
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
                     <div className="text-muted-foreground">
-                      {"کد رهگیری:"}{" "}
-                      <span dir="ltr" className="text-foreground persian-number">
-                        {order.trackingCode || "ثبت نشده"}
-                      </span>
+                      کد رهگیری: <span dir="ltr" className="text-foreground">{order.trackingCode || "ثبت نشده"}</span>
                     </div>
                     <Button asChild variant="outline" className="h-10 px-4">
-                      <Link href={`/account/orders/${order.id}`}>
-                        {"جزئیات"}
-                      </Link>
+                      <Link href={`/account/orders/${order.id}`}>جزئیات</Link>
                     </Button>
                   </div>
 

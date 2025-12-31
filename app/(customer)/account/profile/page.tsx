@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth/next"
+﻿import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { SectionHeader } from "@/components/ui/section-header"
 import { PanelContainer } from "@/components/account/panel-container"
@@ -13,17 +13,14 @@ export default async function CustomerProfilePage() {
   return (
     <PanelContainer dir="rtl">
       <SectionHeader
-        title={
-          <h1 className="text-xl font-semibold">پروفایل</h1>
-        }
-        subtitle="اطلاعات حساب و راه‌های ارتباطی خود را بررسی کنید."
+        kicker="پروفایل"
+        title={<h1 className="text-xl font-semibold">اطلاعات حساب</h1>}
+        subtitle="اطلاعات هویتی و روش‌های ارتباطی خود را بررسی کنید."
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <PanelCard>
-          <h3 className="text-base font-semibold mb-4">
-            {"اطلاعات حساب"}
-          </h3>
+          <h3 className="text-base font-semibold mb-4">اطلاعات حساب</h3>
           <div className="space-y-3 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-muted-foreground">نام</span>
@@ -31,23 +28,21 @@ export default async function CustomerProfilePage() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-muted-foreground">ایمیل</span>
-              <span className="font-semibold">{email}</span>
+              <span className="font-semibold" dir="ltr">{email}</span>
             </div>
           </div>
         </PanelCard>
 
         <PanelCard>
-          <h3 className="text-base font-semibold mb-4">
-            {"اطلاعات تماس"}
-          </h3>
+          <h3 className="text-base font-semibold mb-4">ارتباطات</h3>
           <div className="space-y-3 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-muted-foreground">شماره تماس</span>
-              <span className="font-semibold">ثبت نشده</span>
+              <span className="text-muted-foreground">تلفن پشتیبانی</span>
+              <span className="font-semibold" dir="ltr">021-12345678</span>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-muted-foreground">ایمیل پشتیبانی</span>
-              <span className="font-semibold">info@stylino.ir</span>
+              <span className="font-semibold" dir="ltr">info@stylino.ir</span>
             </div>
           </div>
         </PanelCard>

@@ -12,7 +12,7 @@ const styledCardVariants = cva(
         default: "shadow-sm",
         elevated: "shadow-md hover:shadow-lg",
         subtle: "bg-muted/40 shadow-none",
-        glass: "bg-background/70 backdrop-blur-xl shadow-md",
+        glass: "bg-background/70 backdrop-blur-sm shadow-md",
       },
     },
     defaultVariants: {

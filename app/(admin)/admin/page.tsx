@@ -1,11 +1,11 @@
 ﻿import { prisma } from "@/lib/prisma"
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { TrendingUp, Package, Users, ShoppingCart, AlertTriangle } from "lucide-react"
-import { StyledCard } from "@/components/ui/styled-card"
-import { PageContainer } from "@/components/ui/page-container"
+import { Container } from "@/components/ui/container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LOW_STOCK_THRESHOLD } from "@/lib/constants"
+import { GlassCard } from "@/components/ui/glass-card"
+import { Surface } from "@/components/ui/surface"
 
 const getOrderStatusLabel = (status: string) => {
   switch (status) {
@@ -14,15 +14,15 @@ const getOrderStatusLabel = (status: string) => {
     case "processing":
       return "در حال پردازش"
     case "shipped":
-      return "ارسال شد"
+      return "ارسال شده"
     case "delivered":
-      return "تحویل شد"
+      return "تحویل شده"
     case "canceled":
-      return "لغو شد"
+      return "لغو شده"
     case "refunded":
-      return "بازپرداخت شد"
+      return "بازگشت وجه"
     case "returned":
-      return "مرجوع شد"
+      return "مرجوع شده"
     default:
       return "نامشخص"
   }
@@ -66,116 +66,102 @@ export default async function AdminDashboard() {
   ).length
 
   return (
-    <PageContainer className="space-y-8 py-6" dir="rtl">
-      <SectionHeader title="داشبورد" subtitle="نمای کلی فروشگاه" />
+    <Container className="space-y-8 py-6" dir="rtl">
+      <SectionHeader title="داشبورد مدیریت" subtitle="نمای کلی فروشگاه" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              کل سفارش ها
-            </CardTitle>
-            <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold persian-number">{totalOrders}</div>
-            <p className="text-xs text-muted-foreground mt-1">مجموع سفارش های ثبت شده</p>
-          </CardContent>
-        </StyledCard>
-
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              درآمد کل
-            </CardTitle>
-            <TrendingUp className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {formatPrice(totalRevenue._sum.totalAmount || 0)}
+        <Surface className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">کل سفارش‌ها</div>
+              <div className="text-3xl font-bold persian-number mt-2">{totalOrders}</div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">بدون سفارش های لغو شده</p>
-          </CardContent>
-        </StyledCard>
+            <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">مجموع سفارش‌های ثبت‌شده</p>
+        </Surface>
 
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              تعداد محصولات
-            </CardTitle>
+        <Surface className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">درآمد</div>
+              <div className="text-2xl font-bold mt-2">
+                {formatPrice(totalRevenue._sum.totalAmount || 0)}
+              </div>
+            </div>
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">تجمعی سفارش‌های غیرلغو</p>
+        </Surface>
+
+        <Surface className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">محصولات</div>
+              <div className="text-3xl font-bold persian-number mt-2">{totalProducts}</div>
+            </div>
             <Package className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold persian-number">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground mt-1">مجموع محصولات ثبت شده</p>
-          </CardContent>
-        </StyledCard>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">تعداد محصولات فعال</p>
+        </Surface>
 
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              کاربران
-            </CardTitle>
+        <Surface className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">کاربران</div>
+              <div className="text-3xl font-bold persian-number mt-2">{totalUsers}</div>
+            </div>
             <Users className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold persian-number">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground mt-1">مجموع کاربران ثبت شده</p>
-          </CardContent>
-        </StyledCard>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">ثبت‌نام‌های کل</p>
+        </Surface>
 
-        <StyledCard variant="elevated">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              کمبود موجودی
-            </CardTitle>
+        <Surface className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">کمبود موجودی</div>
+              <div className="text-3xl font-bold persian-number mt-2">{lowStockCount}</div>
+            </div>
             <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold persian-number">{lowStockCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              محصولات زیر حد {LOW_STOCK_THRESHOLD}
-            </p>
-          </CardContent>
-        </StyledCard>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            کمتر از {LOW_STOCK_THRESHOLD} عدد
+          </p>
+        </Surface>
       </div>
 
-      <StyledCard variant="elevated">
-        <CardHeader>
-          <CardTitle>آخرین سفارش ها</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentOrders.length > 0 ? (
-              recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-accent/50 transition-colors"
-                >
-                  <div className="space-y-1">
-                    <div className="font-semibold">
-                      {order.user.name || order.user.email}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(order.createdAt)}
-                    </div>
+      <GlassCard className="p-6">
+        <div className="text-base font-semibold mb-4">سفارش‌های اخیر</div>
+        <div className="space-y-4">
+          {recentOrders.length > 0 ? (
+            recentOrders.map((order) => (
+              <div
+                key={order.id}
+                className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-accent/50 transition-colors"
+              >
+                <div className="space-y-1">
+                  <div className="font-semibold">
+                    {order.user.name || order.user.email}
                   </div>
-                  <div className="text-left space-y-1">
-                    <div className="font-bold">{formatPrice(order.totalAmount)}</div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {getOrderStatusLabel(order.status)}
-                    </div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatDate(order.createdAt)}
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                هنوز سفارشی ثبت نشده است.
+                <div className="text-left space-y-1">
+                  <div className="font-bold">{formatPrice(order.totalAmount)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {getOrderStatusLabel(order.status)}
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </StyledCard>
-    </PageContainer>
+            ))
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              سفارشی ثبت نشده است.
+            </div>
+          )}
+        </div>
+      </GlassCard>
+    </Container>
   )
 }

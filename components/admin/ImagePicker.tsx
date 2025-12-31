@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,17 +25,48 @@ export function ImagePicker({
   helperText = "برای نمایش بهتر، چند تصویر از زوایای مختلف اضافه کنید.",
 }: ImagePickerProps) {
   const { toast } = useToast()
+  const placeholderImage = "/placeholders/N1.png"
   const [activeTab, setActiveTab] = useState<"upload" | "url">("upload")
   const [urlInput, setUrlInput] = useState("")
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   const images = useMemo(() => value.filter((item) => item.trim()), [value])
 
+  useEffect(() => {
+    setImageErrors((prev) => {
+      if (!Object.keys(prev).length) return prev
+      const next: Record<string, boolean> = {}
+      images.forEach((image) => {
+        if (prev[image]) next[image] = true
+      })
+      return next
+    })
+  }, [images])
+
+  const normalizeImageInput = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+    if (/^blob:/i.test(trimmed) || /^file:\/\//i.test(trimmed)) return null
+    if (/^[a-zA-Z]:[\\/]/.test(trimmed)) return null
+    if (/^https?:\/\//i.test(trimmed)) return trimmed
+    if (trimmed.startsWith("//")) return null
+    const normalized = trimmed.replace(/\\/g, "/")
+    return normalized.startsWith("/") ? normalized : `/${normalized}`
+  }
+
   const addImage = (url: string) => {
-    const normalized = url.trim()
-    if (!normalized) return
+    const normalized = normalizeImageInput(url)
+    if (!normalized) {
+      toast({
+        title: "???? ???????",
+        description: "?? ?????? ???? ????.",
+        variant: "destructive",
+      })
+      return
+    }
     if (images.includes(normalized)) {
       toast({
         title: "تصویر تکراری",
@@ -62,14 +93,6 @@ export function ImagePicker({
     onChange(next)
   }
 
-  const isValidUrl = (value: string) => {
-    try {
-      const url = new URL(value)
-      return url.protocol === "http:" || url.protocol === "https:"
-    } catch {
-      return false
-    }
-  }
 
   const uploadFile = (file: File) => {
     return new Promise<string>((resolve, reject) => {
@@ -146,7 +169,7 @@ export function ImagePicker({
 
   const handleUrlAdd = () => {
     const trimmed = urlInput.trim()
-    if (!trimmed || !isValidUrl(trimmed)) {
+    if (!trimmed || !normalizeImageInput(trimmed)) {
       toast({
         title: "آدرس نامعتبر",
         description: "یک آدرس معتبر وارد کنید.",
@@ -264,14 +287,18 @@ export function ImagePicker({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {images.map((image, index) => (
               <div key={`${image}-${index}`} className="rounded-xl border border-border p-2">
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+                <div className="relative h-36 w-full overflow-hidden rounded-lg bg-muted sm:h-40 md:h-44">
                   <Image
-                    src={image}
+                    src={imageErrors[image] ? placeholderImage : image}
                     alt={`product-image-${index + 1}`}
                     fill
                     sizes="(max-width: 768px) 50vw, 25vw"
                     className="object-cover"
                     unoptimized
+                    onError={() => {
+                      if (imageErrors[image]) return
+                      setImageErrors((prev) => ({ ...prev, [image]: true }))
+                    }}
                   />
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-1">

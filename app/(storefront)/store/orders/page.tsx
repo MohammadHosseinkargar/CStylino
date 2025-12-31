@@ -1,8 +1,7 @@
-"use client"
+﻿"use client"
 
 import { useQuery } from "@tanstack/react-query"
 import { QueryProvider } from "@/components/query-provider"
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPrice, formatDate } from "@/lib/utils"
 import { OrderStatus } from "@prisma/client"
 import {
@@ -15,13 +14,13 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { PageContainer } from "@/components/ui/page-container"
+import { Container } from "@/components/ui/container"
 import { SectionHeader } from "@/components/ui/section-header"
-import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton-kit"
 import { ORDER_STATUS_LABELS_FA } from "@/lib/order-status"
 import { fa } from "@/lib/copy/fa"
+import { GlassCard } from "@/components/ui/glass-card"
 
 type OrderItem = {
   id: string
@@ -71,14 +70,14 @@ function OrdersPageContent() {
 
   if (isLoading) {
     return (
-      <PageContainer className="py-10" dir="rtl">
+      <Container className="py-10" dir="rtl">
         <SkeletonTable rows={6} />
-      </PageContainer>
+      </Container>
     )
   }
 
   return (
-    <PageContainer className="py-8 md:py-12" dir="rtl">
+    <Container className="py-8 md:py-12" dir="rtl">
       <SectionHeader title={fa.orders.title} subtitle={fa.orders.subtitle} />
 
       {orders?.length === 0 ? (
@@ -92,63 +91,58 @@ function OrdersPageContent() {
           {orders?.map((order) => {
             const StatusIcon = statusIcons[order.status]
             return (
-              <StyledCard key={order.id} variant="elevated">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          "h-10 w-10 rounded-xl flex items-center justify-center",
-                          statusColors[order.status]
-                        )}
-                      >
-                        <StatusIcon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
-                          {fa.orders.orderLabel} #{order.id.slice(0, 8)}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {formatDate(order.createdAt)}
-                        </p>
-                      </div>
+              <GlassCard key={order.id} className="p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "h-10 w-10 rounded-xl flex items-center justify-center",
+                        statusColors[order.status]
+                      )}
+                    >
+                      <StatusIcon className="w-5 h-5" />
                     </div>
-                    <div className="text-end">
-                      <div className="font-bold text-lg mb-1">
-                        {formatPrice(order.totalAmount)}
+                    <div>
+                      <div className="text-lg font-semibold">
+                        {fa.orders.orderLabel} <span dir="ltr">#{order.id.slice(0, 8)}</span>
                       </div>
-                      <span
-                        className={cn(
-                          "text-xs px-2.5 py-1 rounded-full font-medium",
-                          statusColors[order.status]
-                        )}
-                      >
-                        {ORDER_STATUS_LABELS_FA[order.status]}
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {formatDate(order.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-lg mb-1">
+                      {formatPrice(order.totalAmount)}
+                    </div>
+                    <span
+                      className={cn(
+                        "text-xs px-2.5 py-1 rounded-full font-medium",
+                        statusColors[order.status]
+                      )}
+                    >
+                      {ORDER_STATUS_LABELS_FA[order.status]}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-3 pt-4 border-t border-border mt-4">
+                  {order.items.map((item: OrderItem) => (
+                    <div key={item.id} className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">
+                        {item.product.name} - <span dir="ltr">{item.variant.size}</span> / {item.variant.color} - {item.quantity}
+                      </span>
+                      <span className="font-semibold persian-number">
+                        {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 pt-4 border-t border-border">
-                    {order.items.map((item: OrderItem) => (
-                      <div key={item.id} className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">
-                          {item.product.name} - {item.variant.size} / {item.variant.color} ×{" "}
-                          {item.quantity}
-                        </span>
-                        <span className="font-semibold persian-number">
-                          {formatPrice(item.price * item.quantity)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </StyledCard>
+                  ))}
+                </div>
+              </GlassCard>
             )
           })}
         </div>
       )}
-    </PageContainer>
+    </Container>
   )
 }
 

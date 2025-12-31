@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { AdminSidebar } from "@/components/admin/sidebar"
 import { prisma } from "@/lib/prisma"
+import { AdminProviders } from "./providers"
 
 export default async function AdminLayout({
   children,
@@ -25,9 +26,15 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" dir="rtl">
-      <AdminSidebar />
-      <main className="flex-1 w-full p-4 md:p-8">{children}</main>
-    </div>
+    <AdminProviders>
+      <div
+        className="min-h-screen flex flex-col md:flex-row md:items-start md:gap-6 bg-background font-sans"
+        dir="rtl"
+        lang="fa"
+      >
+        <AdminSidebar />
+        <main className="flex-1 w-full p-4 md:p-8">{children}</main>
+      </div>
+    </AdminProviders>
   )
 }

@@ -51,6 +51,17 @@ interface ProductFormProps {
   }
 }
 
+const normalizeImageInput = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (/^blob:/i.test(trimmed) || /^file:\/\//i.test(trimmed)) return null
+  if (/^[a-zA-Z]:[\\/]/.test(trimmed)) return null
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  if (trimmed.startsWith("//")) return null
+  const normalized = trimmed.replace(/\\/g, "/")
+  return normalized.startsWith("/") ? normalized : `/${normalized}`
+}
+
 export function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter()
   const { toast } = useToast()
@@ -132,8 +143,23 @@ export function ProductForm({ initialData }: ProductFormProps) {
         setIsSubmitting(false)
         return
       }
+      const normalizedImages = formData.images
+        .map((img) => normalizeImageInput(img))
+        .filter((img): img is string => Boolean(img))
+      const hadInvalidImages =
+        normalizedImages.length !== formData.images.filter((img) => img.trim()).length
 
-      if (formData.images.filter((img) => img.trim()).length === 0) {
+      if (hadInvalidImages) {
+        toast({
+          title: "???",
+          description: "?? ?????? ???? ????.",
+          variant: "destructive",
+        })
+        setIsSubmitting(false)
+        return
+      }
+
+      if (normalizedImages.length === 0) {
         toast({
           title: "خطا",
           description: "حداقل یک تصویر محصول را وارد کنید.",
@@ -146,7 +172,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       const productData = {
         ...formData,
         basePrice: parseInt(formData.basePrice, 10),
-        images: formData.images.filter((img) => img.trim()),
+        images: normalizedImages,
         variants: variants.map((variant) => ({
           id: variant.id,
           size: variant.size,

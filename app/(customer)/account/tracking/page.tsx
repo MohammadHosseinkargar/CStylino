@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useMemo, useState } from "react"
 import dynamic from "next/dynamic"
@@ -40,14 +40,14 @@ type TrackingResponse = {
 
 const statusMeta = {
   Delivered: { label: "تحویل شده", variant: "success" },
-  InTransit: { label: "در حال ارسال", variant: "info" },
+  InTransit: { label: "در مسیر", variant: "info" },
   Unknown: { label: "نامشخص", variant: "neutral" },
 } as const
 
 const toEnglishDigits = (value: string) =>
   value
-    .replace(/[۰-۹]/g, (d) => "0123456789"[Number(d.charCodeAt(0) - 1776)])
-    .replace(/[٠-٩]/g, (d) => "0123456789"[Number(d.charCodeAt(0) - 1632)])
+    .replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)])
+    .replace(/[٠-٩]/g, (d) => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)])
 
 const sanitizeTrackingInput = (value: string) =>
   toEnglishDigits(value.replace(/\s+/g, "")).replace(/[^\d]/g, "")
@@ -77,13 +77,11 @@ export default function TrackingPage() {
     setData(null)
 
     if (!normalizedCode) {
-      setError("کد رهگیری را وارد کنید.")
+      setError("لطفا کد رهگیری را وارد کنید.")
       return
     }
     if (!/^\d{20,30}$/.test(normalizedCode)) {
-      setError(
-        "کد رهگیری باید ۲۰ تا ۳۰ رقم باشد."
-      )
+      setError("کد رهگیری باید بین ۲۰ تا ۳۰ رقم باشد.")
       return
     }
 
@@ -92,14 +90,12 @@ export default function TrackingPage() {
       const res = await fetch(`/api/tracking/${normalizedCode}`)
       const payload = (await res.json()) as TrackingResponse
       if (!res.ok) {
-        setError(payload?.message || "مشکلی در دریافت اطلاعات رخ داد.")
+        setError(payload?.message || "دریافت اطلاعات ناموفق بود.")
         return
       }
       setData(payload)
     } catch (err) {
-      setError(
-        "اتصال به سرور برقرار نشد. دوباره تلاش کنید."
-      )
+      setError("ارتباط با سرور برقرار نشد. دوباره تلاش کنید.")
     } finally {
       setIsLoading(false)
     }
@@ -108,12 +104,9 @@ export default function TrackingPage() {
   return (
     <PanelContainer dir="rtl">
       <SectionHeader
-        title={
-          <h1 className="text-xl font-semibold">
-            {"رهگیری مرسوله"}
-          </h1>
-        }
-        subtitle="کد رهگیری خود را وارد کنید تا وضعیت مرسوله را ببینید."
+        kicker="پیگیری مرسوله"
+        title={<h1 className="text-xl font-semibold">رهگیری سفارش</h1>}
+        subtitle="کد رهگیری را وارد کنید تا وضعیت مرسوله نمایش داده شود."
       />
 
       <PanelCard>
@@ -127,24 +120,24 @@ export default function TrackingPage() {
                 autoComplete="off"
                 pattern="^\\d{20,30}$"
                 maxLength={30}
-                title="کد رهگیری باید ۲۰ تا ۳۰ رقم باشد."
+                title="کد رهگیری باید بین ۲۰ تا ۳۰ رقم باشد."
                 placeholder="مثال: 608220428200103030009114"
                 value={code}
                 onChange={(event) => setCode(sanitizeTrackingInput(event.target.value))}
                 className="text-left"
               />
               <p className="text-xs text-muted-foreground">
-                {"کد رهگیری ۲۰ تا ۳۰ رقمی را وارد کنید."}
+                کد رهگیری معمولا روی رسید یا پیامک شما درج شده است.
               </p>
             </div>
             <Button type="submit" className="h-12 w-full md:w-auto px-6">
               {isLoading ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {"در حال بررسی"}
+                  در حال بررسی
                 </span>
               ) : (
-                "رهگیری"
+                "پیگیری"
               )}
             </Button>
           </div>
@@ -156,7 +149,7 @@ export default function TrackingPage() {
         <PanelCard className="border-primary/20">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            {"در حال دریافت اطلاعات مرسوله..."}
+            در حال دریافت اطلاعات رهگیری...
           </div>
         </PanelCard>
       )}
@@ -168,10 +161,7 @@ export default function TrackingPage() {
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
                 <span className="text-sm text-muted-foreground">
-                  {"کد رهگیری:"}{" "}
-                  <span className="font-semibold" dir="ltr">
-                    {data.trackingCode}
-                  </span>
+                  کد رهگیری: <span className="font-semibold" dir="ltr">{data.trackingCode}</span>
                 </span>
               </div>
               <StatusBadge variant={statusMeta[data.status].variant}>
@@ -181,12 +171,9 @@ export default function TrackingPage() {
 
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm">
-                <span className="font-semibold">
-                  {"آخرین موقعیت"}
-                </span>
+                <span className="font-semibold">آخرین موقعیت</span>
                 <span className="text-muted-foreground">
-                  {decodeMaybe(data.lastKnownCity) ||
-                    "اطلاعات موقعیت در دسترس نیست."}
+                  {decodeMaybe(data.lastKnownCity) || "اطلاعات مکانی در دسترس نیست."}
                 </span>
               </div>
               {data.coords && data.lastKnownCity ? (
@@ -200,20 +187,18 @@ export default function TrackingPage() {
                 />
               ) : (
                 <div className="rounded-2xl border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
-                  {"اطلاعاتی برای نمایش نقشه موجود نیست."}
+                  اطلاعات نقشه برای این مرسوله موجود نیست.
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
-                {"مسیر نمایش‌داده‌شده تقریبی است و ممکن است با مسیر واقعی تفاوت داشته باشد."}
+                زمان‌ها براساس آخرین داده ثبت‌شده نمایش داده می‌شوند.
               </p>
             </div>
           </PanelCard>
 
           <PanelCard className="h-fit">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-base font-semibold">
-                {"رویدادهای مسیر"}
-              </h3>
+              <h3 className="text-base font-semibold">تاریخچه رویدادها</h3>
               <span className="text-xs text-muted-foreground">
                 {data.timelineNewestFirst?.length
                   ? `${data.timelineNewestFirst.length} رویداد`
@@ -229,20 +214,16 @@ export default function TrackingPage() {
                     <div className="rounded-xl border border-border/60 bg-background/80 p-3">
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                          {decodeMaybe(event.description) || "رویداد ثبت شد"}
+                          {decodeMaybe(event.description) || "رویداد بدون عنوان"}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {decodeMaybe(event.location) || "-"}
                         </span>
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span>
-                          {event.friendly_event_date || event.local_event_date || "-"}
-                        </span>
-                        <span>
-                          {event.event_time
-                            ? `ساعت ${event.event_time}`
-                            : "-"}
+                        <span>{event.friendly_event_date || event.local_event_date || "-"}</span>
+                        <span dir="ltr">
+                          {event.event_time ? `ساعت ${event.event_time}` : "-"}
                         </span>
                       </div>
                     </div>
@@ -250,7 +231,7 @@ export default function TrackingPage() {
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {"هنوز رویدادی برای این مرسوله ثبت نشده است."}
+                  رویدادی برای این مرسوله ثبت نشده است.
                 </p>
               )}
             </div>

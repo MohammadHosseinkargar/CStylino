@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -18,7 +18,7 @@ const menuItems = [
   { href: "/account/orders", label: "سفارش‌ها", icon: Package },
   {
     href: "/account/tracking",
-    label: "رهگیری مرسوله",
+    label: "پیگیری مرسوله",
     icon: MapPin,
   },
   { href: "/account/profile", label: "پروفایل", icon: User },
@@ -30,7 +30,7 @@ export function CustomerSidebar() {
   return (
     <aside
       dir="rtl"
-      className="hidden md:flex w-full md:w-56 lg:w-64 border-b md:border-b-0 md:border-l border-border/50 bg-muted/30 p-4 md:p-6 flex-col h-auto md:h-screen flex-shrink-0 font-sans"
+      className="hidden md:flex w-full md:w-56 lg:w-64 border-b md:border-b-0 md:border-l border-border/50 bg-white/60 backdrop-blur-[12px] p-4 md:p-6 flex-col h-auto md:h-fit md:sticky md:top-24 md:self-start flex-shrink-0 font-sans shadow-sm ring-1 ring-black/5"
     >
       <div className="mb-8">
         <h2 className="text-lg font-bold">پنل مشتری</h2>
@@ -53,7 +53,7 @@ export function CustomerSidebar() {
               <Icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
             </Link>
-          )
+          )}
         })}
       </nav>
       <div className="mt-auto pt-4 border-t border-border/50 space-y-2">

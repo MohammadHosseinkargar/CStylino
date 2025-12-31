@@ -65,9 +65,16 @@ export function VariantSelector({
             {selectedSize && (
               <span className="text-muted-foreground font-normal ms-2 text-caption persian-number">
                 (
-                {getVariantStock(selectedSize, selectedColor || undefined) > 0
-                  ? `${getVariantStock(selectedSize, selectedColor || undefined)} ${fa.pdp.stockCount}`
-                  : fa.pdp.stockUnavailable}
+                {getVariantStock(selectedSize, selectedColor || undefined) > 0 ? (
+                  <>
+                    <span dir="ltr">
+                      {getVariantStock(selectedSize, selectedColor || undefined)}
+                    </span>{" "}
+                    {fa.pdp.stockCount}
+                  </>
+                ) : (
+                  fa.pdp.stockUnavailable
+                )}
                 )
               </span>
             )}
@@ -113,9 +120,16 @@ export function VariantSelector({
             {selectedColor && (
               <span className="text-muted-foreground font-normal ms-2 text-caption persian-number">
                 (
-                {getVariantStock(selectedSize || undefined, selectedColor) > 0
-                  ? `${getVariantStock(selectedSize || undefined, selectedColor)} ${fa.pdp.stockCount}`
-                  : fa.pdp.stockUnavailable}
+                {getVariantStock(selectedSize || undefined, selectedColor) > 0 ? (
+                  <>
+                    <span dir="ltr">
+                      {getVariantStock(selectedSize || undefined, selectedColor)}
+                    </span>{" "}
+                    {fa.pdp.stockCount}
+                  </>
+                ) : (
+                  fa.pdp.stockUnavailable
+                )}
                 )
               </span>
             )}

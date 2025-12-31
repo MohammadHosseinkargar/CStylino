@@ -19,9 +19,9 @@ import {
 
 const menuItems = [
   { href: "/affiliate", label: "داشبورد", icon: LayoutDashboard },
-  { href: "/affiliate/commissions", label: "کمیسیون ها", icon: TrendingUp },
-  { href: "/affiliate/payouts", label: "تسویه ها", icon: Wallet },
-  { href: "/affiliate/sub-affiliates", label: "زیرمجموعه ها", icon: Users },
+  { href: "/affiliate/commissions", label: "کمیسیون‌ها", icon: TrendingUp },
+  { href: "/affiliate/payouts", label: "تسویه‌ها", icon: Wallet },
+  { href: "/affiliate/sub-affiliates", label: "زیرمجموعه‌ها", icon: Users },
   { href: "/affiliate/settings", label: "تنظیمات", icon: Settings },
 ]
 
@@ -105,7 +105,7 @@ export function AffiliateSidebar() {
 
   return (
     <>
-      <div className="md:hidden border-b border-border/50 bg-muted/30 p-4 flex items-center justify-between">
+      <div className="md:hidden border-b border-border/50 bg-white/70 backdrop-blur-[12px] p-4 flex items-center justify-between shadow-sm ring-1 ring-black/5">
         <button
           ref={triggerRef}
           type="button"
@@ -121,7 +121,7 @@ export function AffiliateSidebar() {
         <div className="w-9" aria-hidden="true" />
       </div>
 
-      <aside className="hidden md:flex w-full md:w-64 border-b md:border-b-0 md:border-l border-border/50 bg-muted/30 p-4 md:p-6 flex-col h-auto md:h-screen flex-shrink-0">
+      <aside className="hidden md:flex w-full md:w-64 border-b md:border-b-0 md:border-l border-border/50 bg-white/60 backdrop-blur-[12px] p-4 md:p-6 flex-col h-auto md:h-fit md:sticky md:top-24 md:self-start flex-shrink-0 shadow-sm ring-1 ring-black/5">
         <div className="mb-8">
           <h2 className="text-xl font-bold">پنل همکاری</h2>
         </div>
@@ -152,9 +152,9 @@ export function AffiliateSidebar() {
           id="affiliate-drawer"
           role="dialog"
           aria-modal="true"
-          aria-label="ناوبری همکاری"
+          aria-label="منوی همکاری"
           className={cn(
-            "absolute right-0 top-0 h-full w-72 max-w-[85%] bg-muted/95 backdrop-blur border-l border-border/50 p-5 flex flex-col transition-transform duration-200",
+            "absolute right-0 top-0 h-full w-72 max-w-[85%] bg-white/80 backdrop-blur-[12px] border-l border-border/50 p-5 flex flex-col transition-transform duration-200 shadow-sm ring-1 ring-black/5",
             isOpen ? "translate-x-0" : "translate-x-full"
           )}
         >

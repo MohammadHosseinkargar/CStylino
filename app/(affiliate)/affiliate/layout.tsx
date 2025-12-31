@@ -25,7 +25,11 @@ export default async function AffiliateLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" dir="rtl">
+    <div
+      className="min-h-screen flex flex-col md:flex-row md:items-start md:gap-6 bg-background font-sans"
+      dir="rtl"
+      lang="fa"
+    >
       <AffiliateSidebar />
       <main className="flex-1 w-full p-4 md:p-8">{children}</main>
     </div>

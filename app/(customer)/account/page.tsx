@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -36,12 +36,9 @@ export default async function CustomerDashboardPage() {
   return (
     <PanelContainer dir="rtl">
       <SectionHeader
-        title={
-          <h1 className="text-xl font-semibold">
-            {"داشبورد حساب کاربری"}
-          </h1>
-        }
-        subtitle="خلاصه سفارش‌ها و وضعیت مرسوله‌ها در یک نگاه."
+        kicker="حساب کاربری"
+        title={<h1 className="text-xl font-semibold">داشبورد شما</h1>}
+        subtitle="مرور سریع سفارش‌ها و وضعیت ارسال در یک نگاه."
       />
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -51,9 +48,7 @@ export default async function CustomerDashboardPage() {
               <Package className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {"کل سفارش‌ها"}
-              </p>
+              <p className="text-sm text-muted-foreground">کل سفارش‌ها</p>
               <p className="text-2xl font-bold persian-number">{totalOrders}</p>
             </div>
           </div>
@@ -64,9 +59,7 @@ export default async function CustomerDashboardPage() {
               <Truck className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {"در حال ارسال"}
-              </p>
+              <p className="text-sm text-muted-foreground">در حال ارسال</p>
               <p className="text-2xl font-bold persian-number">{shippedOrders}</p>
             </div>
           </div>
@@ -77,9 +70,7 @@ export default async function CustomerDashboardPage() {
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                {"تحویل شده"}
-              </p>
+              <p className="text-sm text-muted-foreground">تحویل‌شده</p>
               <p className="text-2xl font-bold persian-number">{deliveredOrders}</p>
             </div>
           </div>
@@ -90,14 +81,12 @@ export default async function CustomerDashboardPage() {
         <PanelCard>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">
-                {"آخرین سفارش‌ها"}
-              </h3>
+              <h3 className="text-base font-semibold">آخرین سفارش‌ها</h3>
               <Link
                 href="/account/orders"
                 className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80"
               >
-                {"مشاهده همه"}
+                مشاهده همه
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
@@ -110,12 +99,9 @@ export default async function CustomerDashboardPage() {
                   >
                     <div className="space-y-1">
                       <p className="font-semibold">
-                        {"سفارش #"}
-                        {order.id.slice(0, 8)}
+                        سفارش <span dir="ltr">#{order.id.slice(0, 8)}</span>
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(order.createdAt)}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</p>
                     </div>
                     <div className="text-end space-y-1">
                       <p className="font-semibold">{formatPrice(order.totalAmount)}</p>
@@ -128,7 +114,7 @@ export default async function CustomerDashboardPage() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                {"هنوز سفارشی ثبت نکرده‌اید."}
+                هنوز سفارشی ثبت نشده است.
               </p>
             )}
           </div>
@@ -136,24 +122,22 @@ export default async function CustomerDashboardPage() {
 
         <PanelCard>
           <div className="space-y-3">
-            <h3 className="text-base font-semibold">
-              {"اقدام سریع"}
-            </h3>
+            <h3 className="text-base font-semibold">دسترسی سریع</h3>
             <p className="text-sm text-muted-foreground">
-              {"دسترسی سریع به رهگیری مرسوله و سفارش‌ها."}
+              پیگیری مرسوله یا مشاهده تاریخچه سفارش‌ها با یک کلیک.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <Link
                 href="/account/orders"
                 className="inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/80 px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent"
               >
-                {"مشاهده سفارش‌ها"}
+                سفارش‌ها
               </Link>
               <Link
                 href="/account/tracking"
                 className="inline-flex items-center justify-center rounded-xl border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10"
               >
-                {"رهگیری مرسوله"}
+                پیگیری مرسوله
               </Link>
             </div>
           </div>

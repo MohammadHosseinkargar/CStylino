@@ -23,8 +23,8 @@ export function SizeGuide() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="p-3">سایز</th>
-                  <th className="p-3">دور سینه (سانتی متر)</th>
-                  <th className="p-3">دور کمر (سانتی متر)</th>
+                  <th className="p-3">دور سینه (سانتی‌متر)</th>
+                  <th className="p-3">دور کمر (سانتی‌متر)</th>
                 </tr>
               </thead>
               <tbody>

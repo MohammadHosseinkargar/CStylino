@@ -1,19 +1,19 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useCartStore } from "@/store/cart-store"
 import { Button } from "@/components/ui/button"
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Price } from "@/components/storefront/price"
 import Image from "next/image"
 import Link from "next/link"
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react"
-import { PageContainer } from "@/components/ui/page-container"
+import { Container } from "@/components/ui/container"
 import { SectionHeader } from "@/components/ui/section-header"
-import { StyledCard } from "@/components/ui/styled-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { formatPrice } from "@/lib/utils"
 import { fa } from "@/lib/copy/fa"
+import { GlassCard } from "@/components/ui/glass-card"
+import { Surface } from "@/components/ui/surface"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal } = useCartStore()
@@ -51,26 +51,26 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <PageContainer className="py-20 min-h-screen flex items-center justify-center" dir="rtl">
+      <Container className="py-20 min-h-screen flex items-center justify-center" dir="rtl">
         <EmptyState
           icon={<ShoppingBag className="w-10 h-10 text-muted-foreground" />}
           title={fa.cart.emptyTitle}
           description={fa.cart.emptyDescription}
           action={
             <Link href="/store/products">
-              <Button size="lg" className="btn-editorial">
+              <Button size="lg">
                 <ArrowLeft className="w-5 h-5 ms-2" />
                 {fa.cart.emptyCta}
               </Button>
             </Link>
           }
         />
-      </PageContainer>
+      </Container>
     )
   }
 
   return (
-    <PageContainer className="py-8 md:py-12 lg:py-16 pb-[calc(var(--mobile-bottom-nav-height)+2.5rem)]" dir="rtl">
+    <Container className="py-8 md:py-12 lg:py-16 pb-[calc(var(--mobile-bottom-nav-height)+2.5rem)]" dir="rtl">
       <SectionHeader
         title={fa.cart.title}
         subtitle={fa.cart.subtitle.replace("{count}", items.length.toLocaleString("fa-IR"))}
@@ -78,8 +78,8 @@ export default function CartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
         <div className="lg:col-span-2 space-y-6">
-          <StyledCard variant="elevated" className="border-border/40 hidden md:block">
-            <CardContent className="p-0">
+          <GlassCard className="hidden md:block">
+            <div className="p-0">
               <table className="w-full">
                 <thead className="border-b border-border/40 text-xs text-muted-foreground">
                   <tr>
@@ -119,7 +119,7 @@ export default function CartPage() {
                             <div className="mt-2 text-xs text-muted-foreground flex items-center gap-3">
                               <span className="flex items-center gap-2">
                                 <span className="font-medium">سایز:</span>
-                                <span>{item.variantSize}</span>
+                                <span dir="ltr">{item.variantSize}</span>
                               </span>
                               <span> - </span>
                               <span className="flex items-center gap-2">
@@ -182,13 +182,13 @@ export default function CartPage() {
                   ))}
                 </tbody>
               </table>
-            </CardContent>
-          </StyledCard>
+            </div>
+          </GlassCard>
 
           <div className="space-y-6 md:hidden">
             {items.map((item) => (
-              <StyledCard key={item.variantId} variant="elevated" className="overflow-hidden border-border/40">
-                <CardContent className="p-5">
+              <Surface key={item.variantId} className="overflow-hidden">
+                <div className="p-5">
                   <div className="flex gap-4">
                     <Link
                       href={`/store/products/${item.slug || item.productId}`}
@@ -213,7 +213,7 @@ export default function CartPage() {
                       <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-4">
                         <span className="flex items-center gap-2">
                           <span className="font-medium">سایز:</span>
-                          <span>{item.variantSize}</span>
+                          <span dir="ltr">{item.variantSize}</span>
                         </span>
                         <span> - </span>
                         <span className="flex items-center gap-2">
@@ -265,18 +265,18 @@ export default function CartPage() {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </StyledCard>
+                </div>
+              </Surface>
             ))}
           </div>
         </div>
 
         <div className="lg:sticky lg:top-24 h-fit order-first lg:order-last">
-          <StyledCard variant="subtle" className="border-border/40">
-            <CardHeader className="pb-4 md:pb-6">
-              <CardTitle className="text-base md:text-title">{fa.cart.summaryTitle}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          <GlassCard className="p-6">
+            <div className="pb-4 md:pb-6">
+              <div className="text-base md:text-title font-semibold">{fa.cart.summaryTitle}</div>
+            </div>
+            <div className="space-y-6">
               <div className="space-y-4">
                 <div className="flex justify-between text-body">
                   <span className="text-muted-foreground">{fa.cart.itemsTotal}</span>
@@ -300,7 +300,7 @@ export default function CartPage() {
                 </div>
               </div>
               <Link href="/store/checkout" className="block">
-                <Button className="w-full btn-editorial h-14 text-base" size="lg">
+                <Button className="w-full h-14 text-base" size="lg">
                   {fa.cart.checkout}
                 </Button>
               </Link>
@@ -309,12 +309,12 @@ export default function CartPage() {
                   {fa.cart.continueShopping}
                 </Button>
               </Link>
-            </CardContent>
-          </StyledCard>
+            </div>
+          </GlassCard>
         </div>
       </div>
 
-      <div className="lg:hidden sticky bottom-[calc(var(--mobile-bottom-nav-height)+env(safe-area-inset-bottom))] z-30 -mx-4 mt-8 border-t border-border/50 bg-background/95 backdrop-blur px-4 py-4">
+      <div className="lg:hidden sticky bottom-[calc(var(--mobile-bottom-nav-height)+env(safe-area-inset-bottom))] z-30 -mx-4 mt-8 border-t border-border/50 bg-background/95 backdrop-blur-sm px-4 py-4">
         <div className="flex items-center justify-between text-sm mb-3">
           <span className="text-muted-foreground">{fa.cart.total}</span>
           {total === null ? (
@@ -324,9 +324,9 @@ export default function CartPage() {
           )}
         </div>
         <Link href="/store/checkout" className="block">
-          <Button className="w-full btn-editorial h-12 text-base">{fa.cart.checkout}</Button>
+          <Button className="w-full h-12 text-base">{fa.cart.checkout}</Button>
         </Link>
       </div>
-    </PageContainer>
+    </Container>
   )
 }

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -14,7 +14,6 @@ import {
   Package,
   Percent,
 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/store/cart-store"
 import { CartDrawer } from "@/components/storefront/cart-drawer"
@@ -57,7 +56,7 @@ export function Header() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
           scrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-sm h-16 md:h-20"
+            ? "bg-background/80 backdrop-blur-md border-b border-border/40 shadow-sm h-16 md:h-20"
             : "bg-background/40 backdrop-blur-sm border-b border-border/10 h-20 md:h-24"
         )}
       >
@@ -73,7 +72,10 @@ export function Header() {
                 >
                   <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
                   {itemCount > 0 && (
-                    <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    <span
+                      className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                      dir="ltr"
+                    >
                       {itemCount}
                     </span>
                   )}
@@ -104,16 +106,16 @@ export function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-64 rounded-[2.5rem] p-4 shadow-2xl border-none bg-background/95 backdrop-blur-xl"
+                    className="w-64 rounded-[2.5rem] p-4 shadow-2xl border-none bg-background/95 backdrop-blur-sm"
                   >
                     <div className="px-4 py-3 text-right">
                       <p className="font-bold text-xl">
-                        {session.user.name || "کاربر استایلینو"}
+                        {session.user.name || fa.brand.name}
                       </p>
                       <div className="inline-block bg-orange-50 text-orange-500 text-[10px] font-bold px-3 py-1 rounded-full mt-2">
-                        {session.user.role === "admin" && "ادمین استایلینو"}
+                        {session.user.role === "admin" && "مدیر فروشگاه"}
                         {session.user.role === "affiliate" && "همکار فروش"}
-                        {session.user.role === "customer" && "عضو استایلینو"}
+                        {session.user.role === "customer" && "مشتری"}
                       </div>
                     </div>
                     <DropdownMenuSeparator className="my-2" />
@@ -190,10 +192,7 @@ export function Header() {
                 >
                   {item.label}
                   {pathname === item.href && (
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute bottom-0 right-0 h-[2px] w-full bg-primary"
-                    />
+                    <span className="absolute bottom-0 right-0 h-[2px] w-full bg-primary" />
                   )}
                 </Link>
               ))}
@@ -210,83 +209,83 @@ export function Header() {
         </div>
       </header>
 
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100] lg:hidden">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+      <div
+        className={cn(
+          "fixed inset-0 z-[100] lg:hidden transition-opacity duration-300",
+          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        aria-hidden={!mobileMenuOpen}
+      >
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(false)}
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          aria-label="بستن منو"
+        />
+        <div
+          className={cn(
+            "absolute top-0 right-0 bottom-0 w-[280px] bg-background shadow-2xl flex flex-col text-right transition-transform duration-300",
+            mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          )}
+        >
+          <div className="p-6 border-b flex items-center justify-between">
+            <span className="font-black text-xl text-primary">{fa.brand.name}</span>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute top-0 right-0 bottom-0 w-[280px] bg-background shadow-2xl flex flex-col text-right"
+              className="rounded-full"
+              aria-label="بستن منو"
             >
-              <div className="p-6 border-b flex items-center justify-between">
-                <span className="font-black text-xl text-primary">{fa.brand.name}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-full"
-                  aria-label="بستن منو"
-                >
-                  <X className="h-6 w-6" />
-                </Button>
-              </div>
-              <nav className="flex flex-col p-4 gap-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "p-4 rounded-xl text-lg font-medium",
-                      pathname === item.href ? "bg-primary/10 text-primary" : "hover:bg-accent"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-              <div className="mt-auto p-6 border-t bg-accent/5 space-y-3">
-                {session ? (
-                  <>
-                    {session.user.role === "admin" && (
-                      <Button asChild variant="ghost" className="w-full justify-end gap-2">
-                        <Link href="/admin">
-                          پنل مدیریت <LayoutDashboard className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    )}
-                    <Button asChild variant="ghost" className="w-full justify-end gap-2">
-                      <Link href="/store/orders">
-                        سفارش‌های من <Package className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      onClick={() => signOut()}
-                      variant="outline"
-                      className="w-full h-12 rounded-xl text-red-500 gap-2"
-                    >
-                      خروج <LogOut className="h-5 w-5" />
-                    </Button>
-                  </>
-                ) : (
-                  <Button asChild className="w-full h-12 rounded-xl">
-                    <Link href="/auth/signin">ورود / ساخت حساب</Link>
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          <nav className="flex flex-col p-4 gap-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "p-4 rounded-xl text-lg font-medium",
+                  pathname === item.href ? "bg-primary/10 text-primary" : "hover:bg-accent"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="mt-auto p-6 border-t bg-accent/5 space-y-3">
+            {session ? (
+              <>
+                {session.user.role === "admin" && (
+                  <Button asChild variant="ghost" className="w-full justify-end gap-2">
+                    <Link href="/admin">
+                      پنل مدیریت <LayoutDashboard className="h-4 w-4" />
+                    </Link>
                   </Button>
                 )}
-              </div>
-            </motion.div>
+                <Button asChild variant="ghost" className="w-full justify-end gap-2">
+                  <Link href="/store/orders">
+                    سفارش‌های من <Package className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  onClick={() => signOut()}
+                  variant="outline"
+                  className="w-full h-12 rounded-xl text-red-500 gap-2"
+                >
+                  خروج <LogOut className="h-5 w-5" />
+                </Button>
+              </>
+            ) : (
+              <Button asChild className="w-full h-12 rounded-xl">
+                <Link href="/auth/signin">ورود / ثبت‌نام</Link>
+              </Button>
+            )}
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      </div>
     </>
   )
 }

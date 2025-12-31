@@ -24,11 +24,11 @@ import {
 const menuItems = [
   { href: "/admin", label: "داشبورد", icon: LayoutDashboard },
   { href: "/admin/products", label: "محصولات", icon: Package },
-  { href: "/admin/categories", label: "دسته بندی ها", icon: FolderTree },
-  { href: "/admin/orders", label: "سفارش ها", icon: ShoppingCart },
+  { href: "/admin/categories", label: "دسته‌بندی‌ها", icon: FolderTree },
+  { href: "/admin/orders", label: "سفارش‌ها", icon: ShoppingCart },
   { href: "/admin/users", label: "کاربران", icon: Users },
   { href: "/admin/affiliates", label: "همکاران فروش", icon: TrendingUp },
-  { href: "/admin/payouts", label: "تسویه های همکاران", icon: Wallet },
+  { href: "/admin/payouts", label: "تسویه‌ها", icon: Wallet },
   { href: "/admin/settings", label: "تنظیمات", icon: Settings },
 ]
 
@@ -90,7 +90,7 @@ export function AdminSidebar() {
 
   return (
     <>
-      <div className="relative z-40 md:hidden border-b border-border/50 bg-muted/30 p-4 flex items-center justify-between">
+      <div className="relative z-40 md:hidden border-b border-border/50 bg-white/70 backdrop-blur-[12px] p-4 flex items-center justify-between shadow-sm ring-1 ring-black/5">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
@@ -101,13 +101,13 @@ export function AdminSidebar() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="text-base font-semibold">پنل ادمین</span>
+        <span className="text-base font-semibold">پنل مدیریت</span>
         <div className="w-9" aria-hidden="true" />
       </div>
 
-      <aside className="hidden md:flex w-full md:w-64 border-b md:border-b-0 md:border-l border-border/50 bg-muted/30 p-4 md:p-6 flex-col h-auto md:h-screen flex-shrink-0">
+      <aside className="hidden md:flex w-full md:w-64 border-b md:border-b-0 md:border-l border-border/50 bg-white/60 backdrop-blur-[12px] p-4 md:p-6 flex-col h-auto md:h-fit md:sticky md:top-24 md:self-start flex-shrink-0 shadow-sm ring-1 ring-black/5">
         <div className="mb-8">
-          <h2 className="text-xl font-bold">پنل ادمین</h2>
+          <h2 className="text-xl font-bold">پنل مدیریت</h2>
         </div>
         {renderNav()}
         {renderFooter()}
@@ -117,11 +117,11 @@ export function AdminSidebar() {
         <SheetContent
           id="admin-drawer"
           side="right"
-          aria-label="ناوبری ادمین"
-          className="md:hidden w-72 max-w-[85%] bg-muted/95 backdrop-blur border-l border-border/50 p-5"
+          aria-label="منوی مدیریت"
+          className="md:hidden w-72 max-w-[85%] bg-white/80 backdrop-blur-[12px] border-l border-border/50 p-5 shadow-sm ring-1 ring-black/5"
         >
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-bold">پنل ادمین</h2>
+            <h2 className="text-lg font-bold">پنل مدیریت</h2>
             <SheetClose asChild>
               <button
                 type="button"

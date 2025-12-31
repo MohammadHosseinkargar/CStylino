@@ -27,7 +27,7 @@ export default async function CustomerLayout({
 
   return (
     <div
-      className="min-h-screen flex flex-col md:flex-row bg-background font-sans"
+      className="min-h-screen flex flex-col md:flex-row md:items-start md:gap-6 bg-background font-sans"
       dir="rtl"
       lang="fa"
     >

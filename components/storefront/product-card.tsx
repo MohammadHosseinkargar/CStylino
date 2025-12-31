@@ -1,19 +1,19 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { ProductImage } from "@/components/product-image"
-import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, Heart } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { normalizeProductImageSrc } from "@/lib/product-image"
-import { StyledCard } from "@/components/ui/styled-card"
 import { useCartStore } from "@/store/cart-store"
 import { useToast } from "@/hooks/use-toast"
 import { useWishlistStore } from "@/store/wishlist-store"
 import { PriceBlock } from "@/components/storefront/price-block"
 import { fa } from "@/lib/copy/fa"
+import { Surface } from "@/components/ui/surface"
+import { Badge } from "@/components/ui/badge"
 
 interface ProductCardProps {
   id: string
@@ -112,9 +112,8 @@ export function ProductCard({
   }
 
   return (
-    <StyledCard
-      variant="elevated"
-      className="group overflow-hidden h-full flex flex-col border-border/40"
+    <Surface
+      className="group overflow-hidden h-full flex flex-col border-border/40 transition-all duration-300 hover:shadow-md"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -128,17 +127,17 @@ export function ProductCard({
           fill
           className={cn(
             "object-cover transition-transform duration-700 ease-out",
-            isHovered && "scale-110"
+            isHovered && "scale-105"
           )}
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
         {featured && (
-          <div className="absolute top-4 right-4 bg-primary/95 text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-md">
+          <Badge variant="primary" className="absolute top-4 right-4">
             {fa.price.featuredBadge}
-          </div>
+          </Badge>
         )}
         {!hasStock && (
-          <div className="absolute inset-0 bg-background/90 flex items-center justify-center backdrop-blur-sm">
+          <div className="absolute inset-0 bg-background/90 flex items-center justify-center">
             <span className="text-sm font-semibold text-muted-foreground">
               {fa.price.outOfStock}
             </span>
@@ -152,7 +151,7 @@ export function ProductCard({
         >
           <Button
             size="icon"
-            className="h-12 w-12 rounded-full bg-background/95 backdrop-blur-md shadow-xl hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110"
+            className="h-11 w-11 rounded-full bg-background/95 shadow-md hover:bg-primary hover:text-primary-foreground transition-all duration-300"
             onClick={(e) => {
               e.preventDefault()
               handleAddToCart()
@@ -165,7 +164,7 @@ export function ProductCard({
           <Button
             size="icon"
             variant="ghost"
-            className="h-12 w-12 rounded-full bg-background/95 backdrop-blur-md shadow-xl hover:bg-destructive/10 hover:text-destructive transition-all duration-300 hover:scale-110"
+            className="h-11 w-11 rounded-full bg-background/95 shadow-md hover:bg-destructive/10 hover:text-destructive transition-all duration-300"
             onClick={(e) => {
               e.preventDefault()
               handleWishlistToggle()
@@ -177,7 +176,7 @@ export function ProductCard({
         </div>
       </Link>
 
-      <CardContent className="p-5 flex-1 flex flex-col">
+      <div className="p-5 flex-1 flex flex-col">
         <Link href={`/store/products/${slug}`}>
           <h3 className="font-semibold mb-3 line-clamp-2 hover:text-primary transition-colors duration-300 leading-relaxed">
             {name}
@@ -204,7 +203,7 @@ export function ProductCard({
             </div>
           )}
         </div>
-      </CardContent>
-    </StyledCard>
+      </div>
+    </Surface>
   )
 }

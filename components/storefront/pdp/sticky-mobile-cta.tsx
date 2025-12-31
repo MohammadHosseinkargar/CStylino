@@ -1,7 +1,7 @@
 ﻿import { Button } from "@/components/ui/button"
 import { PriceBlock } from "@/components/storefront/price-block"
 import { cn } from "@/lib/utils"
-import { PageContainer } from "@/components/ui/page-container"
+import { Container } from "@/components/ui/container"
 import { fa } from "@/lib/copy/fa"
 
 interface StickyMobileCTAProps {
@@ -18,8 +18,8 @@ export function StickyMobileCTA({
   onAddToCart,
 }: StickyMobileCTAProps) {
   return (
-    <div className="lg:hidden fixed bottom-[env(safe-area-inset-bottom)] left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur">
-      <PageContainer className="flex items-center justify-between gap-4 py-4">
+    <div className="lg:hidden fixed bottom-[env(safe-area-inset-bottom)] left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-sm">
+      <Container className="flex items-center justify-between gap-4 py-4">
         <PriceBlock price={price} size="sm" />
         <Button
           onClick={onAddToCart}
@@ -28,7 +28,7 @@ export function StickyMobileCTA({
         >
           {isAdding ? fa.price.addingToCart : fa.price.addToCart}
         </Button>
-      </PageContainer>
+      </Container>
     </div>
   )
 }

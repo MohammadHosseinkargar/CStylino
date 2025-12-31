@@ -103,6 +103,9 @@
     font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
     line-height: 1.8;
     letter-spacing: 0;
+    background-image:
+      radial-gradient(1000px 500px at 85% -10%, hsl(var(--primary) / 0.08), transparent),
+      radial-gradient(900px 500px at -10% 20%, hsl(var(--accent) / 0.2), transparent);
   }
 
   h1 {
@@ -164,7 +167,7 @@
   }
 
   .page-container {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
   }
 
   .section-spacing {
@@ -240,6 +243,12 @@
     animation: hero-reveal 1s cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
   }
 
+  .hero-slide {
+    opacity: 0;
+    animation: hero-slide-fade 18s ease-in-out infinite;
+    will-change: opacity, transform;
+  }
+
   .hero-line-delay-1 {
     animation-delay: 0.05s;
   }
@@ -298,12 +307,41 @@
       opacity: 1;
       transform: none;
     }
+
+    .hero-slide {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+    }
   }
   
   /* Persian number formatting */
   .persian-number {
     font-variant-numeric: persian;
     font-feature-settings: "tnum" 1, "rlig" 1;
+  }
+
+  @keyframes hero-slide-fade {
+    0% {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    10% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    33% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    45% {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
   }
   
 }
