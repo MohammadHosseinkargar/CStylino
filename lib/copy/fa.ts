@@ -223,19 +223,19 @@ export const fa = {
         title: "دوخت دقیق برای کمد مدرن",
         body: "فیت‌های خوش‌فرم و پارچه‌های تنفس‌پذیر برای همراهی روزانه.",
         kicker: "مجموعه آتلیه",
-        image: "/placeholders/story-atelier-1.svg",
+        image: "/placeholders/N1.png",
       },
       {
         title: "بافت‌های لایه‌دار و سیلوئت‌های تمیز",
         body: "ترکیبی از بافت نرم و ساختار دقیق برای استایلی متعادل.",
         kicker: "ویرایش فصل",
-        image: "/placeholders/story-atelier-2.svg",
+        image: "/placeholders/N2.png",
       },
       {
         title: "جزئیات هدفمند",
         body: "از دوخت تا یراق، هر بخش با وسواس طراحی شده است.",
         kicker: "امضای برند",
-        image: "/placeholders/story-atelier-3.svg",
+        image: "/placeholders/N3.png",
       },
     ],
     featureCards: [
