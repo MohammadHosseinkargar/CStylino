@@ -1,4 +1,6 @@
-﻿import * as Dialog from "@radix-ui/react-dialog"
+"use client"
+
+import * as Dialog from "@radix-ui/react-dialog"
 import { Button } from "@/components/ui/button"
 import { Ruler } from "lucide-react"
 import { fa } from "@/lib/copy/fa"
@@ -30,18 +32,18 @@ export function SizeGuide() {
               <tbody>
                 <tr className="border-t border-border/50">
                   <td className="p-3 font-semibold">S</td>
-                  <td className="p-3">82-86</td>
-                  <td className="p-3">62-66</td>
+                  <td className="p-3 persian-number">۸۲-۸۶</td>
+                  <td className="p-3 persian-number">۶۲-۶۶</td>
                 </tr>
                 <tr className="border-t border-border/50">
                   <td className="p-3 font-semibold">M</td>
-                  <td className="p-3">86-90</td>
-                  <td className="p-3">66-70</td>
+                  <td className="p-3 persian-number">۸۶-۹۰</td>
+                  <td className="p-3 persian-number">۶۶-۷۰</td>
                 </tr>
                 <tr className="border-t border-border/50">
                   <td className="p-3 font-semibold">L</td>
-                  <td className="p-3">90-94</td>
-                  <td className="p-3">70-74</td>
+                  <td className="p-3 persian-number">۹۰-۹۴</td>
+                  <td className="p-3 persian-number">۷۰-۷۴</td>
                 </tr>
               </tbody>
             </table>

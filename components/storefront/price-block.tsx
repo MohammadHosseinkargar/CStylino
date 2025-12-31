@@ -8,6 +8,8 @@ interface PriceBlockProps {
   label?: string
   align?: "start" | "center" | "end"
   className?: string
+  emphasis?: "strong" | "subtle"
+  priceClassName?: string
 }
 
 export function PriceBlock({
@@ -17,6 +19,8 @@ export function PriceBlock({
   label,
   align = "start",
   className,
+  emphasis = "strong",
+  priceClassName,
 }: PriceBlockProps) {
   return (
     <div
@@ -28,7 +32,13 @@ export function PriceBlock({
       )}
     >
       {label ? <span className="text-caption text-muted-foreground">{label}</span> : null}
-      <Price price={price} originalPrice={originalPrice} size={size} />
+      <Price
+        price={price}
+        originalPrice={originalPrice}
+        size={size}
+        emphasis={emphasis}
+        priceClassName={priceClassName}
+      />
     </div>
   )
 }

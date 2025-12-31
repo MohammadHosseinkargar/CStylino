@@ -33,6 +33,8 @@ export function VariantSelector({
   availableSizes = [],
   availableColors = [],
 }: VariantSelectorProps) {
+  const formatNumber = (value: number) => value.toLocaleString("fa-IR")
+
   const getVariantStock = (size?: string, color?: string) => {
     if (size && color) {
       const variant = variants.find((v) => v.size === size && v.color === color)
@@ -68,7 +70,7 @@ export function VariantSelector({
                 {getVariantStock(selectedSize, selectedColor || undefined) > 0 ? (
                   <>
                     <span dir="ltr">
-                      {getVariantStock(selectedSize, selectedColor || undefined)}
+                      {formatNumber(getVariantStock(selectedSize, selectedColor || undefined))}
                     </span>{" "}
                     {fa.pdp.stockCount}
                   </>
@@ -79,7 +81,11 @@ export function VariantSelector({
               </span>
             )}
           </label>
-          <div className="flex flex-wrap gap-2 md:gap-2.5">
+          <div
+            className="flex flex-wrap gap-2 md:gap-2.5"
+            role="radiogroup"
+            aria-label={fa.pdp.sizeLabel}
+          >
             {availableSizes.map((size) => {
               const stock = selectedColor
                 ? getVariantStock(size, selectedColor)
@@ -93,18 +99,20 @@ export function VariantSelector({
                   onClick={() => !isDisabled && onSizeSelect(size)}
                   disabled={isDisabled}
                   className={cn(
-                    "relative px-4 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl border-2 font-medium text-xs md:text-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
+                    "relative px-4 py-2 md:px-5 md:py-2.5 rounded-2xl border text-xs md:text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
                     isSelected
-                      ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
-                      : "border-border bg-background hover:border-primary/50 hover:bg-accent/50",
-                    isDisabled && "opacity-30 cursor-not-allowed grayscale"
+                      ? "border-primary/70 bg-primary/15 text-foreground shadow-sm"
+                      : "border-border/70 bg-background hover:border-primary/40 hover:bg-accent/40",
+                    isDisabled && "opacity-40 cursor-not-allowed grayscale"
                   )}
                   aria-pressed={isSelected}
                   aria-disabled={isDisabled}
+                  role="radio"
+                  aria-checked={isSelected}
                 >
                   {size}
                   {isSelected && (
-                    <Check className="absolute top-0.5 left-0.5 md:top-1 md:left-1 h-3 w-3 md:h-3.5 md:w-3.5" />
+                    <Check className="absolute top-1 left-1 h-3 w-3 md:h-3.5 md:w-3.5 text-primary" />
                   )}
                 </button>
               )
@@ -123,7 +131,7 @@ export function VariantSelector({
                 {getVariantStock(selectedSize || undefined, selectedColor) > 0 ? (
                   <>
                     <span dir="ltr">
-                      {getVariantStock(selectedSize || undefined, selectedColor)}
+                      {formatNumber(getVariantStock(selectedSize || undefined, selectedColor))}
                     </span>{" "}
                     {fa.pdp.stockCount}
                   </>
@@ -134,7 +142,11 @@ export function VariantSelector({
               </span>
             )}
           </label>
-          <div className="flex flex-wrap gap-2 md:gap-3">
+          <div
+            className="flex flex-wrap gap-2 md:gap-3"
+            role="radiogroup"
+            aria-label={fa.pdp.colorLabel}
+          >
             {availableColors.map((colorItem, idx) => {
               const stock = selectedSize
                 ? getVariantStock(selectedSize, colorItem.color)
@@ -148,21 +160,26 @@ export function VariantSelector({
                   onClick={() => !isDisabled && onColorSelect(colorItem.color)}
                   disabled={isDisabled}
                   className={cn(
-                    "relative h-12 w-12 md:h-14 md:w-14 rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
+                    "relative inline-flex items-center gap-2 rounded-2xl border px-3.5 py-2 text-xs md:text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
                     isSelected
-                      ? "border-primary ring-2 md:ring-4 ring-primary/20 ring-offset-1 md:ring-offset-2 ring-offset-background scale-110"
-                      : "border-border/50 hover:border-primary/50",
-                    isDisabled && "opacity-30 cursor-not-allowed grayscale"
+                      ? "border-primary/70 bg-primary/15 text-foreground"
+                      : "border-border/60 bg-background hover:border-primary/40 hover:bg-accent/30",
+                    isDisabled && "opacity-40 cursor-not-allowed grayscale"
                   )}
-                  style={{ backgroundColor: colorItem.hex }}
                   title={colorItem.color}
                   aria-label={`${fa.pdp.colorLabel} ${colorItem.color}`}
                   aria-pressed={isSelected}
                   aria-disabled={isDisabled}
+                  role="radio"
+                  aria-checked={isSelected}
                 >
-                  {isSelected && (
-                    <Check className="absolute inset-0 m-auto h-4 w-4 md:h-5 md:w-5 text-white drop-shadow-lg" />
-                  )}
+                  <span
+                    className="h-4 w-4 rounded-full border border-border/60 shadow-sm"
+                    style={{ backgroundColor: colorItem.hex }}
+                    aria-hidden="true"
+                  />
+                  <span className="whitespace-nowrap">{colorItem.color}</span>
+                  {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
               )
             })}

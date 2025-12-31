@@ -1,9 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { LazyMotion, MotionConfig, domAnimation, m, useReducedMotion } from "framer-motion"
 import { QueryProvider } from "@/components/query-provider"
 import { useCartStore } from "@/store/cart-store"
 import { useToast } from "@/hooks/use-toast"
@@ -12,12 +13,13 @@ import { Container } from "@/components/ui/container"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ProductGallery } from "@/components/storefront/pdp/product-gallery"
-import { ProductInfo } from "@/components/storefront/pdp/product-info"
+import { ProductMedia } from "@/components/storefront/pdp/product-media"
+import { PurchasePanel } from "@/components/storefront/pdp/purchase-panel"
+import { ProductTabs } from "@/components/storefront/pdp/product-tabs"
+import { SimilarProductsGrid } from "@/components/storefront/pdp/similar-products-grid"
+import { ReviewsSection } from "@/components/storefront/pdp/reviews-section"
 import { StickyMobileCTA } from "@/components/storefront/pdp/sticky-mobile-cta"
-import { ProductCard } from "@/components/storefront/product-card"
-import { PackageSearch, Sparkles, Star, Truck } from "lucide-react"
-import { Surface } from "@/components/ui/surface"
+import { PackageSearch } from "lucide-react"
 import { fa } from "@/lib/copy/fa"
 
 interface ProductVariant {
@@ -64,6 +66,7 @@ function ProductPageContent() {
   const [currentImage, setCurrentImage] = useState(0)
   const [isAdding, setIsAdding] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const prefersReducedMotion = useReducedMotion()
 
   const { data: productData, isLoading } = useQuery<ProductData>({
     queryKey: ["product", slug],
@@ -91,6 +94,23 @@ function ProductPageContent() {
   const availableSizes = useMemo(
     () => Array.from(new Set(normalizedVariants.map((variant) => variant.size))),
     [normalizedVariants]
+  )
+
+  const allColors = useMemo(
+    () => Array.from(new Set(normalizedVariants.map((variant) => variant.color))),
+    [normalizedVariants]
+  )
+
+  const heroVariants = useMemo(
+    () => ({
+      hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 26 },
+      show: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: prefersReducedMotion ? 0 : 0.55, ease: [0.22, 0.61, 0.36, 1] },
+      },
+    }),
+    [prefersReducedMotion]
   )
 
   const colorsForSize = useMemo(() => {
@@ -239,10 +259,10 @@ function ProductPageContent() {
         await navigator.share(shareData)
       } else if (shareData.url) {
         await navigator.clipboard.writeText(shareData.url)
-        toast({ title: "لینک کپی شد" })
+        toast({ title: "پیوند کپی شد." })
       }
     } catch (error) {
-      toast({ title: "اشتراک‌گذاری انجام نشد", variant: "destructive" })
+      toast({ title: "اشتراک‌گذاری با خطا مواجه شد.", variant: "destructive" })
     }
   }
 
@@ -267,8 +287,8 @@ function ProductPageContent() {
       <Container className="py-16" dir="rtl">
         <EmptyState
           icon={<PackageSearch className="h-7 w-7 text-muted-foreground" />}
-          title="محصولی پیدا نشد"
-          description="این محصول در دسترس نیست یا حذف شده است."
+          title="محصولی یافت نشد"
+          description="محصول موردنظر در دسترس نیست یا حذف شده است."
           action={
             <Link href="/store/products">
               <span className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground">
@@ -282,119 +302,81 @@ function ProductPageContent() {
   }
 
   return (
-    <Container className="py-8 md:py-12 lg:py-16 pb-28" dir="rtl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-        <ProductGallery
-          images={product.images}
-          name={product.name}
-          currentIndex={currentImage}
-          onChange={setCurrentImage}
-        />
-        <ProductInfo
-          variants={normalizedVariants}
-          name={product.name}
-          price={price}
-          stock={stock}
-          isOutOfStock={isOutOfStock}
-          selectedSize={selectedSize}
-          selectedColor={selectedColor}
-          availableSizes={sizesForColor}
-          availableColors={colorsForSize}
-          quantity={quantity}
-          onQuantityChange={setQuantity}
-          onSizeSelect={handleSizeSelect}
-          onColorSelect={handleColorSelect}
-          onAddToCart={handleAddToCart}
-          isAdding={isAdding}
-          showSuccess={showSuccess}
-          isWishlisted={isWishlisted}
-          onToggleWishlist={handleWishlistToggle}
-          onShare={handleShare}
-        />
-      </div>
+    <LazyMotion features={domAnimation}>
+      <MotionConfig reducedMotion="user">
+        <Container className="py-8 md:py-12 lg:py-16 pb-28" dir="rtl">
+          <m.div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start"
+            variants={heroVariants}
+            initial="hidden"
+            animate="show"
+          >
+            <ProductMedia
+              images={product.images}
+              name={product.name}
+              currentIndex={currentImage}
+              onChange={setCurrentImage}
+              badge={isOutOfStock ? fa.price.outOfStock : undefined}
+            />
+            <PurchasePanel
+              variants={normalizedVariants}
+              name={product.name}
+              price={price}
+              stock={stock}
+              isOutOfStock={isOutOfStock}
+              selectedSize={selectedSize}
+              selectedColor={selectedColor}
+              availableSizes={sizesForColor}
+              availableColors={colorsForSize}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              onSizeSelect={handleSizeSelect}
+              onColorSelect={handleColorSelect}
+              onAddToCart={handleAddToCart}
+              isAdding={isAdding}
+              showSuccess={showSuccess}
+              isWishlisted={isWishlisted}
+              onToggleWishlist={handleWishlistToggle}
+              onShare={handleShare}
+            />
+          </m.div>
 
-      <div className="mt-16 md:mt-24 space-y-10">
-        <div className="max-w-3xl space-y-3">
-          <h2 className="text-title font-bold">درباره محصول</h2>
-          <p className="text-body text-muted-foreground leading-relaxed">
-            {product.description || "توضیحی برای این محصول ثبت نشده است."}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Surface className="p-6 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Sparkles className="h-4 w-4 text-primary" />
-              کیفیت ممتاز
-            </div>
-            <p className="text-body text-muted-foreground">
-              انتخاب شده از بهترین متریال‌ها برای ماندگاری بیشتر.
-            </p>
-          </Surface>
-          <Surface className="p-6 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Star className="h-4 w-4 text-primary" />
-              مناسب استایل روز
-            </div>
-            <p className="text-body text-muted-foreground">
-              طراحی به‌روز و هماهنگ با ترندهای فصل.
-            </p>
-          </Surface>
-          <Surface className="p-6 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Truck className="h-4 w-4 text-primary" />
-              ارسال سریع و امن
-            </div>
-            <p className="text-body text-muted-foreground">
-              ارسال مطمئن به سراسر ایران با بسته‌بندی شیک.
-            </p>
-            <Link href="/store/shipping" className="text-sm font-semibold text-primary">
-              مشاهده جزئیات ارسال
-            </Link>
-          </Surface>
-        </div>
-
-        <SectionHeader
-          title="محصولات مشابه"
-          subtitle="منتخب‌هایی با استایل نزدیک به انتخاب شما."
-        />
-        {relatedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedProducts.slice(0, 4).map((item) => (
-              <ProductCard
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                slug={item.slug}
-                basePrice={item.basePrice}
-                images={item.images}
-                variants={normalizeVariants(item.variants)}
+          <div className="mt-14 md:mt-20 space-y-12">
+            <section className="space-y-6">
+              <SectionHeader
+                title="جزئیات محصول"
+                subtitle="تمامی مشخصات، سایزبندی و رنگ‌بندی این محصول را بررسی کنید."
               />
-            ))}
+              <ProductTabs
+                description={product.description}
+                sizes={availableSizes}
+                colors={allColors}
+              />
+            </section>
+
+            <section className="space-y-6">
+              <SectionHeader
+                title="محصولات مشابه"
+                subtitle="گزینه‌های هم‌خانواده و پیشنهادی برای انتخابی مطمئن."
+              />
+              <SimilarProductsGrid
+                products={relatedProducts}
+                normalizeVariants={normalizeVariants}
+              />
+            </section>
+
+            <ReviewsSection />
           </div>
-        ) : (
-          <EmptyState
-            icon={<Sparkles className="h-6 w-6 text-muted-foreground" />}
-            title="محصول مشابهی پیدا نشد"
-            description="به زودی موارد مرتبط اضافه خواهد شد."
+
+          <StickyMobileCTA
+            price={price * quantity}
+            disabled={isAdding || isOutOfStock}
+            isAdding={isAdding}
+            onAddToCart={handleAddToCart}
           />
-        )}
-
-        <SectionHeader title="نقد و بررسی" subtitle="به زودی بخش نظرات فعال می‌شود." />
-        <EmptyState
-          icon={<Star className="h-6 w-6 text-muted-foreground" />}
-          title="نظری ثبت نشده"
-          description="اولین نظر را شما بنویسید."
-        />
-      </div>
-
-      <StickyMobileCTA
-        price={price * quantity}
-        disabled={isAdding || isOutOfStock}
-        isAdding={isAdding}
-        onAddToCart={handleAddToCart}
-      />
-    </Container>
+        </Container>
+      </MotionConfig>
+    </LazyMotion>
   )
 }
 
