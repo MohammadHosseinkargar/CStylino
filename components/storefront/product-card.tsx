@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
+import { ProductImage } from "@/components/product-image"
 import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, Heart } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { normalizeProductImageSrc } from "@/lib/product-image"
 import { StyledCard } from "@/components/ui/styled-card"
 import { useCartStore } from "@/store/cart-store"
 import { useToast } from "@/hooks/use-toast"
@@ -47,7 +48,7 @@ export function ProductCard({
   const toggleWishlist = useWishlistStore((state) => state.toggleItem)
   const isWishlisted = useWishlistStore((state) => state.hasItem(id))
   const hasStock = variants.some((v) => v.stockOnHand - v.stockReserved > 0)
-  const mainImage = images[0] || "/placeholders/product-1.svg"
+  const mainImage = normalizeProductImageSrc(images[0])
   const uniqueColors = Array.from(
     new Map(
       variants.map((v) => [
@@ -121,7 +122,7 @@ export function ProductCard({
         href={`/store/products/${slug}`}
         className="relative block aspect-[4/5] overflow-hidden bg-muted/30"
       >
-        <Image
+        <ProductImage
           src={mainImage}
           alt={name}
           fill

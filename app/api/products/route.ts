@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { productSchema, variantSchema } from "@/lib/validations"
 import { z } from "zod"
 import { requireAdmin } from "@/lib/rbac"
+import { normalizeProductImages } from "@/lib/product-image.server"
 
 const querySchema = z.object({
   category: z.string().optional(),
@@ -76,8 +77,13 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where }),
     ])
 
+    const normalizedProducts = products.map((product) => ({
+      ...product,
+      images: normalizeProductImages(product.images),
+    }))
+
     return NextResponse.json({
-      products,
+      products: normalizedProducts,
       pagination: {
         page,
         limit,

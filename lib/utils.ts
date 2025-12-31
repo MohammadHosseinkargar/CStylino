@@ -48,3 +48,10 @@ export function formatDateTime(date: Date | string): string {
     minute: "2-digit",
   }).format(d)
 }
+
+export function decodeUnicodeEscapes(value: string): string {
+  if (!value.includes("\\u")) return value
+  return value.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16))
+  )
+}

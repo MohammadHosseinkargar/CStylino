@@ -77,8 +77,8 @@ const config = {
         xl: "var(--shadow-xl)",
       },
       fontFamily: {
-        sans: ["var(--font-persian)", "system-ui", "sans-serif"],
-        display: ["var(--font-persian)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       fontSize: {
         display: ["clamp(3rem, 6vw, 5rem)", { lineHeight: "1.1", letterSpacing: "-0.04em" }],

@@ -17,7 +17,7 @@ export function MobileBottomNav() {
     return null
   }
 
-  const accountHref = session ? "/store/orders" : "/auth/signin"
+  const accountHref = session ? "/account" : "/auth/signin"
 
   const navItems = [
     { href: "/store", label: fa.nav.home, icon: Home, match: (path: string) => path === "/store" },
@@ -37,7 +37,10 @@ export function MobileBottomNav() {
       href: accountHref,
       label: fa.nav.account,
       icon: User,
-      match: (path: string) => path.startsWith("/store/orders") || path.startsWith("/auth"),
+      match: (path: string) =>
+        path.startsWith("/account") ||
+        path.startsWith("/store/orders") ||
+        path.startsWith("/auth"),
     },
   ]
 

@@ -67,6 +67,13 @@ export default withAuth(
       }
     }
 
+    // Customer routes
+    if (path.startsWith("/account")) {
+      if (isBlocked || !token) {
+        return NextResponse.redirect(new URL("/auth/signin", req.url))
+      }
+    }
+
     return NextResponse.next()
   },
   {
@@ -88,7 +95,7 @@ export default withAuth(
         }
 
         // Protected routes require auth
-        if (path.startsWith("/admin") || path.startsWith("/affiliate")) {
+        if (path.startsWith("/admin") || path.startsWith("/affiliate") || path.startsWith("/account")) {
           return !!token && !isBlocked
         }
 
@@ -102,6 +109,7 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/affiliate/:path*",
+    "/account/:path*",
     "/api/orders/:path*",
     "/api/admin/:path*",
     "/api/affiliate/:path*",

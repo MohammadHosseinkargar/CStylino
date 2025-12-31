@@ -42,11 +42,13 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const accountHref = session ? "/account" : "/auth/signin"
   const navItems = [
     { href: "/store", label: fa.nav.home },
     { href: "/store/products", label: fa.nav.products },
     { href: "/store/categories", label: fa.nav.categories },
     { href: "/store/about", label: fa.nav.about },
+    { href: accountHref, label: fa.nav.account },
   ]
 
   return (

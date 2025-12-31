@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { normalizeProductImages } from "@/lib/product-image.server"
 
 export async function GET(
   request: NextRequest,
@@ -41,9 +42,19 @@ export async function GET(
       },
     })
 
+    const normalizedProduct = {
+      ...product,
+      images: normalizeProductImages(product.images),
+    }
+
+    const normalizedRelatedProducts = relatedProducts.map((item) => ({
+      ...item,
+      images: normalizeProductImages(item.images),
+    }))
+
     return NextResponse.json({
-      product,
-      relatedProducts,
+      product: normalizedProduct,
+      relatedProducts: normalizedRelatedProducts,
     })
   } catch (error) {
     console.error("Error fetching product:", error)

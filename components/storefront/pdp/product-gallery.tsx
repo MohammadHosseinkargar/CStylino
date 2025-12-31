@@ -1,7 +1,8 @@
-﻿import Image from "next/image"
+﻿import { ProductImage } from "@/components/product-image"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { PRODUCT_PLACEHOLDER_SRC } from "@/lib/product-image"
 
 interface ProductGalleryProps {
   images: string[]
@@ -19,19 +20,18 @@ export function ProductGallery({
   badge,
 }: ProductGalleryProps) {
   const hasMultiple = images.length > 1
+  const galleryImages = images.length > 0 ? images : [PRODUCT_PLACEHOLDER_SRC]
 
   return (
     <div className="space-y-6 order-1">
       <div className="relative group rounded-3xl overflow-hidden border border-border/50 bg-card shadow-sm">
-        {images[currentIndex] && (
-          <Image
-            src={images[currentIndex]}
-            alt={name}
-            fill
-            priority
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        )}
+        <ProductImage
+          src={galleryImages[currentIndex] ?? PRODUCT_PLACEHOLDER_SRC}
+          alt={name}
+          fill
+          priority
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+        />
 
         {badge ? (
           <div className="absolute top-5 right-5 rounded-full bg-primary/90 px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-md backdrop-blur-sm">
@@ -65,7 +65,7 @@ export function ProductGallery({
 
       {hasMultiple && (
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {images.map((img, idx) => (
+          {galleryImages.map((img, idx) => (
             <button
               key={`${img}-${idx}`}
               onClick={() => onChange(idx)}
@@ -77,7 +77,7 @@ export function ProductGallery({
               )}
               aria-label={`تصویر ${idx + 1}`}
             >
-              <Image src={img} alt="" fill className="object-cover" />
+              <ProductImage src={img} alt="" fill className="object-cover" />
             </button>
           ))}
         </div>
